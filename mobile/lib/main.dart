@@ -13,6 +13,18 @@ Future<void> main() async {
   final isConfigured = supabaseUrl.isNotEmpty && supabaseKey.isNotEmpty;
   const operationsOnly = bool.fromEnvironment('FIXMATE_OPERATIONS_WEB', defaultValue: false);
 
+  // Validate build-time public credentials as carefully as the runtime
+  // connection screen. Legacy service_role JWTs must never reach a Web client.
+  if (operationsOnly && isConfigured) {
+    final problem = validateOperationsPublicConnection(supabaseUrl, supabaseKey);
+    if (problem != null) {
+      runApp(MaterialApp(home: Scaffold(body: Center(
+        child: Text('Invalid operations Supabase configuration: $problem'),
+      ))));
+      return;
+    }
+  }
+
   if (isConfigured) {
     await Supabase.initialize(
       url: supabaseUrl,
