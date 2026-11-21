@@ -5,6 +5,7 @@ on:
     paths:
       - '.github/workflows/supabase-local-integration.yml'
       - 'docs/sql/test/local_supabase_api_smoke.sh'
+      - 'supabase/migrations/**'
   workflow_dispatch:
 
 jobs:
@@ -39,7 +40,11 @@ jobs:
           fi
           PGPASSWORD=postgres psql -X -h 127.0.0.1 -p 54322 -U postgres -d postgres -v ON_ERROR_STOP=1 -c 'SELECT version();'
 
-      - name: Reconstruct baseline and proposed changes in disposable Supabase
+      - name: Rebuild a clean DB from committed Supabase CLI migrations
+        run: |
+          supabase migration list --local
+          supabase db reset
+      - name: Apply separately proposed validation and moderator SQL in local DB
         env:
           PGHOST: 127.0.0.1
           PGPORT: 54322
@@ -47,8 +52,6 @@ jobs:
           PGPASSWORD: postgres
           PGDATABASE: postgres
         run: |
-          psql -X -v ON_ERROR_STOP=1 -f docs/sql/VERIFIED_BASELINE_RECONSTRUCTION_DRAFT.sql
-          psql -X -v ON_ERROR_STOP=1 -f docs/sql/VERIFIED_CATEGORY_SEED_DRAFT.sql
           psql -X -v ON_ERROR_STOP=1 -f docs/sql/PROPOSED_REPORT_INPUT_VALIDATION.sql
           psql -X -v ON_ERROR_STOP=1 -f docs/sql/PROPOSED_MODERATOR_REVIEW_MIGRATION.sql
           psql -X -v ON_ERROR_STOP=1 -c "NOTIFY pgrst, 'reload schema';"
