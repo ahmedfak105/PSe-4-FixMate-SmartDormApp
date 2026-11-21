@@ -40,6 +40,7 @@ jobs:
       - name: Start fresh disposable Supabase and replay CLI migrations
         run: |
           supabase init
+          mkdir -p supabase/migrations
           cp db-reference/supabase/migrations/*.sql supabase/migrations/
           supabase start
           supabase db reset
