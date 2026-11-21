@@ -2,7 +2,7 @@
 
 This is the **standalone administrator web interface** for FixMate – SmartDormApp. It consists of `index.html`, `app.js` and `styles.css` and connects to the same Supabase backend as the Flutter resident/maintenance-staff application.
 
-**Important scope note:** this dashboard uses plain HTML, CSS and JavaScript, **not Flutter Web**. The original project backlog mentions Flutter Web administration. Confirm acceptance of the standalone implementation with the lecturer before declaring that deliverable complete.
+**Approved implementation choice (reported by the project team on 21 Nov 2026):** the lecturer has agreed to use a standalone HTML/CSS/JavaScript dashboard instead of the Flutter Web technology originally named in the backlog. This confirms the framework choice, **not** completion of every admin feature or security acceptance check.
 
 ## What the dashboard does
 
