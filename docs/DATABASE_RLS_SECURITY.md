@@ -145,9 +145,22 @@ The three `public` functions (`claim_maintenance_report`, `assign_maintenance_re
 - `authenticated` also has private-schema USAGE and private-function EXECUTE. The role checks inside the `SECURITY DEFINER` functions therefore matter even for calls made outside the public wrappers. Public API exposure of the private schema was **not** established by the export and should be checked separately.
 - Code review supports the listed role and report-state protections, but **does not replace live negative tests for unauthorized access or a complete security audit**.
 
+## Storage bucket configuration verified (2026-11-21)
+
+The team supplied this **read-only** SQL Editor result for `storage.buckets`:
+
+| Setting | Observed value |
+|---|---|
+| Bucket ID and name | `report-photos` |
+| Public bucket | `false` (private bucket) |
+| File size limit | `5242880` bytes = **5 MiB** |
+| Allowed MIME types | `image/jpeg`, `image/png`, `image/webp` |
+
+**Important:** a private bucket does not by itself prove that resident, staff or admin file reads are correctly isolated. The `storage.objects` policies (including any broad SELECT rules) and effective bucket-related authorization still need review. The team has not yet provided policy query results; the SQL query text alone is not evidence of its output.
+
 ## Remaining evidence needed before claiming full security verification
 
-1. Inspect `storage.objects` RLS and the `report-photos` bucket privacy settings.
+1. Inspect `storage.objects` RLS policies and verify owner/staff/admin access rules for the verified private `report-photos` bucket.
 2. Run live direct-API negative tests for each role and RPC path (beyond UI denial), including unassigned/assigned reports and invalid role transitions.
 3. Confirm API-exposed schemas, function owner roles and effective runtime privileges for `SECURITY DEFINER` routines.
 4. Gather database indexes, remaining schema triggers and additional objects for a full deployment/backup script.
