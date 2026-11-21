@@ -1,0 +1,56 @@
+name: FixMate Database Baseline & Moderator Smoke
+
+on:
+  push:
+    paths:
+      - 'docs/sql/**'
+      - '.github/workflows/database-smoke.yml'
+  pull_request:
+    paths:
+      - 'docs/sql/**'
+      - '.github/workflows/database-smoke.yml'
+  workflow_dispatch:
+
+jobs:
+  postgres-smoke:
+    name: Isolated PostgreSQL 17 schema & role smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: 5432
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: postgres
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install PostgreSQL client
+        run: |
+          if ! command -v psql >/dev/null; then
+            sudo apt-get update -qq
+            sudo apt-get install -y -qq postgresql-client
+          fi
+      - name: Prepare disposable Supabase schema stubs
+        run: psql -X -v ON_ERROR_STOP=1 -f docs/sql/test/prepare_postgres_smoke.sql
+      - name: Recreate verified six-table baseline
+        run: psql -X -v ON_ERROR_STOP=1 -f docs/sql/VERIFIED_BASELINE_RECONSTRUCTION_DRAFT.sql
+      - name: Seed only the eight public maintenance categories
+        run: psql -X -v ON_ERROR_STOP=1 -f docs/sql/VERIFIED_CATEGORY_SEED_DRAFT.sql
+      - name: Apply proposed moderator review migration in disposable DB
+        run: psql -X -v ON_ERROR_STOP=1 -f docs/sql/PROPOSED_MODERATOR_REVIEW_MIGRATION.sql
+      - name: Assert authorization, signup trigger, claim/resolve and moderation
+        run: psql -X -v ON_ERROR_STOP=1 -f docs/sql/test/assert_baseline_moderator_smoke.sql
