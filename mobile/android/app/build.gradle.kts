@@ -1,3 +1,8 @@
+@file:Suppress("DEPRECATION")
+// Flutter 3.50 + AGP 9 migration bridge: legacy Kotlin Gradle plugin/DSL
+// remains in use with android.builtInKotlin=false and android.newDsl=false.
+// Move to built-in Kotlin only after all Flutter plugins are compatible.
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
