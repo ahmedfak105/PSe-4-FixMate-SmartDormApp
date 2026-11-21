@@ -58,3 +58,7 @@ jobs:
         run: psql -X -v ON_ERROR_STOP=1 -f docs/sql/test/assert_baseline_moderator_smoke.sql
       - name: Test invalid fields, ownership and archived-category blocking
         run: psql -X -v ON_ERROR_STOP=1 -f docs/sql/test/assert_report_input_validation.sql
+      - name: Prove only one of two concurrent staff claims wins
+        run: |
+          bash -n docs/sql/test/test_concurrent_claims.sh
+          bash docs/sql/test/test_concurrent_claims.sh
