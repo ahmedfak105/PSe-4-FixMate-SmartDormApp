@@ -1,86 +1,124 @@
-# FixMate — Lecturer Presentation Script and Live Demo
+# FixMate — Lecturer Presentation and Live Demonstration
 
-**Evidence snapshot:** 21 Nov 2026  
-**Suggested speaking time:** 7–9 minutes (plus SQL and questions)  
-**Project:** FixMate – SmartDormApp, Kauno Kolegija internal internship.
+**Prepared for:** Kauno Kolegija Internal Internship  
+**Current evidence:** Integrated release from 22 November 2026  
+**Speaking time:** about 7–9 minutes, plus questions and optional SQL examples  
+**Code under review:** [Integrated Draft PR #46](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/pull/46)
 
-> This is the spoken script for the **tested MVP**, not a claim that the full backlog or production release is complete. Use sample accounts and demo data only; never show passwords or private API keys.
+> Present the implemented and locally tested MVP accurately. The GitHub integration branch includes the Flutter Mobile and **Flutter Web** applications, backend migration files and documentation. The original hosted Supabase project is **not** updated with the proposed Moderator/report-validation SQL. Do not describe it as a production release or a merged `main` branch.
 
-## Start here: direct access to evidence
+## Before presenting
 
-The lecturer already has repository access. Use [the one-page review index](LECTURER_REVIEW_START_HERE.md) to navigate directly to the relevant code, SQL, ERD and successful CI runs. All three submissions are currently **draft pull requests**, so they are not yet visible on `main`: [#43 Flutter](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/pull/43), [#44 Admin](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/pull/44), and [#42 Database & Documentation](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/pull/42).
+1. Open [Integrated PR #46](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/pull/46), [project README](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/tree/integration/lecturer-review-2026-11-22) and the [original six-table ERD](FIXMATE_ERD.md). Keep the [proposed Moderator ERD](erd/FIXMATE_PROPOSED_MODERATOR_ERD.mmd) separate.
+2. Prepare a **separate local Supabase or approved staging** environment with dummy users for the four roles: `resident`, `maintenance_staff`, `moderator`, and `system_admin`. The proposed seventh-table Moderator SQL is available **only in the tested local/staging build**, not on the unchanged hosted project.
+3. Open a Resident/Staff Flutter app (Android emulator/device or Flutter run) and the Flutter Web Operations application. For the latter, run `flutter run -d chrome --dart-define=FIXMATE_OPERATIONS_WEB=true` inside `mobile/`, or serve the compiled Web artifact on a web server.
+4. Use **only the public Supabase URL and publishable/anon key**. Never show passwords, service-role keys, private Storage object URLs or real resident personal data.
+5. Have one valid and one duplicate dummy report ready, with a synthetic photo for review. Ensure a Moderator account exists in the **test** environment. Do not use live user accounts for a demonstration.
 
-**Speaking approach:** keep the introduction short; for each claim show the real GitHub source or live Supabase result rather than a generic slide. Distinguish **implemented**, **tested**, and **planned** functionality.
+## 0:00–0:45 | Introduction
 
-## Before starting
+"Good morning. Today we are presenting FixMate – SmartDormApp, our dormitory maintenance reporting project. It allows residents to submit maintenance requests, track progress, and attach photos. Maintenance staff can claim and resolve work, while moderators review submissions and administrators monitor reports and assign employees.
 
-Open the Flutter resident/staff app, the local admin dashboard (e.g. `http://localhost:5500`), Supabase SQL Editor, [the ERD](FIXMATE_ERD.md), and [the architecture document](DATABASE_ARCHITECTURE.md). Have authorized test resident, maintenance staff and system admin accounts ready.
+Our aim was to build a realistic system with a Flutter client, a Flutter Web operations workspace, a Supabase backend, a documented database, and automated tests."
 
-## 1. Introduction (show repo or app)
+**Show:** project README and integrated PR #46.
 
-"Good morning. Today I will present FixMate, our SmartDormApp project for reporting and managing maintenance problems in a student dormitory. Residents can submit requests and track progress, maintenance staff can process reports, and administrators can review reports and assign work. This is a working demonstration connected to Supabase."
+## 0:45–1:45 | Architecture and database
 
-## 2. System architecture (show architecture document)
+"Our application has two Flutter experiences: a Resident and Staff app, and a role-specific Flutter Web operations interface for Maintenance Staff, Moderators and System Administrators. Both use the same backend contract.
 
-"The resident and staff application is developed in Flutter. The current admin dashboard is a separate HTML, CSS and JavaScript website. Both connect to the same Supabase project. Supabase Auth handles sign-in, PostgreSQL stores relational data, private Storage holds report photos, RLS protects records, and database functions validate important report actions."
+Supabase Authentication handles user sessions. PostgreSQL stores reports, categories, profiles, notes, attachments metadata and status history. Supabase Storage stores uploaded photos in a private bucket. Row Level Security, database grants and protected functions enforce permissions; simply hiding a button is not our security model.
 
-**Implementation note:** the initial backlog mentions Flutter Web administration, but the project team reported on 21 Nov 2026 that the lecturer approved the standalone HTML/CSS/JavaScript dashboard. This approval concerns the technology choice; it does not imply that unfinished admin functions are complete.
+The current hosted system has six public application tables. We have a separate proposed seventh table, report_reviews, which records Moderator decisions. We document these as two distinct schema states."
 
-## 3. ER diagram (show the ERD)
+**Show:** [Database Architecture](DATABASE_ARCHITECTURE.md), [baseline ERD](FIXMATE_ERD.md) and [proposed Moderator ERD](erd/FIXMATE_PROPOSED_MODERATOR_ERD.mmd).
 
-"Our public application database has six tables, 34 columns and ten foreign keys. The main table is maintenance_reports. Each report belongs to a resident and category, and may be assigned to a staff member. Report attachments, notes and status history are linked to reports. The profiles table links to Supabase auth.users. These relationships were verified from the real database constraints."
+## 1:45–2:40 | Resident workflow
 
-## 4. Resident walkthrough (open Flutter resident login)
+"I will start with a resident account. New users register with email, password and name, and the existing Auth trigger provisions the role Resident. There is no option to choose an Admin or Staff role during registration.
 
-"The resident can submit a maintenance report with details, category and an optional image, and open My Reports to see its status. Reports live in PostgreSQL, while images use a private Storage bucket. We have recorded that a submitted report persists after restarting the app. In isolation tests, two resident accounts saw only their own reports."
+A resident submits a report with its title, description, location, category and optionally a photo. The report is associated with the authenticated owner. In My Reports, the resident sees only their own submitted reports and can follow their status."
 
-## 5. Staff walkthrough (open Flutter maintenance staff account)
+**Demonstrate:** Resident sign-in, create a dummy maintenance report, My Reports, report details. If time is short, use a pre-created test report.
 
-"Maintenance staff can see eligible new reports and assigned work. Claiming a report changes its state from new to in_progress and writes a history entry. The assigned worker can add notes and resolve the report; resolution writes another history entry. The protected database functions check the user's role, assignment, and report state."
+## 2:40–3:35 | Admin operations in Flutter Web
 
-## 6. Admin dashboard (show Overview, Reports, Assignments and People)
+"I will now open the actual Flutter Web operations interface. Users with the Resident role are denied access. The System Admin sees a dashboard with report counts, statuses, searchable reports, a People directory and maintenance assignments.
 
-"The admin dashboard displays live report data, report statuses, assignments and existing users. It can assign an eligible new report to a maintenance employee. The report remains new until that employee claims it. People & Roles is read-only in this web MVP. A signed-in maintenance_staff test user was denied entry, while the system_admin account could access the dashboard."
+The administrator can assign an eligible New report to a Maintenance Staff member. This does not start the work automatically; the report remains New until the employee claims it. Role changes are deliberately read-only in this UI and require a trusted provisioning process."
 
-## 7. Database security (show RLS documentation)
+**Demonstrate:** Resident access denied, Admin dashboard, report search, optionally assign an unclaimed valid test report.
 
-"RLS is enabled on all six application tables, and we reviewed thirteen policies. Resident report access is ownership-based, staff access follows assigned work, and role checks inside privileged RPC functions restrict status changes. We verified the authenticated database role cannot update profiles.role directly. The report-photos bucket is private, allows JPEG/PNG/WebP and limits files to five MiB. We have reviewed the Storage RLS rules, although complete live anonymous and cross-user endpoint testing remains an outstanding task."
+## 3:35–4:35 | Staff claim and resolution
 
-## 8. Testing and conclusion (show PRs)
+"The staff member signs in to view Available Reports and My Jobs. Claiming an eligible report calls a protected PostgreSQL function, which checks the role and report state. A successful claim moves the report from New to In Progress and records a status-history entry. Only the assigned staff member may resolve their report, which changes its status to Resolved.
 
-"We ran the Flutter test suite in our cloned GitHub repository: nineteen tests passed. GitHub Actions also completed successfully. We documented the SQL schema, ERD, RLS, RPC functions and Storage rules. The work is organized in draft pull requests rather than prematurely merged into main. Next we will complete remaining authorization tests, a reproducible migration and unfinished backlog features. Thank you. I am ready to answer questions."
+We also tested two simultaneous claim attempts and verified that only one wins for the same report."
 
-## Read-only SQL demonstration (run in Supabase SQL Editor)
+**Demonstrate:** Staff claim → My Jobs → Resolve → resident sees the updated status and staff sees the status timestamp, where RLS permits.
 
-**Explain that SQL Editor may use elevated privileges, so results here are not proof of client RLS behavior.** Run individual `SELECT` statements from [FIXMATE_DEMO_QUERIES_READ_ONLY.sql](sql/FIXMATE_DEMO_QUERIES_READ_ONLY.sql):
+## 4:35–5:35 | Moderator review
 
-1. Reports JOIN profiles, categories and assigned staff: demonstrates foreign keys and `LEFT JOIN` for optional assignment.
-2. Count reports grouped by status: demonstrates the workflow `new / in_progress / resolved`.
-3. Join status history to profiles: demonstrates recorded transitions and acting users.
-4. List RLS-enabled flags from `pg_class`: demonstrates all six app tables have RLS.
-5. Count profiles by role: demonstrates `resident / maintenance_staff / moderator / system_admin`.
+"Moderators review New, unassigned reports. They can read report details and permitted private photos, then select Valid, Duplicate or Inappropriate. Rejected reports require a reason. The decision is persisted in the review table, and the proposed backend guard prevents rejected reports from being claimed or assigned.
 
-## Anticipated lecturer questions
+This feature was tested against a disposable local Supabase environment with the proposed migration applied. The original hosted project does not have the new review table and RPC yet, so we are not claiming that Moderator review is available there."
 
-**Why RLS?** To constrain which database rows clients can access, not merely hide screens in the UI.
+**Demonstrate only on local/staging:** Moderator sign-in, preview photo, make a Duplicate decision with a reason and confirm it is saved.
 
-**Why SECURITY DEFINER?** The privileged routine performs a limited report update after validating role, assignment and state. Do not give every browser direct report UPDATE permission.
+## 5:35–6:35 | SQL, RLS and security
 
-**Can a resident self-promote to admin?** In the inspected grants, authenticated lacks UPDATE permission on `profiles.role`. Other indirect code paths remain subject to review.
+"The original database has six RLS-protected public tables. We also inspected the three Storage policies for private report photos. A Resident cannot update their role directly, read another resident's reports or view another resident's private images. The status changes and review operations use role-checked database RPC functions, not arbitrary client updates.
 
-**Can two workers claim the same unassigned report?** The function uses a conditional row UPDATE; only one can transition that specific report from new to in_progress.
+We have three ordered Supabase CLI migrations for rebuilding the **baseline** in a fresh development environment: the six-table schema, eight maintenance categories and nine supporting foreign-key indexes. Their clean local reset succeeded, but those baseline migrations must not be pushed over an already populated database with no recorded migration history."
 
-**Why is assignment separate from claim?** Assignment selects a staff member; claim confirms work started and changes the status.
+**Show two or three read-only SELECT statements** from [FIXMATE_DEMO_QUERIES_READ_ONLY.sql](sql/FIXMATE_DEMO_QUERIES_READ_ONLY.sql):
+- Query 4: JOIN reports, resident profiles, categories and optional staff.
+- Query 5: report counts by status.
+- Query 10: RLS-enabled flags for the six application tables.
 
-**Is the solution finished?** It is a tested MVP, not a production release. Password recovery, notifications, full migration/testing, and role-administration enhancements are not all demonstrated as complete.
+*Note:* The SQL Editor may run with privileged permissions, so the SELECT results alone **do not** demonstrate ordinary-user RLS. The negative access evidence comes from separate Auth sessions in integration tests.
 
-## Repository review links
+## 6:35–7:35 | Evidence and honest conclusion
 
+"Our work is documented in GitHub and checked by CI. The integrated Flutter tests, Flutter Web build, real Chrome role-workflow tests, PostgreSQL smoke tests and local Supabase API tests passed. The integrated Android APK and Flutter Web artifacts were also built successfully.
+
+This is a tested release candidate, not a fully deployed production application. Ten of the twelve original implementation tasks are closed, while two still require an approved deployment and verification of report validation and Moderator review on the target Supabase project. Password recovery, push notifications and self-service role administration are not presented as complete.
+
+Thank you. We are ready for questions and can demonstrate the SQL, architecture and automated tests."
+
+**Show latest verified evidence:**
+- [Integrated release — all jobs successful, Android APK and Flutter Web artifacts](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/44963696769).
+- [Integrated Flutter Web Chromium E2E](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/44963696839).
+- [Integrated PostgreSQL/Moderator smoke](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/44963696859).
+- [Local Supabase Auth/REST/Storage API integration](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/44963622480).
+- [Two-session atomic claim check](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/44956576887).
+
+## Common lecturer questions
+
+**Why Flutter and Flutter Web?** We share a Flutter codebase and Supabase data model while presenting role-specific mobile and browser experiences. The earlier standalone HTML/JavaScript admin was a prototype, not the final selected Flutter Web operations deliverable.
+
+**Why use Supabase?** Authentication, relational PostgreSQL, private photo Storage and policy-based authorization are integrated. We still keep SQL definitions and a rebuildable local backend to explain and test the design.
+
+**Why Row Level Security (RLS)?** It protects data at the database level across different clients. Tests confirm cross-resident report/photo isolation and no direct role self-promotion.
+
+**What is a protected RPC?** A PostgreSQL function exposed to the authenticated client that checks the user's role, ownership and report state before doing a permitted operation.
+
+**How can only one employee claim a report?** The claim function uses an atomic conditional update. Our two-session concurrency test showed exactly one winner and one status-history record.
+
+**Why are there two ERDs?** The current hosted database has six application tables. The Moderator review proposal introduces a seventh table; it is separately labelled until deployed and verified.
+
+**Why can't we just run all migrations on production?** The hosted database already has the baseline schema but no recorded migration history. Reapplying the fresh baseline would collide with existing objects. We need a reviewed reconciliation and staged additive migration plan.
+
+**Is the project completely finished?** The integrated MVP is tested locally and the APK/Web artifacts are built. Tasks #36 and #39 are not yet accepted on the hosted backend, and some backlog features are beyond this tested scope.
+
+## Lecturer handoff links
+
+- [Integrated code and PR #46](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/pull/46)
+- [Lecturer review index](LECTURER_REVIEW_START_HERE.md)
 - [Database Architecture](DATABASE_ARCHITECTURE.md)
-- [ER diagram](FIXMATE_ERD.md)
-- [Read-only SQL demo queries](sql/FIXMATE_DEMO_QUERIES_READ_ONLY.sql)
-- [RLS, RPC and Storage security](DATABASE_RLS_SECURITY.md)
-- [Security & QA verification](SECURITY_QA_VERIFICATION.md)
-- Draft PRs: #42 documentation, #43 Flutter, #44 Admin dashboard.
+- [Read-only SQL demonstration](sql/FIXMATE_DEMO_QUERIES_READ_ONLY.sql)
+- [Task status and evidence](TASK_STATUS_RECONCILIATION.md)
+- [Safe validation/Moderator rollout plan](CONTROLLED_SUPABASE_ROLLOUT_TASK36_TASK39.md)
+- [Flutter Web operations setup](../mobile/OPERATIONS_WEB_README.md)
 
-**Never execute the structural `CREATE TABLE` reference SQL on the existing Supabase project.**
+**Safety:** Never display real passwords or secret keys, and never run structural SQL on the populated hosted project for a classroom demonstration.
