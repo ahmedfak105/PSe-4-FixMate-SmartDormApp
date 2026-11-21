@@ -19,5 +19,6 @@ jobs:
           supabase init
           supabase migration new fixmate_baseline
           supabase migration new fixmate_categories_seed
+          supabase migration new fixmate_fk_indexes
           echo 'CLI-GENERATED-MIGRATION-PATHS:'
           find supabase/migrations -maxdepth 1 -name '*.sql' -type f | sort
