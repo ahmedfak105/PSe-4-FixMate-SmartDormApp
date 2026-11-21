@@ -122,3 +122,11 @@ Two small initial smoke-test assertion mistakes were fixed before the successful
 - [Role and moderation checks](sql/test/assert_baseline_moderator_smoke.sql)
 - [Invalid-input tests](sql/test/assert_report_input_validation.sql)
 - [Proposed Moderator ERD](erd/FIXMATE_PROPOSED_MODERATOR_ERD.mmd) (not live schema)
+
+## Task #34 — clean Supabase CLI replay passed
+
+- Captured baseline and category seed as **actual CLI-named files** under `supabase/migrations`.
+- The `supabase db reset` step succeeded on a fresh **full local Supabase** container. Real Auth/REST/RLS and private Storage tests succeeded in [run 44956986519](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/44956986519).
+- Added a third CLI-named migration with nine FK indexes for further local replay verification.
+- **Status remains In Progress** pending test of the index migration, team review, and a safe migration reconciliation plan for the already-populated remote database. No production schema modifications.
+
