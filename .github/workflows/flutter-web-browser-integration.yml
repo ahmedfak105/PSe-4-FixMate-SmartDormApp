@@ -88,10 +88,15 @@ jobs:
       - name: Install compatible ChromeDriver
         run: |
           google-chrome --version
-          npx --yes @puppeteer/browsers install chromedriver@stable --path "$RUNNER_TEMP/chromedriver-install"
+          # GitHub's preinstalled Chrome can lag ChromeDriver's latest stable.
+          # Match the browser MAJOR version instead of assuming both are equal.
+          CHROME_MAJOR="$(google-chrome --version | grep -oE '[0-9]+\\.' | head -n 1 | tr -d '.')"
+          test -n "$CHROME_MAJOR"
+          npx --yes @puppeteer/browsers install "chromedriver@$CHROME_MAJOR" --path "$RUNNER_TEMP/chromedriver-install"
           DRIVER="$(find "$RUNNER_TEMP/chromedriver-install" -type f -name chromedriver | head -n 1)"
           test -x "$DRIVER"
           "$DRIVER" --version
+          "$DRIVER" --version | grep -q "ChromeDriver $CHROME_MAJOR\\."
           "$DRIVER" --port=4444 > "$RUNNER_TEMP/chromedriver.log" 2>&1 &
           for i in $(seq 1 25); do
             if curl -fsS http://127.0.0.1:4444/status > /dev/null; then break; fi
