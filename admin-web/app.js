@@ -110,10 +110,15 @@ async function guardAndLoad() {
     errorBox('authError', `Cannot read your profile: ${error?.message || 'Profile record not found'}. Check the profiles SELECT permission and RLS policy.`);
     return;
   }
+  if (profile.role === 'maintenance_staff') {
+    // The staff view has its own role guard and uses the same authenticated session.
+    window.location.replace('staff.html');
+    return;
+  }
   if (profile.role !== 'system_admin') {
     await state.client.auth.signOut();
     screen('auth');
-    errorBox('authError', `Access denied: this account has role "${profile.role}". Only system_admin can open this workspace.`);
+    errorBox('authError', `Access denied: this account has role "${profile.role}". Only system_admin can open this workspace; moderator review is not implemented yet.`);
     return;
   }
   state.admin = data.user;
