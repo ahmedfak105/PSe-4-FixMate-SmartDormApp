@@ -138,8 +138,14 @@ async function performAction(action, reportId) {
 async function initialize() {
   try {
     const config = JSON.parse(localStorage.getItem(CONNECTION_KEY) || 'null');
-    if (!config || !config.url || !config.key || !config.url.startsWith('https://')) {
-      throw new Error('Open the FixMate sign-in page and connect to Supabase first.');
+    const parsed = new URL(config?.url || '');
+    const hosted = parsed.protocol === 'https:' && parsed.hostname.endsWith('.supabase.co');
+    const devApi = ['localhost', '127.0.0.1'].includes(window.location.hostname) &&
+      parsed.protocol === 'http:' &&
+      ['localhost', '127.0.0.1'].includes(parsed.hostname) &&
+      parsed.port === '54321';
+    if (!config?.key || !(hosted || devApi)) {
+      throw new Error('Open the FixMate sign-in page and connect to an authorized Supabase project first.');
     }
     if (!window.supabase?.createClient) throw new Error('Supabase library did not load.');
     state.client = window.supabase.createClient(config.url, config.key, {
