@@ -3,6 +3,21 @@
  */
 'use strict';
 
+// Reject legacy service_role JWTs as well as modern sb_secret API keys.
+// A three-section JWT is not proof that a browser key is anonymous.
+function isSafePublicApiKey(key) {
+  if (typeof key !== 'string') return false;
+  if (key.startsWith('sb_publishable_')) return key.length > 'sb_publishable_'.length;
+  if (key.startsWith('sb_secret_') || key.startsWith('service_role')) return false;
+  const parts = key.split('.');
+  if (parts.length !== 3 || parts.some(x => !x)) return false;
+  try {
+    const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+    return payload.role === 'anon';
+  } catch { return false; }
+}
+
+
 const PROJECT_URL = 'https://epsvagztisdovixlqehi.supabase.co';
 const STORAGE_KEY = 'fixmate_admin_public_connection_v1';
 const viewNames = { overview: 'OVERVIEW', reports: 'ALL REPORTS', assignments: 'ASSIGNMENTS', people: 'PEOPLE & ROLES' };
@@ -64,9 +79,8 @@ function checkConnection(url, key) {
     parsed.port === '54321';
   if (!hosted && !(localPage && localApi))
     throw new Error('Use an HTTPS *.supabase.co project or local Supabase CLI on localhost:54321.');
-  if (!key || (!key.startsWith('sb_publishable_') && key.split('.').length !== 3))
-    throw new Error('Use a publishable key (sb_publishable_…) or legacy anon key. Never use a secret key.');
-  if (key.startsWith('sb_secret_')) throw new Error('Secret API keys must never be used in a browser.');
+  if (!isSafePublicApiKey(key))
+    throw new Error('Use only a public publishable API key or legacy anon JWT. Service-role and secret keys are forbidden.');
   return { url: parsed.origin, key };
 }
 function makeClient(cfg) {
