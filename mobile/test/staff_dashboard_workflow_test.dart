@@ -5,6 +5,7 @@ import 'package:fixmate_mobile/data/models/staff_report.dart';
 import 'package:fixmate_mobile/data/repositories/staff_reports_repository.dart';
 import 'package:fixmate_mobile/features/staff/staff_dashboard_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// No real DB or network mutations: the fake repo exercises the Flutter
 /// Staff UI response to RPC success/conflict and queue refreshes.
@@ -59,6 +60,10 @@ class FakeStaffQueue implements StaffReportsRepository {
 
 void main() {
   setUpAll(() async {
+    // SupabaseFlutter's auth storage uses the shared_preferences platform
+    // channel, which isn't registered by plain flutter_test. Stub only
+    // local preferences; all report RPCs are a fake repository in this file.
+    SharedPreferences.setMockInitialValues({});
     await Supabase.initialize(
       url: 'https://ci-only-placeholder.supabase.co',
       publishableKey: 'sb_publishable_ci_only_nonfunctional',
