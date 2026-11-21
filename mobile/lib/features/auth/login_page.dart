@@ -5,9 +5,10 @@ import 'sign_up_page.dart';
 
 /// Sign in with Supabase Auth or register a new Resident account.
 class LoginPage extends StatefulWidget {
-  const LoginPage({super.key, this.connectionError});
+  const LoginPage({super.key, this.connectionError, this.allowResidentSignup = true});
 
   final String? connectionError;
+  final bool allowResidentSignup;
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -73,7 +74,9 @@ class _LoginPageState extends State<LoginPage> {
                         textAlign: TextAlign.center,
                         style: Theme.of(context).textTheme.headlineSmall),
                     const SizedBox(height: 8),
-                    const Text('Sign in or create a resident account.',
+                    Text(widget.allowResidentSignup
+                            ? 'Sign in or create a resident account.'
+                            : 'Authorized maintenance staff, moderators and administrators only.',
                         textAlign: TextAlign.center),
                     const SizedBox(height: 28),
                     TextFormField(
@@ -142,7 +145,7 @@ class _LoginPageState extends State<LoginPage> {
                     // Enabled after isolated local Supabase Auth + profile/RLS
                     // API tests passed. Set ENABLE_RESIDENT_SIGNUP=false
                     // to hide registration for deployments that disable signup.
-                    if (const bool.fromEnvironment(
+                    if (widget.allowResidentSignup && const bool.fromEnvironment(
                       'ENABLE_RESIDENT_SIGNUP', defaultValue: true,
                     )) ...[
                       const SizedBox(height: 8),

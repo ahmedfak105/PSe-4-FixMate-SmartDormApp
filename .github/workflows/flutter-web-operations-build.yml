@@ -1,0 +1,52 @@
+name: FixMate Flutter Web Operations Build
+
+on:
+  push:
+    paths:
+      - 'mobile/**'
+      - '.github/workflows/flutter-web-operations-build.yml'
+  pull_request:
+    paths:
+      - 'mobile/**'
+      - '.github/workflows/flutter-web-operations-build.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: flutter-web-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  web-operations:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Fetch packages and translations
+        run: |
+          flutter pub get
+          flutter gen-l10n
+      - name: Analyze role-aware operations code
+        run: flutter analyze --no-fatal-infos
+      - name: Run role routing and all Flutter tests
+        run: flutter test
+      - name: Compile deployable Web app with runtime public connection form
+        run: |
+          flutter build web --release \
+            --dart-define=FIXMATE_OPERATIONS_WEB=true
+      - name: Verify Flutter Web output
+        run: test -s build/web/index.html && test -s build/web/main.dart.js
+      - name: Upload operations Web build (serve from HTTPS)
+        uses: actions/upload-artifact@v4
+        with:
+          name: fixmate-flutter-web-operations
+          path: mobile/build/web/
+          if-no-files-found: error
+          retention-days: 7

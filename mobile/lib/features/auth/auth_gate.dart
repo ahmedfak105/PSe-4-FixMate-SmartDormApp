@@ -6,11 +6,14 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../data/models/resident_profile.dart';
 import '../../data/repositories/resident_profile_repository.dart';
 import 'login_page.dart';
+import '../operations/operations_role.dart';
 
 /// Checks the Supabase session and loads the user's real profile before
 /// allowing entry to Resident screens. The database must still enforce RLS.
 class AuthGate extends StatefulWidget {
-  const AuthGate({super.key, required this.builder});
+  const AuthGate({super.key, required this.builder, this.operationsOnly = false});
+
+  final bool operationsOnly;
 
   final Widget Function(ResidentProfile profile) builder;
 
@@ -111,7 +114,10 @@ class _AuthGateState extends State<AuthGate> {
 
   @override
   Widget build(BuildContext context) {
-    if (_userId == null) return LoginPage(connectionError: _authError);
+    if (_userId == null) return LoginPage(
+      connectionError: _authError,
+      allowResidentSignup: !widget.operationsOnly,
+    );
 
     return FutureBuilder<ResidentProfile>(
       future: _profileFuture,
@@ -132,12 +138,16 @@ class _AuthGateState extends State<AuthGate> {
           );
         }
         final profile = snapshot.data!;
-        if (!profile.isResident && profile.role.trim().toLowerCase() != 'maintenance_staff') {
+        if (workspaceForRole(profile.role,
+                operationsOnly: widget.operationsOnly) == FixMateWorkspace.denied) {
           return _message(
-            heading: 'Unsupported account role',
-            description: 'This FixMate build supports Resident and Maintenance Staff accounts. '
-                'Your profile role is ${profile.role}. '
-                'Admin and moderator dashboards are not implemented yet.',
+            heading: 'Account role not permitted in this workspace',
+            description: widget.operationsOnly
+                ? 'This Flutter Web operations workspace is for Maintenance Staff, '
+                    'Moderators and System Admins only. The signed-in role is ${profile.role}.'
+                : 'This Flutter mobile application supports Resident and Maintenance Staff '
+                    'accounts. The signed-in role is ${profile.role}. '
+                    'Use the Operations Web application for Moderator and Admin access.',
           );
         }
         return widget.builder(profile);

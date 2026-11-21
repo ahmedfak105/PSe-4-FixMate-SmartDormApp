@@ -16,6 +16,25 @@ StaffReport report({String status = 'new', String? assignedTo}) =>
     });
 
 void main() {
+  test('Staff model displays the most recent backend status timestamp', () {
+    final map = {
+      'id': 9,
+      'resident_id': 'resident-uuid',
+      'category_id': 2,
+      'title': 'Broken bathroom light',
+      'description': 'The light is not working',
+      'location': 'Dorm A - Room 101',
+      'status': 'in_progress',
+      'assigned_to': 'staff-a',
+      'created_at': '2026-11-19T11:37:55+00:00',
+      'last_status_updated_at': '2026-11-20T12:30:00+00:00',
+    };
+    final item = StaffReport.fromJson(map);
+    expect(item.lastStatusUpdatedAt?.toUtc().toIso8601String(),
+        '2026-11-20T12:30:00.000Z');
+    expect(report().lastStatusUpdatedAt, isNull);
+  });
+
   test('Staff model maps Supabase report #9 with all required fields', () {
     final item = report();
     expect(item.id, 9);

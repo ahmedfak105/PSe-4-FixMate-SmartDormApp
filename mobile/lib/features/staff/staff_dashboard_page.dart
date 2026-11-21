@@ -231,6 +231,10 @@ class _StaffDashboardPageState extends State<StaffDashboardPage> {
                           ),
                           const SizedBox(height: 8),
                           Text('Location: ${report.location.isEmpty ? 'Not set' : report.location}'),
+                          Text('Submitted: ${report.createdAt.toLocal().toString().substring(0, 16)}'),
+                          Text('Last status update: ${report.lastStatusUpdatedAt == null
+                              ? 'Not recorded or not available'
+                              : report.lastStatusUpdatedAt!.toLocal().toString().substring(0, 16)}'),
                           Text('Category ID: ${report.categoryId}'),
                           if (report.description.isNotEmpty) ...[
                             const SizedBox(height: 8),

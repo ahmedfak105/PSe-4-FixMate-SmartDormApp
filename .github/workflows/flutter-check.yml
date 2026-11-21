@@ -10,6 +10,10 @@ on:
       - 'mobile/**'
       - '.github/workflows/flutter-check.yml'
 
+concurrency:
+  group: flutter-tests-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   flutter:
     runs-on: ubuntu-latest
