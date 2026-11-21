@@ -22,7 +22,7 @@ WHERE conrelid IN (
   'public.profiles'::regclass, 'public.maintenance_reports'::regclass,
   'public.report_status_history'::regclass)
   AND contype='c'
-ORDER BY app_table::text, conname;
+ORDER BY conrelid::regclass::text, conname;
 
 -- 3. Application function signatures and SECURITY DEFINER status.
 SELECT n.nspname AS function_schema, p.proname AS function_name,
