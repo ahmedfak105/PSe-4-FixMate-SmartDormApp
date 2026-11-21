@@ -6,6 +6,12 @@
 
 > This is the spoken script for the **tested MVP**, not a claim that the full backlog or production release is complete. Use sample accounts and demo data only; never show passwords or private API keys.
 
+## Start here: direct access to evidence
+
+The lecturer already has repository access. Use [the one-page review index](LECTURER_REVIEW_START_HERE.md) to navigate directly to the relevant code, SQL, ERD and successful CI runs. All three submissions are currently **draft pull requests**, so they are not yet visible on `main`: [#43 Flutter](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/pull/43), [#44 Admin](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/pull/44), and [#42 Database & Documentation](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/pull/42).
+
+**Speaking approach:** keep the introduction short; for each claim show the real GitHub source or live Supabase result rather than a generic slide. Distinguish **implemented**, **tested**, and **planned** functionality.
+
 ## Before starting
 
 Open the Flutter resident/staff app, the local admin dashboard (e.g. `http://localhost:5500`), Supabase SQL Editor, [the ERD](FIXMATE_ERD.md), and [the architecture document](DATABASE_ARCHITECTURE.md). Have authorized test resident, maintenance staff and system admin accounts ready.
