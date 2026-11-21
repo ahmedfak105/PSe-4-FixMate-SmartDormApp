@@ -187,6 +187,7 @@ class _ModeratorOperationsPageState extends State<ModeratorOperationsPage> {
       );
       if (!mounted || submitted == null) return;
       setState(() { _busy = true; _notice = null; _error = null; });
+      String? actionError;
       try {
         if (!_authorized) throw StateError('Moderator session changed.');
         final response = await _client.rpc('review_maintenance_report', params: {
@@ -200,11 +201,13 @@ class _ModeratorOperationsPageState extends State<ModeratorOperationsPage> {
             ? 'Review saved for report #${report['id']}: ${submitted.$1}.'
             : 'Report #${report['id']} was already reviewed or assigned.');
       } catch (error) {
-        if (mounted) setState(() =>
-            _error = 'Could not save review for #${report['id']}: $error');
+        actionError = 'Could not save review for #${report['id']}: $error';
       } finally {
         if (mounted) setState(() => _busy = false);
         await _refresh();
+        if (mounted && actionError != null) {
+          setState(() => _error = actionError);
+        }
       }
     } finally {
       reason.dispose();
