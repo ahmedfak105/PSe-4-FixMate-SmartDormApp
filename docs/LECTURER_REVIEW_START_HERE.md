@@ -77,3 +77,9 @@ TASK #39 has a proposed implementation in PRs #42/#44: the new [Moderator Review
 ## Resident registration progress (not yet part of the tested baseline)
 
 A feature-flagged Flutter resident sign-up form is now in [PR #43](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/pull/43) and the matching [proposed Auth-to-profile trigger](sql/PROPOSED_RESIDENT_SIGNUP_PROVISIONING.sql) is documented in PR #42. The default remains **disabled** until the backend trigger is reviewed and deployed/tested on staging, so the lecturer should not be told that registration is end-to-end complete yet.
+
+## Live Supabase inspection — 22 November 2026
+
+Connected to the existing FixMate Supabase project in **read-only mode**. All six `public` application tables have RLS enabled. Six Auth accounts have matching profiles (no missing profile). The existing `on_auth_user_created` trigger calls `private.handle_new_user()` and forces new profiles to role `resident`; do **not** install a second signup trigger. The previously proposed signup SQL file was revised to contain **read-only verification queries**. Flutter registration is still feature-flagged off until fresh-account end-to-end tests pass.
+
+The moderator review schema/RPC remains **proposed only**; no `report_reviews` table exists in live Supabase and there are no moderator profiles in the current database snapshot. The Supabase project has **no tracked migration history and no development branch** in the connector results. Do not run the moderator migration on live production solely to make the demo work.
