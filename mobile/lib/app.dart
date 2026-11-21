@@ -6,6 +6,9 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'data/repositories/report_repository.dart';
 import 'data/repositories/supabase_report_repository.dart';
 import 'features/auth/auth_gate.dart';
+import 'features/operations/operations_role.dart';
+import 'features/operations/admin_operations_page.dart';
+import 'features/operations/moderator_operations_page.dart';
 import 'features/bottom_tabs/bottom_tabs_cubit.dart';
 import 'features/bottom_tabs/bottom_tabs_page.dart';
 import 'features/reports/reports_cubit.dart';
@@ -17,10 +20,12 @@ import 'navigation/route_generator.dart';
 
 /// Offline tests use InMemoryReportRepository; authenticated app uses DB.
 class FixMateApp extends StatelessWidget {
-  const FixMateApp({super.key, this.repository, this.requireLogin = false});
+  const FixMateApp({super.key, this.repository, this.requireLogin = false,
+      this.operationsOnly = false});
 
   final ReportRepository? repository;
   final bool requireLogin;
+  final bool operationsOnly;
 
   @override
   Widget build(BuildContext context) => MultiBlocProvider(
@@ -50,8 +55,20 @@ class FixMateApp extends StatelessWidget {
         ),
         home: requireLogin
             ? AuthGate(
-                builder: (profile) => profile.role.trim().toLowerCase() == 'maintenance_staff'
-                    ? StaffDashboardPage(
+                operationsOnly: operationsOnly,
+                builder: (profile) => switch (workspaceForRole(profile.role,
+                    operationsOnly: operationsOnly)) {
+                    FixMateWorkspace.systemAdmin =>
+                      AdminOperationsPage(
+                        key: ValueKey('admin-${profile.id}'),
+                        profile: profile,
+                      ),
+                    FixMateWorkspace.moderator =>
+                      ModeratorOperationsPage(
+                        key: ValueKey('moderator-${profile.id}'),
+                        profile: profile,
+                      ),
+                    FixMateWorkspace.maintenanceStaff => StaffDashboardPage(
                         key: ValueKey('staff-${profile.id}'),
                         profile: profile,
                         repository: SupabaseStaffReportsRepository(
@@ -59,7 +76,7 @@ class FixMateApp extends StatelessWidget {
                           staffId: profile.id,
                         ),
                       )
-                    : BlocProvider<ReportsCubit>(
+                    FixMateWorkspace.resident => BlocProvider<ReportsCubit>(
                   key: ValueKey('reports-${profile.id}'),
                   create: (_) => ReportsCubit(
                     repository ?? SupabaseReportRepository(
@@ -69,6 +86,10 @@ class FixMateApp extends StatelessWidget {
                   )..load(),
                   child: BottomTabsPage(profile: profile),
                 ),
+                FixMateWorkspace.denied => const Scaffold(
+                  body: Center(child: Text('This role cannot enter the selected workspace.')),
+                ),
+              },
               )
             : const BottomTabsPage(),
         onGenerateRoute: const RouteGenerator().getRoute,
