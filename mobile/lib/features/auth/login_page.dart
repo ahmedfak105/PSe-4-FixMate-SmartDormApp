@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'sign_up_page.dart';
+
 /// Sign-in only: use an existing Supabase Auth account.
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key, this.connectionError});
@@ -137,6 +139,22 @@ class _LoginPageState extends State<LoginPage> {
                             : const Text('Sign in'),
                       ),
                     ),
+                    // Enable only after the resident profile provisioning
+                    // migration has passed staging verification.
+                    if (const bool.fromEnvironment(
+                      'ENABLE_RESIDENT_SIGNUP', defaultValue: false,
+                    )) ...[
+                      const SizedBox(height: 8),
+                      TextButton(
+                        key: const Key('go_to_signup'),
+                        onPressed: () => Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) => const SignUpPage(),
+                          ),
+                        ),
+                        child: const Text('Create resident account'),
+                      ),
+                    ],
                     const SizedBox(height: 16),
                     const Text(
                       'Residents can view and submit maintenance reports after signing in.',
