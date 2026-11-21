@@ -128,6 +128,7 @@ class _AdminOperationsPageState extends State<AdminOperationsPage> {
     );
     if (!mounted || chosen == null) return;
     setState(() { _busy = true; _error = null; _notice = null; });
+    String? actionError;
     try {
       if (!_authorized) throw StateError('Administrator session changed.');
       final response = await _client.rpc('assign_maintenance_report', params: {
@@ -140,10 +141,13 @@ class _AdminOperationsPageState extends State<AdminOperationsPage> {
           ? 'Report #$reportId assigned. Staff must claim it before work begins.'
           : 'Report #$reportId was changed by someone else. List refreshed.');
     } catch (error) {
-      if (mounted) setState(() => _error = 'Could not assign report #$reportId: $error');
+      actionError = 'Could not assign report #$reportId: $error';
     } finally {
       if (mounted) setState(() => _busy = false);
       await _load();
+      if (mounted && actionError != null) {
+        setState(() => _error = actionError);
+      }
     }
   }
 
