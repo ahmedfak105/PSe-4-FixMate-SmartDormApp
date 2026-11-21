@@ -7,14 +7,15 @@ This is the **standalone administrator web interface** for FixMate – SmartDorm
 ## What the dashboard does
 
 - Supabase connection setup with a **publishable / legacy anon key** and project URL.
-- Email/password sign-in using existing Supabase Auth accounts: `system_admin` enters the Admin Dashboard; `maintenance_staff` is redirected to `staff.html` with a separate role guard.
+- Email/password sign-in using existing Supabase Auth accounts: `system_admin` enters the Admin Dashboard; `maintenance_staff` is redirected to `staff.html` and `moderator` to `moderator.html`, each with a separate role guard.
 - **Overview:** counts by report status and recent reports.
 - **All reports:** report list, text search and status filter.
 - **Assignments:** assign an eligible, unassigned new report to a maintenance staff account using the protected `assign_maintenance_report` RPC. Assignment retains the report's `new` status; maintenance staff then claim it in their Flutter interface.
 - **People & Roles:** **read-only** listing of profiles and roles.
 - **Maintenance staff web workspace (`staff.html`):** authorized staff can view available reports and their assigned jobs, claim with the protected RPC, resolve their own in-progress reports, and view submission/status-history timestamps where permitted by RLS.
+- **Moderator review (`moderator.html`):** moderator/system_admin can review new unassigned reports with Valid, Duplicate or Inappropriate outcomes, inspect authorized private report photos and read persisted review decisions. **Requires the proposed SQL migration to be reviewed and deployed separately before this feature works.**
 
-There is **no** admin user creation, direct role editing, category management, moderator review workflow, or general-purpose unrestricted SQL access in this MVP. Moderator functionality still requires a persisted review operation and its own authorized interface.
+There is **no** admin user creation, direct role editing, category management, or general-purpose unrestricted SQL access in this MVP. Moderator review is coded but not yet operational until its proposed database migration is applied and end-to-end permission tests pass.
 
 ## Run locally
 
@@ -38,7 +39,7 @@ The HTML loads Supabase JavaScript SDK v2 via jsDelivr, so an internet connectio
 1. Supply the **HTTPS Supabase project URL**.
 2. Supply the project's **publishable key** (`sb_publishable_...`) or legacy anon key. Never use `service_role` or `sb_secret_`.
 3. Select **Connect to Supabase**.
-4. Sign in using an existing **system_admin** test account (or **maintenance_staff** to open the new staff web page).
+4. Sign in using an existing **system_admin** test account (or **maintenance_staff** / **moderator** to open their role-specific pages).
 5. Open **Overview**, **All reports**, **Assignments**, or **People & Roles**.
 
 The current code persists the connection in browser `localStorage`. Use **Change Supabase connection** to replace it, or **Sign out** to end the current session.
