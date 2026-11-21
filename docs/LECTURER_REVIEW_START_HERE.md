@@ -91,3 +91,7 @@ The moderator review schema/RPC remains **proposed only**; no `report_reviews` t
 ## Role-based account provisioning evidence
 
 [Trusted Staff / Moderator / Admin Provisioning](TRUSTED_ROLE_PROVISIONING.md) documents safe operator-only role changes and the negative API tests required by TASK #35. Ordinary resident signup cannot grant privileged roles. This is documentation of an existing security model, **not evidence that the Moderator end-to-end workflow has passed**.
+
+## Verified CI test milestone — 22 Nov 2026
+
+[Isolated PostgreSQL 17 CI smoke](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/44956106507) has passed for the **current six-table baseline** and the **proposed** input validation/Moderator review SQL, using synthetic users and stubbed Supabase-managed schemas. A separate [Moderator proposed ERD](erd/FIXMATE_PROPOSED_MODERATOR_ERD.mmd) is available; do not confuse it with the live six-table ERD. **This does not show Moderator working on Supabase production**, which still lacks the review table/RPC. Real Auth/Storage/API tests and a recorded migration on an approved fresh Supabase environment remain outstanding.
