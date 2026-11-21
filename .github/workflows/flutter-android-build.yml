@@ -5,6 +5,8 @@ on:
     paths:
       - '.github/workflows/flutter-android-build.yml'
       - 'mobile/android/**'
+      - 'mobile/lib/**'
+      - 'mobile/l10n/**'
       - 'mobile/pubspec.yaml'
       - 'mobile/pubspec.lock'
   workflow_dispatch:
