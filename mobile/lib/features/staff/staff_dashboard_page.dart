@@ -97,7 +97,20 @@ class _StaffDashboardPageState extends State<StaffDashboardPage> {
         setState(() => _error = 'Could not update report #${report.id}: $error');
       }
     } finally {
-      if (mounted) setState(() => _busyReportId = null);
+      if (mounted) {
+        setState(() => _busyReportId = null);
+        // Confirmation must remain visible even after the refreshed ListView
+        // scrolls to an item below its initial viewport. A note placed only
+        // at the top of a lazily built list can be absent from the viewport.
+        final feedback = _error ?? _notice;
+        if (feedback != null) {
+          final messenger = ScaffoldMessenger.maybeOf(context);
+          messenger?.hideCurrentSnackBar();
+          messenger?.showSnackBar(
+            SnackBar(content: Text(feedback), duration: const Duration(seconds: 6)),
+          );
+        }
+      }
     }
   }
 
@@ -190,11 +203,6 @@ class _StaffDashboardPageState extends State<StaffDashboardPage> {
                   Text(_error!,
                       style: TextStyle(color: Theme.of(context).colorScheme.error)),
                   TextButton(onPressed: _refresh, child: const Text('Retry')),
-                ],
-                if (_notice != null) ...[
-                  const SizedBox(height: 12),
-                  Text(_notice!,
-                      style: TextStyle(color: Theme.of(context).colorScheme.primary)),
                 ],
                 if (!_loading && _error == null && displayed.isEmpty) ...[
                   const SizedBox(height: 40),
