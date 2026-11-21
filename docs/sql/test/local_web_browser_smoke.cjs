@@ -16,8 +16,9 @@ async function apiLogin(email) {
     headers: { 'apikey': KEY, 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, password: PASSWORD }),
   });
-  assert.equal(response.status, 200, await response.text().catch(()=>'Auth unavailable'));
-  return (await response.json()).access_token;
+  const raw = await response.text();
+  assert.equal(response.status, 200, raw);
+  return JSON.parse(raw).access_token;
 }
 async function apiReq(path, token, options = {}) {
   const response = await fetch(API + path, {
