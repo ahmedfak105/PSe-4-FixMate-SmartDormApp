@@ -95,3 +95,12 @@ The moderator review schema/RPC remains **proposed only**; no `report_reviews` t
 ## Verified CI test milestone — 22 Nov 2026
 
 [Isolated PostgreSQL 17 CI smoke](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/44956106507) has passed for the **current six-table baseline** and the **proposed** input validation/Moderator review SQL, using synthetic users and stubbed Supabase-managed schemas. A separate [Moderator proposed ERD](erd/FIXMATE_PROPOSED_MODERATOR_ERD.mmd) is available; do not confuse it with the live six-table ERD. **This does not show Moderator working on Supabase production**, which still lacks the review table/RPC. Real Auth/Storage/API tests and a recorded migration on an approved fresh Supabase environment remain outstanding.
+
+
+## Key evidence update — 22 November 2026
+
+- FixMate baseline now has three committed CLI-named migration files for the six-table schema, eight categories and nine supporting FK indexes; [full local Supabase db reset passed](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/44957264386).
+- [Local Auth and role/Storage API integration](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/44956711120) proved account provisioning, unauthorized role update rejection, Resident report/photo isolation, Moderator/Admin reviews and Staff claim/resolve, using only synthetic local accounts.
+- [Two concurrent staff claims](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/44956576887) yielded exactly one successful claim and one status-history entry.
+- GitHub TASK issues **#30, #33, #34, #35** were closed after written acceptance review. Details are in [Task Reconciliation](TASK_STATUS_RECONCILIATION.md).
+- **Do not demonstrate Moderator as live production functionality** until its separate proposed migration is deployed/tested on approved staging. Production still contains the original six-table schema, and the three PRs remain Draft.
