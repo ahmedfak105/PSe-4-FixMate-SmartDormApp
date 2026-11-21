@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -24,11 +26,23 @@ String? validateOperationsPublicConnection(String url, String key) {
       key.trim().startsWith('service_role')) {
     return 'Only a public publishable key or legacy anon JWT is permitted.';
   }
-  final jwtParts = key.trim().split('.');
-  final legacyAnon = jwtParts.length == 3 &&
-      jwtParts.every((part) => part.isNotEmpty);
-  if (!key.trim().startsWith('sb_publishable_') && !legacyAnon) {
-    return 'Enter a Supabase publishable key or legacy anon JWT.';
+  if (!key.trim().startsWith('sb_publishable_')) {
+    // A legacy service_role key looks like a valid three-part JWT, but must
+    // never be passed to Flutter Web: it bypasses all PostgreSQL RLS.
+    final parts = key.trim().split('.');
+    try {
+      if (parts.length != 3 || parts.any((p) => p.isEmpty)) {
+        return 'Enter a publishable key or legacy anon JWT.';
+      }
+      final payload = jsonDecode(utf8.decode(
+        base64Url.decode(base64Url.normalize(parts[1])),
+      ));
+      if (payload is! Map || payload['role'] != 'anon') {
+        return 'Only legacy anon JWTs are allowed. Never enter service_role tokens.';
+      }
+    } catch (_) {
+      return 'Invalid legacy anon JWT.';
+    }
   }
   return null;
 }
