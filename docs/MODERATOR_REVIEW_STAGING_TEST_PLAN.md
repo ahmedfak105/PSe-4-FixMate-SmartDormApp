@@ -73,3 +73,7 @@ The migration keeps `maintenance_reports.status` at `new`, `in_progress`, `resol
 - Review decisions do not automatically send a resident notification; notifications are a separate backlog feature.
 
 **No live Supabase schema or data change is claimed by this file.**
+
+## New automated evidence (22 November 2026)
+
+A [PostgreSQL 17 smoke job](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/44956106507) now passes after applying the proposed review migration on an **ephemeral database** with synthetic Auth/Storage stubs. It tests moderator/admin review outcomes, rejection reasons, one-decision-only behavior, denied resident review, private review metadata, rejected-report claim prevention, and normal claim/resolve. This verifies PostgreSQL logic only; it **does not verify Supabase Auth API, real photo download, UI interactions, or concurrent separate transactions**. The migration remains undeployed on the live Supabase project; TASK #39 stays In Progress.
