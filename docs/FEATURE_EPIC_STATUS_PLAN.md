@@ -4,7 +4,7 @@
 **Source:** Actual feature/epic acceptance criteria in GitHub Issues #1–#29; committed Flutter MVP in PR #43; admin dashboard in PR #44; verified SQL/ERD/RLS/RPC/Storage evidence in PR #42.  
 **Project Board:** The existing GitHub Project board may contain **copied issues from the lecturer's repository with different issue numbers**. Match tasks by **issue title / feature ID**, never copy an issue number from the student repository into the lecturer's project.
 
-> The classifications below are proposals to synchronize the **GitHub Project Status field**, not assertions that draft PRs have been merged or the product is production-ready. `Done` means the stated Feature acceptance criteria are met in the observed MVP. If the lecturer requires a particular UI framework, final feature acceptance may change. `Todo` = not yet demonstrated; `In Progress` = implemented in part; `Done` = demonstrably meets criteria.
+> The classifications below are proposals to synchronize the **GitHub Project Status field**, not assertions that draft PRs have been merged or the product is production-ready. `Done` means the stated Feature acceptance criteria are met in the observed MVP. The project team reports that the lecturer approved the standalone HTML/CSS/JS admin technology on 21 Nov 2026; implementation scope and other acceptance criteria still need review. `Todo` = not yet demonstrated; `In Progress` = implemented in part; `Done` = demonstrably meets criteria.
 
 ## Epic status matrix
 
@@ -39,7 +39,7 @@
 | **F04.2 View Report Details and Track Progress** | In Progress | Own-report details and status implemented; details omit required submission date |
 | **F05.1 Report Status Change Notifications** | Todo | Status-history logging is NOT resident notification delivery |
 | **F05.2 Push Notification Delivery** | Todo | No verified token registration/delivery handling |
-| **F06.1 Administrative Dashboard** | Done | Standalone HTML/JS admin UI shows real status counts and report navigation, gates `system_admin` role |
+| **F06.1 Administrative Dashboard** | Done | Standalone HTML/JS admin UI shows real status counts and report navigation, gates `system_admin` role; the project team reports lecturer approval of this framework choice (21 Nov 2026) |
 | **F06.2 User and Role Administration** | In Progress | Admin People & Roles view exists but is explicitly read-only; privileged edits missing |
 | **F06.3 Maintenance Category Management** | Todo | Category schema and read-only category retrieval exist, but no admin create/edit/activate/deactivate UI or API workflow demonstrated |
 | **F06.4 Report Search and Filtering** | In Progress | Admin supports text search and status filter; category/date filtering not demonstrated |
