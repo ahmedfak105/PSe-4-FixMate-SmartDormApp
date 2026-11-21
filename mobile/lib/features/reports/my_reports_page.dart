@@ -58,7 +58,7 @@ class MyReportsPage extends StatelessWidget {
             itemBuilder: (context, index) {
               final report = state.items[index];
               final submittedDate = MaterialLocalizations.of(context)
-                  .formatMediumDate(report.createdAt.toLocal());
+                  .formatCompactDate(report.createdAt.toLocal());
               return Card(
                 margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                 child: ListTile(
