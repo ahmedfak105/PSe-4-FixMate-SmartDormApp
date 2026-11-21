@@ -75,3 +75,19 @@ This proposed change adds a seventh public table **only if deployed**; existing 
 - Added [proposed resident Auth provisioning trigger](sql/PROPOSED_RESIDENT_SIGNUP_PROVISIONING.sql). It uses the new auth user's UUID and forces `role = 'resident'` regardless of metadata.
 - The SQL has **not** been applied to Supabase. Leave signup disabled by default until trigger ownership, account creation, confirmation behavior and role isolation are tested in staging. Do not close #30/#35 yet.
 - Existing trusted staff/moderator/admin profile provisioning remains separate; this trigger does not authorize assigning privileged roles.
+
+## Live Supabase read-only verification — 22 November 2026 (supersedes proposed trigger)
+
+Direct connector inspection of FixMate's **existing** Supabase project `epsvagztisdovixlqehi` found:
+- **6** `auth.users`, **6** `public.profiles`, **0** users without profiles.
+- `auth.users` already has `on_auth_user_created`, which calls `private.handle_new_user()`.
+- `private.handle_new_user()` uses `SECURITY DEFINER`, empty `search_path`, inserts `NEW.id` and `full_name`, and forces `role='resident'` independently of user-editable metadata. Function owner is `postgres`.
+- `authenticated` cannot directly INSERT profiles or UPDATE `profiles.role`.
+- The signup UI no longer includes optional building/room fields because the existing trigger doesn't populate those fields. There is **no reason to install a duplicate auth trigger**.
+- [Resident provisioning SQL](sql/PROPOSED_RESIDENT_SIGNUP_PROVISIONING.sql) has been replaced with a **read-only verification script**, retaining its original path to avoid broken review links.
+- The default `ENABLE_RESIDENT_SIGNUP=false` stays in place until staging sign-up tests with a new user and confirmation flow pass. **TASKS #30 and #35 remain In Progress**, not Done.
+- No Supabase DDL or data was changed by this verification.
+
+For **TASK #39**, live catalog inspection confirmed `report_reviews` and `review_maintenance_report` are absent and no maintenance-report triggers exist. Proposed moderator migration has **not** been applied. No current `moderator` account was found (resident 3, staff 2, admin 1), so role-specific testing requires a test moderator in a separate environment.
+
+**Database delivery caveat:** `list_migrations` returned zero tracked migrations and `list_branches` returned zero development branches. Do not claim a reproducible deployment or an existing staging database. The migration history and staging strategy need attention before task #34 can be Done.
