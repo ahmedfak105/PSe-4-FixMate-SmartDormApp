@@ -1,118 +1,81 @@
-# FixMate – SmartDormApp | Lecturer Review Index
+# FixMate — Lecturer Review: Start Here
 
-**Kauno Kolegija — Internal Internship**  
-**Evidence snapshot:** 21 November 2026  
-**Purpose:** A direct navigation sheet for a lecturer who already has repository access. Every link goes to the relevant source, SQL, test evidence or review PR. This describes a **working MVP**, not a finished production release.
+**Kauno Kolegija • Internal Internship • 22 November 2026**  
+**Project:** FixMate – SmartDormApp  
+**Integration candidate:** [Draft PR #46](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/pull/46)  
+**Purpose:** Navigate the **actual integrated Flutter Mobile + Flutter Web project**, the original Supabase database model, and the latest automated evidence.
 
-## 1. Where to look in GitHub
+> The integrated source is on a **review branch**, not merged into `main`. Automated development checks have passed, but the hosted Supabase project still has its **original six application tables**. Report-validation changes and the seventh Moderator review table/RPC are **proposed only**, tested in isolated local Supabase, not deployed to the hosted database.
 
-| Workstream | Code / evidence | Review status |
+## 1. Open these first
+
+| What the lecturer wants to inspect | Exact location |
+|---|---|
+| **Whole integrated app and documentation** | [PR #46](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/pull/46) and [combined branch](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/tree/integration/lecturer-review-2026-11-22) |
+| **Resident/Staff mobile source** | [mobile/lib/](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/tree/integration/lecturer-review-2026-11-22/mobile/lib) |
+| **Flutter Web Admin, Moderator and Staff** | [Operations setup](../mobile/OPERATIONS_WEB_README.md) and [operations screens](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/tree/integration/lecturer-review-2026-11-22/mobile/lib/features/operations) |
+| **Source-of-truth database ERD** | [Original six-table ERD](FIXMATE_ERD.md) |
+| **Proposed Moderator schema extension** | [Separately labeled seventh-table ERD](erd/FIXMATE_PROPOSED_MODERATOR_ERD.mmd) |
+| **Backend schema, security and migrations** | [Architecture](DATABASE_ARCHITECTURE.md), [RLS, RPC and Storage](DATABASE_RLS_SECURITY.md), [CLI migrations](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/tree/integration/lecturer-review-2026-11-22/supabase/migrations) |
+| **Read-only SQL examples** | [Demonstration queries](sql/FIXMATE_DEMO_QUERIES_READ_ONLY.sql) |
+| **English 7–9-minute spoken demonstration** | [Lecturer Presentation Script](LECTURER_PRESENTATION_SCRIPT.md) |
+| **Remaining deployment tasks** | [Controlled rollout guide](CONTROLLED_SUPABASE_ROLLOUT_TASK36_TASK39.md) and [read-only preflight SQL](sql/REMOTE_ADDITIVE_PREDEPLOY_READ_ONLY.sql) |
+
+The original, separately implemented HTML/CSS/JavaScript Admin dashboard is in [Draft PR #44](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/pull/44), but the **integrated deliverable uses Flutter Web**. Some older evidence snapshot documents still describe the earlier HTML version; those sections are historical, not the current UI architecture.
+
+## 2. Database architecture
+
+The original hosted Supabase application has **six public tables**:
+`profiles`, `maintenance_categories`, `maintenance_reports`,
+`report_attachments`, `report_notes` and `report_status_history`.
+
+Supabase `auth.users` manages login identities and an existing trigger creates a Resident profile. The `report-photos` bucket is private. Original **RLS is enabled for all six public tables**; the inspection recorded **13 public-table policies and 3 Storage policies**. Database RPCs implement authorized Claim, Resolve and Admin Assign behavior.
+
+A separate proposed `report_reviews` table, restricted Moderator review RPC and rejected-report work guard were successfully tested in **disposable local Supabase**. They are **not** present in the original hosted Supabase project.
+
+Three ordered migrations under `supabase/migrations/` reconstruct the **baseline in a fresh local development project**: base schema, eight maintenance categories and nine foreign-key indexes. Do **not** apply those fresh-baseline scripts to the existing, populated hosted project, which has no recorded migration history.
+
+## 3. Latest verified checks on the integrated code
+
+| Test | Evidence | Result |
 |---|---|---|
-| **Flutter resident and staff app** | [PR #43 — mobile application](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/pull/43) · [main.dart](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/blob/feature/flutter-resident-staff/mobile/lib/main.dart) · [Report feature](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/tree/feature/flutter-resident-staff/mobile/lib/features/reports) · [Staff screens](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/tree/feature/flutter-resident-staff/mobile/lib/features/staff) | Draft PR; 19/19 Flutter tests passed locally and CI checks passed |
-| **Admin web application** | [PR #44 — administrator dashboard](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/pull/44) · [index.html](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/blob/feature/admin-web-dashboard/admin-web/index.html) · [app.js](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/blob/feature/admin-web-dashboard/admin-web/app.js) · [styles.css](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/blob/feature/admin-web-dashboard/admin-web/styles.css) | Draft PR; admin views loaded; maintenance_staff role was denied entry |
-| **Database, ERD and security** | [PR #42 — documentation](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/pull/42) · [Architecture](DATABASE_ARCHITECTURE.md) · [ERD](FIXMATE_ERD.md) · [RLS / RPC / Storage](DATABASE_RLS_SECURITY.md) | Draft PR; definitions and checks extracted from the actual Supabase project |
+| Flutter analysis + widget/unit tests | [Flutter CI](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/44963696849) | Passed |
+| Flutter Web release build | [Web build](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/44963696864) | Passed |
+| Real Flutter Web Chromium role/workflow E2E, isolated Supabase | [Browser E2E](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/44963696839) | Passed |
+| PostgreSQL schema/review/validation smoke | [Database smoke](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/44963696859) | Passed |
+| Full local Supabase Auth/REST/Storage API tests | [Local API integration](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/44963622480) | Passed on earlier integration SHA |
+| Integrated Android debug APK + Web bundle | [Combined release run](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/44963696769) | All jobs passed; both artifacts uploaded |
+| Two simultaneous staff claims | [Concurrency test](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/44956576887) | Exactly one winner |
 
-**Important:** None of these three PRs has been merged into `main` as of the evidence snapshot. Open the **PR branch** linked above, rather than expecting these files on `main`.
+A later **documentation-only** change refreshed the presentation script; its new CI rerun may still be in progress. The app-source build evidence above is from the last checked integrated code SHA. Verify the newest run before merging.
 
-## 2. Database work to demonstrate
+**Artifacts:** Open the Combined Release run → **Artifacts** → `fixmate-integrated-android-debug-apk` or `fixmate-integrated-flutter-web-operations`. Files have limited retention and need suitable Android/Web installation or hosting for a live demo.
 
-- **Six** application tables, **34** columns, **10** foreign keys, and roles `resident`, `maintenance_staff`, `moderator`, `system_admin`.
-- [Actual-schema ERD](FIXMATE_ERD.md) shows the central `maintenance_reports` table, ownership and assigned staff, categories, photos, internal notes and status history.
-- [Schema reference SQL](sql/FIXMATE_PUBLIC_SCHEMA_REFERENCE.sql) records actual column types, defaults, primary keys, foreign keys, CHECK constraints and identity generation. It is a **reference**, not a complete deployment migration; **do not run it against the live Supabase project**.
-- [Read-only demo SQL](sql/FIXMATE_DEMO_QUERIES_READ_ONLY.sql) shows joins between reports, residents, categories and staff; status counts; history; internal notes; and RLS/Storage catalog flags.
-- [Authorization evidence](DATABASE_RLS_SECURITY.md) documents 13 policies across six RLS-enabled app tables, seven RPC routines, the blocked direct `profiles.role` update grant, and the private `report-photos` bucket.
+## 4. What to demonstrate in 7–9 minutes
 
-## 3. Recorded test evidence
+1. **Problem and architecture:** show Flutter Mobile, Flutter Web, Supabase Auth/PostgreSQL/Storage and the ERD.
+2. **Resident:** sign in, submit a dummy report, optionally attach a photo, open My Reports and details.
+3. **Admin:** sign in to Flutter Web, show overview/report search, assign an eligible New report.
+4. **Staff:** Claim the report, then Resolve it; show the status update and history.
+5. **Moderator — isolated local/staging only:** open a private test photo and save a Valid/Duplicate/Inappropriate review with required rejection reason.
+6. **Security/SQL:** show a report JOIN, status counts and RLS flags using read-only SQL; show successful local Auth/API role-denial tests, not just SQL Editor output.
+7. **Conclusion:** show CI and the two remaining hosted-backend acceptance tasks.
 
-- Flutter cloned-repository command: `cd mobile && flutter pub get && flutter test` → **19/19 tests passed**.
-- GitHub Actions on Flutter PR branch: [successful PR workflow run](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/44840755094) and [successful push workflow run](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/44840755397).
-- Staff role login to Admin Web → `Access denied: this account has role "maintenance_staff". Only system_admin can open this workspace.`
-- Admin login → real Overview, All Reports, Assignments and People & Roles views loaded.
-- Previously recorded resident/report/staff data-isolation and workflow tests: see [Security & QA Verification](SECURITY_QA_VERIFICATION.md).
+Use **synthetic accounts and reports only**. Do not show real user records, private tokens, passwords or service-role keys.
 
-**Scope caveat:** SQL Editor read-only queries may execute with elevated privileges and are **not** a replacement for a normal client's RLS test. Code and policy reviews are not a penetration test.
+## 5. Task, feature and release status
 
-## 4. Suggested demonstration order (7–9 minutes)
+The implementation backlog tracks **12 Tasks**. At the current GitHub issue-state snapshot, **10 are closed** and **2 remain open**:
 
-1. **45 s — Introduction.** Show the repository and explain the problem: maintenance reporting and response in a dormitory.
-2. **55 s — Architecture.** Show [Database Architecture](DATABASE_ARCHITECTURE.md): Flutter client + standalone Admin Web + Supabase Auth/PostgreSQL/Storage.
-3. **60 s — ERD.** Show [ER diagram](FIXMATE_ERD.md), starting with `maintenance_reports`.
-4. **70 s — Resident.** Create/show a report, optional attachment, My Reports and report details.
-5. **70 s — Maintenance Staff.** Claim an eligible report, add internal notes, resolve it and show status history.
-6. **55 s — Admin.** Show Overview, All Reports, Assignments and the read-only People & Roles page.
-7. **65 s — SQL.** Run a multi-table JOIN and then a read-only status/history query; explain PK/FK and `LEFT JOIN`.
-8. **50 s — Security & QA.** RLS, RPC role checks, private photo Storage, successful CI, and remaining work.
+- [Task #36](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/36): report input validation and backend/Storage acceptance on the approved target database.
+- [Task #39](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/39): Moderator review database migration and its target-project authorization/end-to-end acceptance.
 
-Use **test accounts and test reports only**; do not show real passwords, session tokens or private API keys.
+The wider Product Backlog includes **6 Epics / 22 Features**; closing the 12 implementation tasks **does not** mean every feature, such as push notifications, password recovery and full role self-administration, is complete. GitHub Project board Status fields may need separate review and synchronization with issue states.
 
-## 5. Technical questions likely to arise
+PRs #42 (docs/backend), #43 (Flutter Mobile), #45 (Flutter Web) and #46 (combined integration) remain under review; PR #44 is the older optional HTML prototype. **No merge into `main` or new hosted database migration is claimed here.**
 
-- **Why RLS as well as UI role checks?** Client-side screens are not a security boundary; database policies restrict row access.
-- **Why do status changes use RPC functions?** Their bodies verify caller role, report state and assigned worker before privileged changes.
-- **Does Admin assignment start the repair?** No. Assignment sets a staff ID and leaves status `new`. Claiming changes `new → in_progress`.
-- **Could two staff members claim the same unassigned report?** The conditional SQL UPDATE prevents two successful state transitions on that same report.
-- **Can a resident edit `profiles.role`?** The checked `authenticated` grants deny direct UPDATE on that column; indirect privileged paths still need review.
-- **What remains?** A full reproducible migration, additional direct-API permission tests and remaining backlog scope such as notifications, password recovery, and user/role administration.
+## 6. Questions and submission
 
-## 6. Admin technology choice — lecturer approval reported
+For lecturer Q&A about RLS, SECURITY DEFINER, staff claims, SQL JOINs, category constraints and the distinction between local tests and hosted deployment, use the [updated presentation script](LECTURER_PRESENTATION_SCRIPT.md).
 
-The [Product Backlog](PRODUCT_BACKLOG.md) originally describes an admin interface in **Flutter Web**. The project team reported on **21 November 2026** that the lecturer **approved** the **standalone HTML/CSS/JavaScript** admin dashboard. This removes the technology-choice blocker; it does **not** mean every admin acceptance criterion has been met. The **People & Roles** screen is currently read-only; the dashboard does **not** yet provide privileged account/role edits. This note records a team-reported verbal confirmation, not independently attached written approval.
-
-## 7. Project Board progress
-
-The [Feature & Epic Status Reconciliation](FEATURE_EPIC_STATUS_PLAN.md) classifies all **22 Features**, **6 Epics** and **12 implementation Tasks** against acceptance criteria. Status updates for the lecturer's GitHub Project must be matched by **item title / Feature ID**, not by issue number; the lecturer and student repositories use different task numbering. The target after verification is **9 Done**, **23 In Progress**, **8 Todo** (40 total). This is a **proposed target**, not proof of live synchronization.
-
-## 8. Presenter materials
-
-- [Detailed spoken presentation script](LECTURER_PRESENTATION_SCRIPT.md) — what to say and what to show.
-- [Read-only SQL demo](sql/FIXMATE_DEMO_QUERIES_READ_ONLY.sql) — exact queries.
-- [Security and QA summary](SECURITY_QA_VERIFICATION.md) — verified evidence and boundaries.
-
-**Review recommendation:** assess the three Draft PRs and their acceptance criteria before merging. Do not mark unfinished backlog features as complete.
-
-## Moderator feature progress (not yet part of the tested baseline)
-
-TASK #39 has a proposed implementation in PRs #42/#44: the new [Moderator Review page](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/blob/feature/admin-web-dashboard/admin-web/moderator.html), a [proposed database migration](sql/PROPOSED_MODERATOR_REVIEW_MIGRATION.sql), and the [staging test plan](MODERATOR_REVIEW_STAGING_TEST_PLAN.md). **The migration has not been applied to Supabase**; the feature must not be demonstrated as working end-to-end until staging and permission tests succeed. The six-table/13-policy counts elsewhere in this index remain the baseline observed before this proposed schema change.
-
-## Resident registration progress (not yet part of the tested baseline)
-
-A feature-flagged Flutter resident sign-up form is now in [PR #43](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/pull/43) and the matching [proposed Auth-to-profile trigger](sql/PROPOSED_RESIDENT_SIGNUP_PROVISIONING.sql) is documented in PR #42. The default remains **disabled** until the backend trigger is reviewed and deployed/tested on staging, so the lecturer should not be told that registration is end-to-end complete yet.
-
-## Live Supabase inspection — 22 November 2026
-
-Connected to the existing FixMate Supabase project in **read-only mode**. All six `public` application tables have RLS enabled. Six Auth accounts have matching profiles (no missing profile). The existing `on_auth_user_created` trigger calls `private.handle_new_user()` and forces new profiles to role `resident`; do **not** install a second signup trigger. The previously proposed signup SQL file was revised to contain **read-only verification queries**. Flutter registration is still feature-flagged off until fresh-account end-to-end tests pass.
-
-The moderator review schema/RPC remains **proposed only**; no `report_reviews` table exists in live Supabase and there are no moderator profiles in the current database snapshot. The Supabase project has **no tracked migration history and no development branch** in the connector results. Do not run the moderator migration on live production solely to make the demo work.
-
-## Task #34 — backend rebuild documentation (draft)
-
-[Reproduction guide](DATABASE_REPRODUCTION_GUIDE.md) links to the [catalog-derived SQL baseline draft](sql/VERIFIED_BASELINE_RECONSTRUCTION_DRAFT.sql), [8-category seed](sql/VERIFIED_CATEGORY_SEED_DRAFT.sql), and [read-only verification queries](sql/BASELINE_READ_ONLY_VERIFICATION.sql). This is substantial documentation progress on Task #34, but has **not been replayed on a clean Supabase environment**, so deployment reproducibility remains unverified. **No changes were made to the active project's database.**
-
-## Role-based account provisioning evidence
-
-[Trusted Staff / Moderator / Admin Provisioning](TRUSTED_ROLE_PROVISIONING.md) documents safe operator-only role changes and the negative API tests required by TASK #35. Ordinary resident signup cannot grant privileged roles. This is documentation of an existing security model, **not evidence that the Moderator end-to-end workflow has passed**.
-
-## Verified CI test milestone — 22 Nov 2026
-
-[Isolated PostgreSQL 17 CI smoke](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/44956106507) has passed for the **current six-table baseline** and the **proposed** input validation/Moderator review SQL, using synthetic users and stubbed Supabase-managed schemas. A separate [Moderator proposed ERD](erd/FIXMATE_PROPOSED_MODERATOR_ERD.mmd) is available; do not confuse it with the live six-table ERD. **This does not show Moderator working on Supabase production**, which still lacks the review table/RPC. Real Auth/Storage/API tests and a recorded migration on an approved fresh Supabase environment remain outstanding.
-
-
-## Key evidence update — 22 November 2026
-
-- FixMate baseline now has three committed CLI-named migration files for the six-table schema, eight categories and nine supporting FK indexes; [full local Supabase db reset passed](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/44957264386).
-- [Local Auth and role/Storage API integration](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/44956711120) proved account provisioning, unauthorized role update rejection, Resident report/photo isolation, Moderator/Admin reviews and Staff claim/resolve, using only synthetic local accounts.
-- [Two concurrent staff claims](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/44956576887) yielded exactly one successful claim and one status-history entry.
-- GitHub TASK issues **#30, #33, #34, #35** were closed after written acceptance review. Details are in [Task Reconciliation](TASK_STATUS_RECONCILIATION.md).
-- **Do not demonstrate Moderator as live production functionality** until its separate proposed migration is deployed/tested on approved staging. Production still contains the original six-table schema, and the three PRs remain Draft.
-
-## Flutter Web lecturer proof and latest task status — 22 Nov 2026
-
-This project now includes a **genuine Flutter Web operations build**, separate from the earlier standalone HTML/JS dashboard. [Draft PR #45](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/pull/45) implements role-gated Flutter Web Admin, Staff and Moderator screens, a runtime public Supabase connection form, read-only people directory, Admin assignment RPC, Staff Claim/Resolve and Moderator private-photo/decision workflow.
-
-- **Actual Flutter Web Chrome integration passed:** [run 44959849054](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/44959849054), using isolated Supabase Auth and PostgreSQL with synthetic users.
-- **Staff widget/role CI passed:** [run 44960549741](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/44960549741), **35 tests** including claim-conflict UX, status timestamps, and narrow-screen card-layout fix.
-- **Web compilation and downloadable build artifact passed:** [run 44960549877](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/44960549877).
-- [English Flutter Web demonstration transcript/checklist](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/blob/feature/flutter-web-operations/mobile/FLUTTER_WEB_LECTURER_DEMO.md).
-- **Student implementation tasks:** 10/12 Done (Closed), 2/12 In Progress (#36 backend validation/storage production acceptance; #39 Moderator SQL still staging-only). This does not update the GitHub Project V2 board field automatically.
-
-**No production deployment:** PRs #42–#45 remain Draft. Live Supabase has not received the proposed input validation and Moderator table/RPC; a full Moderator workflow must be shown on approved local/staging Supabase, **not misrepresented as live**.
+For safe release approval, use the [integration and delivery handoff](INTEGRATION_AND_DELIVERY_HANDOFF_2026-11-22.md) and the [controlled Supabase rollout checklist](CONTROLLED_SUPABASE_ROLLOUT_TASK36_TASK39.md). Do not push fresh-baseline migrations into the populated hosted project.
