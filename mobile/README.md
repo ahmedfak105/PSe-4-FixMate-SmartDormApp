@@ -7,12 +7,13 @@ This Flutter application is part of the Kauno Kolegija Internal Internship **Fix
 ## Implemented scope
 
 - Email/password **sign-in and sign-out** for existing Supabase Auth accounts, with profile-based routing.
+- **Resident sign-up UI is implemented but disabled by default** until secure automatic profile provisioning has been deployed and tested. There is no way to select elevated roles from the registration form.
 - **Resident:** submit reports with active maintenance categories; view own reports and report details; upload/download report photos from private Supabase Storage.
 - **Maintenance staff:** view eligible reports and assigned jobs; claim reports; resolve assigned in-progress reports; read/write internal maintenance notes.
 - **Localization:** English and Lithuanian.
 - Repository abstractions and Flutter tests. Supabase Row Level Security (RLS) and restricted database functions enforce backend authorization; hiding UI buttons alone is not a security boundary.
 
-**Not implemented in this checked-in mobile build:** resident sign-up, password recovery, moderator workflows, push/status-change notifications, complete profile editing, and an in-app admin dashboard. The standalone admin website provides its own admin-only views.
+**Not yet enabled end-to-end in this checked-in mobile build:** resident sign-up (form implemented, proposed backend trigger not deployed). Password recovery, mobile moderator workflows, push/status-change notifications, complete profile editing and an in-app admin dashboard are not implemented. The standalone admin website provides its own admin-only views.
 
 ## Prerequisites
 
@@ -32,6 +33,19 @@ flutter run -d chrome --dart-define=SUPABASE_URL=https://YOUR_PROJECT.supabase.c
 ```
 
 Use an existing resident or maintenance-staff account at the sign-in screen. The app loads the account's role from `profiles`.
+
+### Resident registration (staging only until backend verified)
+
+The resident sign-up page is guarded by a compile-time feature flag and is **off by default**. Before enabling it, review and test the separate proposed database file [PROPOSED_RESIDENT_SIGNUP_PROVISIONING.sql](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/blob/docs/security-qa-evidence-2026-11-21/docs/sql/PROPOSED_RESIDENT_SIGNUP_PROVISIONING.sql) in a cloned Supabase project. The trigger must create `public.profiles` for each new Auth user with `role = 'resident'`, independent of user-supplied metadata. Confirm email behavior and role isolation with test accounts.
+
+Only **after** verifying the backend in a staging project, launch the app with the extra flag:
+
+```bash
+flutter run -d chrome --dart-define=SUPABASE_URL=https://YOUR_STAGING_PROJECT.supabase.co --dart-define=SUPABASE_PUBLISHABLE_KEY=YOUR_STAGING_PUBLIC_KEY --dart-define=ENABLE_RESIDENT_SIGNUP=true
+```
+
+Do not enable this flag on the live project before provisioning is tested: without the trigger, sign-up might create an Auth user with no matching profile. The UI flag is a rollout precaution, **not** a backend security boundary.
+
 
 If your Chrome device has a different Flutter device name, run `flutter devices` first. Android and iOS project files are included, but a successful mobile-device build is **not** claimed in this repository.
 
@@ -61,7 +75,7 @@ flutter test
 ## Relevant source files
 
 - `lib/main.dart`: Supabase configuration via `--dart-define`, or offline demo fallback.
-- `lib/features/auth/`: existing-account sign-in, profile/session gating.
+- `lib/features/auth/`: sign-in, registration form (feature-flagged), and profile/session gating.
 - `lib/features/reports/`: submission, list and details UI.
 - `lib/features/staff/`: staff queue, claim/resolve and internal notes.
 - `lib/data/repositories/`: in-memory and Supabase implementations.
