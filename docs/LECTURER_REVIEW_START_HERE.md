@@ -58,7 +58,11 @@ Use **test accounts and test reports only**; do not show real passwords, session
 
 The [Product Backlog](PRODUCT_BACKLOG.md) originally describes an admin interface in **Flutter Web**. The demonstrable admin dashboard is instead **standalone HTML/CSS/JavaScript**. Its current functionality can be demonstrated, but the implementation choice should be explicitly accepted by the lecturer/team if framework compliance is part of grading. The **People & Roles** screen is currently read-only; the dashboard does **not** yet provide privileged account/role edits.
 
-## 7. Presenter materials
+## 7. Project Board progress
+
+The [Feature & Epic Status Reconciliation](FEATURE_EPIC_STATUS_PLAN.md) classifies all **22 Features**, **6 Epics** and **12 implementation Tasks** against acceptance criteria. Status updates for the lecturer's GitHub Project must be matched by **item title / Feature ID**, not by issue number; the lecturer and student repositories use different task numbering. The target after verification is **9 Done**, **23 In Progress**, **8 Todo** (40 total). This is a **proposed target**, not proof of live synchronization.
+
+## 8. Presenter materials
 
 - [Detailed spoken presentation script](LECTURER_PRESENTATION_SCRIPT.md) — what to say and what to show.
 - [Read-only SQL demo](sql/FIXMATE_DEMO_QUERIES_READ_ONLY.sql) — exact queries.
