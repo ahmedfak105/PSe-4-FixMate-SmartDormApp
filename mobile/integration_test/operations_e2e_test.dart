@@ -35,7 +35,13 @@ void main() {
       await tester.pump(const Duration(milliseconds: 300));
       if (finder.evaluate().isNotEmpty) return;
     }
-    throw TestFailure(reason ?? 'Timed out waiting for a Flutter UI element');
+    final uiLabels = find.byType(Text).evaluate()
+        .map((element) => element.widget as Text)
+        .map((text) => text.data ?? text.textSpan?.toPlainText() ?? '')
+        .where((label) => label.trim().isNotEmpty)
+        .take(45).join(' | ');
+    throw TestFailure('${reason ?? 'Timed out waiting for Flutter UI element'}. '
+        'Rendered labels: $uiLabels');
   }
 
   Future<void> loginAs(WidgetTester tester, String email) async {
@@ -200,7 +206,8 @@ void main() {
     await tester.ensureVisible(assign);
     await tester.tap(assign);
 
-    await waitFor(tester, find.text('Assign report #$id'));
+    await waitFor(tester, find.text('Assign report #$id'),
+        reason: 'Admin assignment dialog did not open');
     await tester.tap(find.text('Assign employee'));
     await waitFor(tester, find.textContaining('Report #$id assigned.'),
         reason: 'Admin assignment notice did not appear');
@@ -214,7 +221,8 @@ void main() {
 
     await loginAs(tester, 'staff.fixmate@example.com');
     final staffHeading = find.text('#$id  $title');
-    await waitFor(tester, staffHeading);
+    await waitFor(tester, staffHeading,
+        reason: 'Preassigned report was not visible in Staff available queue');
     final staffCard = find.ancestor(of: staffHeading, matching: find.byType(Card));
     final claim = find.descendant(
         of: staffCard, matching: find.text('Claim report'));
