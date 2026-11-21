@@ -9,6 +9,11 @@ on:
       - 'supabase/migrations/**'
   workflow_dispatch:
 
+# Avoid simultaneous local Docker stacks on runners with shared daemon state.
+concurrency:
+  group: fixmate-local-supabase-${{ github.repository }}
+  cancel-in-progress: true
+
 jobs:
   local-supabase:
     name: Local Supabase Auth, Storage and RLS APIs
@@ -30,6 +35,8 @@ jobs:
           supabase --version
           supabase init
 
+      - name: Remove any stale isolated Supabase containers before startup
+        run: supabase stop --no-backup || true
       - name: Start disposable local Supabase (Docker, no remote project)
         run: supabase start
 
