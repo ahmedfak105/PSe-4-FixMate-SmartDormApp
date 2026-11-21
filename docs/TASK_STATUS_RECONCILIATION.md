@@ -56,3 +56,14 @@ The approved **Goals, Scope, and Acceptance Criteria in the individual GitHub TA
 | **#39 — Moderator review UI** | Not yet implemented | Requires an approved/persisted review outcome for valid, duplicate and inappropriate reports, with photo visibility and role checks |
 
 Admin Web static CI passed on commit `545e943`. These are **code-level progress updates**, not a declaration that the complete tasks are Done. The previous task classifications and Board field status should not be changed merely because code was committed.
+
+## Moderator review implementation update — 21 Nov 2026 (follow-up)
+
+**TASK #39 remains In Progress / not accepted.** The earlier "not implemented" note was a snapshot before this implementation.
+
+- Moderator UI is now committed to PR #44: `admin-web/moderator.html`, `moderator.js`; main login redirects role `moderator` to its own web view.
+- New, **not-yet-applied** migration in PR #42: [PROPOSED_MODERATOR_REVIEW_MIGRATION.sql](sql/PROPOSED_MODERATOR_REVIEW_MIGRATION.sql). It proposes `report_reviews`, a restricted review RPC, and a guard preventing claim/assignment of rejected reports.
+- [Moderator staging test plan](MODERATOR_REVIEW_STAGING_TEST_PLAN.md) captures the role-based, photo, persisted-decision, concurrency and regression checks required for acceptance.
+- **Not completed:** staging deployment, live browser/API tests, security verification, and lecturer/team review of database migration. Do **not** close TASK #39 or report it as Done yet.
+
+This proposed change adds a seventh public table **only if deployed**; existing six-table documentation records the verified baseline and is not automatically updated.
