@@ -54,9 +54,9 @@ Use **test accounts and test reports only**; do not show real passwords, session
 - **Can a resident edit `profiles.role`?** The checked `authenticated` grants deny direct UPDATE on that column; indirect privileged paths still need review.
 - **What remains?** A full reproducible migration, additional direct-API permission tests and remaining backlog scope such as notifications, password recovery, and user/role administration.
 
-## 6. Scope decision requiring confirmation
+## 6. Admin technology choice — lecturer approval reported
 
-The [Product Backlog](PRODUCT_BACKLOG.md) originally describes an admin interface in **Flutter Web**. The demonstrable admin dashboard is instead **standalone HTML/CSS/JavaScript**. Its current functionality can be demonstrated, but the implementation choice should be explicitly accepted by the lecturer/team if framework compliance is part of grading. The **People & Roles** screen is currently read-only; the dashboard does **not** yet provide privileged account/role edits.
+The [Product Backlog](PRODUCT_BACKLOG.md) originally describes an admin interface in **Flutter Web**. The project team reported on **21 November 2026** that the lecturer **approved** the **standalone HTML/CSS/JavaScript** admin dashboard. This removes the technology-choice blocker; it does **not** mean every admin acceptance criterion has been met. The **People & Roles** screen is currently read-only; the dashboard does **not** yet provide privileged account/role edits. This note records a team-reported verbal confirmation, not independently attached written approval.
 
 ## 7. Project Board progress
 
