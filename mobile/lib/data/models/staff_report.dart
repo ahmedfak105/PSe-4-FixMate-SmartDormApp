@@ -11,6 +11,7 @@ class StaffReport {
     required this.status,
     required this.assignedTo,
     required this.createdAt,
+    this.lastStatusUpdatedAt,
   });
 
   final int id;
@@ -22,6 +23,8 @@ class StaffReport {
   final String status;
   final String? assignedTo;
   final DateTime createdAt;
+  /// Most recent backend status-history timestamp visible under staff RLS.
+  final DateTime? lastStatusUpdatedAt;
 
   bool get isAvailable => status == 'new' && assignedTo == null;
 
@@ -44,5 +47,7 @@ class StaffReport {
         status: json['status'] as String,
         assignedTo: json['assigned_to'] as String?,
         createdAt: DateTime.parse(json['created_at'] as String),
+        lastStatusUpdatedAt: json['last_status_updated_at'] == null
+            ? null : DateTime.parse(json['last_status_updated_at'] as String),
       );
 }
