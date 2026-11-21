@@ -102,6 +102,13 @@ admin_token="$(login "$admin_email")"
 a_profile="$(get_json "$rest/profiles?select=id,role&id=eq.$a" "$a_token")"
 echo "$a_profile" | jq -e --arg id "$a" 'length == 1 and .[0].id==$id and .[0].role=="resident"' >/dev/null
 
+# A Resident must not elevate profiles.role through the actual REST API.
+status="$(curl -sS --max-time 20 -o "$workdir/error_response" -w '%{http_code}' \
+  -X PATCH "$rest/profiles?id=eq.$a" \
+  -H "apikey: $SUPABASE_ANON_KEY" -H "Authorization: Bearer $a_token" \
+  -H 'Content-Type: application/json' --data '{"role":"system_admin"}')"
+if [[ "$status" -lt 400 ]]; then echo "Resident could update their own role" >&2; exit 1; fi
+
 # Resident submits a report with an active category, owner and NEW status.
 category_id="$(get_json "$rest/maintenance_categories?select=id&name=eq.Plumbing" "$a_token" | jq -er '.[0].id')"
 new_report() {
@@ -114,6 +121,36 @@ new_report() {
 id1="$(new_report 'Actual Supabase valid report')"
 id2="$(new_report 'Actual Supabase duplicate report')"
 id3="$(new_report 'Actual Supabase inappropriate report')"
+
+# Store an original 1x1 PNG under the private report-photos bucket.
+# Storage RLS must allow the owner but reject other residents.
+photo_path="$a/$id1/one-pixel.png"
+printf '%s' 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO2l9mYAAAAASUVORK5CYII=' \
+  | base64 --decode > "$workdir/pixel.png"
+status="$(curl -sS --max-time 20 -o "$workdir/storage_response" -w '%{http_code}' \
+  -X POST "$storage/object/report-photos/$photo_path" \
+  -H "apikey: $SUPABASE_ANON_KEY" -H "Authorization: Bearer $a_token" \
+  -H 'Content-Type: image/png' --data-binary "@$workdir/pixel.png")"
+if [[ "$status" != "200" && "$status" != "201" ]]; then
+  echo "Resident photo upload failed (HTTP $status)" >&2
+  cat "$workdir/storage_response" >&2; exit 1
+fi
+photo_meta="$(jq -nc --argjson id "$id1" --arg uid "$a" --arg path "$photo_path" \
+  '{report_id:$id,uploaded_by:$uid,storage_path:$path}')"
+post_json "$rest/report_attachments?select=id,report_id" "$a_token" "$photo_meta" \
+  | jq -e --argjson id "$id1" '.[0].report_id==$id' >/dev/null
+
+# Moderator can read the private report photo by its correct report ownership.
+curl -fsS --max-time 20 "$storage/object/report-photos/$photo_path" \
+  -H "apikey: $SUPABASE_ANON_KEY" \
+  -H "Authorization: Bearer $moderator_token" -o "$workdir/moderator_photo.png"
+test -s "$workdir/moderator_photo.png"
+
+# A different Resident cannot see private Storage data OR attachment metadata.
+status="$(status_code GET "$storage/object/report-photos/$photo_path" "$b_token")"
+if [[ "$status" -lt 400 ]]; then echo "Foreign Resident accessed private photo" >&2; exit 1; fi
+get_json "$rest/report_attachments?select=id&report_id=eq.$id1" "$b_token" \
+  | jq -e 'length==0' >/dev/null
 
 # Other residents must not see this user's reports.
 hidden="$(get_json "$rest/maintenance_reports?select=id&id=eq.$id1" "$b_token")"
@@ -137,6 +174,13 @@ if [[ "$status" -lt 400 ]]; then echo "Staff claimed a rejected report" >&2; exi
 # Valid report still follows the original claim -> in_progress -> resolve flow.
 payload1="$(jq -nc --argjson id "$id1" '{p_report_id:$id}')"
 post_json "$rest/rpc/claim_maintenance_report" "$staff_token" "$payload1" | jq -e '. == true' >/dev/null
+
+# Assigned Staff gains access to this report photo without elevated API keys.
+curl -fsS --max-time 20 "$storage/object/report-photos/$photo_path" \
+  -H "apikey: $SUPABASE_ANON_KEY" \
+  -H "Authorization: Bearer $staff_token" -o "$workdir/staff_photo.png"
+test -s "$workdir/staff_photo.png"
+
 post_json "$rest/rpc/resolve_maintenance_report" "$staff_token" "$payload1" | jq -e '. == true' >/dev/null
 get_json "$rest/maintenance_reports?select=status&id=eq.$id1" "$a_token" | jq -e '.[0].status=="resolved"' >/dev/null
 
@@ -149,4 +193,4 @@ if [[ "$status" -lt 400 ]]; then echo "Blank title was accepted" >&2; exit 1; fi
 # An ordinary authenticated staff account sees zero private review rows.
 get_json "$rest/report_reviews?select=report_id" "$staff_token" | jq -e 'length==0' >/dev/null
 
-echo "PASS: Real local Supabase Auth, profiles, owner RLS, reviewer roles, claim/resolve, backend validation."
+echo "PASS: Real local Supabase Auth, profile RBAC, owner RLS, private Storage, moderation, claim/resolve and input validation."
