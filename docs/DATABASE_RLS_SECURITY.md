@@ -5,7 +5,7 @@
 **Evidence date:** 2026-11-21  
 **Evidence source:** SQL Editor exports of `pg_class` and `pg_policies`, plus `has_table_privilege`, `has_column_privilege` and `pg_trigger` catalog checks supplied by the project team.
 
-> **Evidence-based documentation, not a security certification.** Policy definitions and table flags were observed. Basic `profiles` UPDATE privileges and user-defined triggers have also been checked. RPC metadata and EXECUTE permissions have now also been checked. Function bodies, schema USAGE grants, other grants, Storage RLS and end-to-end RPC authorizations still require separate checks. The checks below must be run with an account that can inspect catalog metadata.
+> **Evidence-based documentation, not a security certification.** Policy definitions and table flags were observed. Basic `profiles` UPDATE privileges and user-defined triggers have also been checked. RPC metadata and EXECUTE permissions have now also been checked. Function bodies and schema USAGE grants have now also been reviewed; function ownership, Storage RLS, effective API exposure, and end-to-end RPC authorization tests still require verification. The checks below must be run with an account that can inspect catalog metadata.
 
 ## Overview
 
@@ -121,11 +121,35 @@ All seven functions return `boolean` and report `search_path=""` in their functi
 - Before approving `SECURITY DEFINER` code, inspect `pg_get_functiondef` and verify explicit schema-qualified object references, role checks, report-state guards, and the security of any nested calls.
 - Do not claim privilege-escalation protection for RPC until those checks are complete.
 
+## Verified RPC implementation logic (SQL definitions reviewed, 2026-11-21)
+
+The project team supplied `pg_get_functiondef` output for all seven previously inventoried functions, plus `has_schema_privilege('authenticated', ..., 'USAGE')` results. The `authenticated` PostgreSQL role has **USAGE on both `public` and `fixmate_private`**. The three public `SECURITY INVOKER` functions call the corresponding `fixmate_private` functions by fully qualified schema name. The four private routines execute as `SECURITY DEFINER`, use `SET search_path TO ''`, and reference `auth.uid()`, `public.profiles`, `public.maintenance_reports`, and `public.report_status_history` by qualified names.
+
+### Access rules visible in the code
+
+| Function | Caller role check in body | Report/target requirement | Result/side effect |
+|---|---|---|---|
+| `fixmate_private.claim_maintenance_report(bigint)` | Current `auth.uid()` must belong to `maintenance_staff` | Report must be `new` and either unassigned or already assigned to same caller | Atomically sets `assigned_to`, `status = in_progress`, inserts a `new → in_progress` history row; returns true, or false if no qualifying report |
+| `fixmate_private.assign_maintenance_report(bigint, uuid)` | Current caller must be `moderator` or `system_admin` | Target UUID must represent `maintenance_staff`; report must be `new` and unassigned | Sets `assigned_to` without changing report status; returns true, or false if no qualifying report |
+| `fixmate_private.resolve_maintenance_report(bigint)` | Current caller must belong to `maintenance_staff` | Report must be `in_progress` and assigned to this caller | Sets status to `resolved`, inserts an `in_progress → resolved` history row; returns true, or false if no qualifying report |
+| `fixmate_private.current_user_is_system_admin()` | Checks caller profile `role = system_admin` | Profile must match `auth.uid()` | Returns true only for matching admin profile |
+
+The three `public` functions (`claim_maintenance_report`, `assign_maintenance_report`, `resolve_maintenance_report`) are thin SQL wrappers of their corresponding private functions. All seven use qualified function/table names and empty `search_path` settings.
+
+**Observations and boundaries:**
+- Report claims use a single conditionally executed `UPDATE ... WHERE status = 'new' ... RETURNING id`. Competing claims on one initially unassigned report cannot both successfully transition that same report from `new`; the state and row-lock behavior prevent the loser from passing the condition after the winner commits.
+- The claim and resolve operations insert history rows in the **same function transaction** as the status transition; exceptions during history insertion would roll back the whole operation.
+- Manager assignment intentionally retains `new` status, so the nominated staff member still needs to claim the report to move it to `in_progress`.
+- There is **no per-staff active workload limit** in the reviewed claim function: an authorized worker may claim multiple distinct eligible reports. Whether this is desirable is a product requirement.
+- The authorization checks reference the `profiles.role` column. Earlier permission checks found no `authenticated` UPDATE privilege on that column.
+- `authenticated` also has private-schema USAGE and private-function EXECUTE. The role checks inside the `SECURITY DEFINER` functions therefore matter even for calls made outside the public wrappers. Public API exposure of the private schema was **not** established by the export and should be checked separately.
+- Code review supports the listed role and report-state protections, but **does not replace live negative tests for unauthorized access or a complete security audit**.
+
 ## Remaining evidence needed before claiming full security verification
 
-1. Inspect all seven RPC function bodies and verify each role/ownership/state check, plus `fixmate_private` schema USAGE grants and actual callable access.
-2. `storage.objects` RLS and the `report-photos` bucket privacy settings.
-3. Direct API negative tests for each role (not just UI gate tests).
-4. Database indexes, other schema triggers and any additional schema objects for a full deployment/backup script.
+1. Inspect `storage.objects` RLS and the `report-photos` bucket privacy settings.
+2. Run live direct-API negative tests for each role and RPC path (beyond UI denial), including unassigned/assigned reports and invalid role transitions.
+3. Confirm API-exposed schemas, function owner roles and effective runtime privileges for `SECURITY DEFINER` routines.
+4. Gather database indexes, remaining schema triggers and additional objects for a full deployment/backup script.
 
 **Documentation status:** Evidence gathered and organized; security review is ongoing.
