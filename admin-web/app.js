@@ -115,10 +115,15 @@ async function guardAndLoad() {
     window.location.replace('staff.html');
     return;
   }
+  if (profile.role === 'moderator') {
+    // Moderator page has its own backend and session role checks.
+    window.location.replace('moderator.html');
+    return;
+  }
   if (profile.role !== 'system_admin') {
     await state.client.auth.signOut();
     screen('auth');
-    errorBox('authError', `Access denied: this account has role "${profile.role}". Only system_admin can open this workspace; moderator review is not implemented yet.`);
+    errorBox('authError', `Access denied: this account has role "${profile.role}". Only system_admin can open this workspace.`);
     return;
   }
   state.admin = data.user;
