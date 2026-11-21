@@ -50,7 +50,11 @@ jobs:
         run: psql -X -v ON_ERROR_STOP=1 -f docs/sql/VERIFIED_BASELINE_RECONSTRUCTION_DRAFT.sql
       - name: Seed only the eight public maintenance categories
         run: psql -X -v ON_ERROR_STOP=1 -f docs/sql/VERIFIED_CATEGORY_SEED_DRAFT.sql
+      - name: Apply proposed report input validation (staging-only)
+        run: psql -X -v ON_ERROR_STOP=1 -f docs/sql/PROPOSED_REPORT_INPUT_VALIDATION.sql
       - name: Apply proposed moderator review migration in disposable DB
         run: psql -X -v ON_ERROR_STOP=1 -f docs/sql/PROPOSED_MODERATOR_REVIEW_MIGRATION.sql
       - name: Assert authorization, signup trigger, claim/resolve and moderation
         run: psql -X -v ON_ERROR_STOP=1 -f docs/sql/test/assert_baseline_moderator_smoke.sql
+      - name: Test invalid fields, ownership and archived-category blocking
+        run: psql -X -v ON_ERROR_STOP=1 -f docs/sql/test/assert_report_input_validation.sql
