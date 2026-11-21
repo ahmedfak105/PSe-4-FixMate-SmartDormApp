@@ -93,47 +93,6 @@ void main() {
     expect(find.text('People'), findsWidgets);
   });
 
-  testWidgets('Admin assigns a new report; status waits for staff claim',
-      (tester) async {
-    const title = 'FLUTTER_WEB_E2E_ADMIN_ASSIGN';
-    final id = (await tester.runAsync(() => createTestReport(title)))!;
-    await loginAs(tester, 'admin.fixmate@example.com');
-
-    final heading = find.text('#$id  $title');
-    await waitFor(tester, heading, reason: 'Admin report was not listed');
-    final reportCard = find.ancestor(of: heading, matching: find.byType(Card));
-    final assign = find.descendant(
-        of: reportCard, matching: find.text('Assign to maintenance staff'));
-    await tester.ensureVisible(assign);
-    await tester.tap(assign);
-
-    await waitFor(tester, find.text('Assign report #$id'));
-    await tester.tap(find.text('Assign employee'));
-    await waitFor(tester, find.textContaining('Report #$id assigned.'));
-
-    final assigned = await tester.runAsync(() async {
-      return Supabase.instance.client.from('maintenance_reports')
-          .select('status,assigned_to').eq('id', id).single();
-    });
-    expect(assigned?['status'], 'new');
-    expect(assigned?['assigned_to'], isNotNull);
-
-    await loginAs(tester, 'staff.fixmate@example.com');
-    final staffHeading = find.text('#$id  $title');
-    await waitFor(tester, staffHeading);
-    final staffCard = find.ancestor(of: staffHeading, matching: find.byType(Card));
-    final claim = find.descendant(
-        of: staffCard, matching: find.text('Claim report'));
-    await tester.ensureVisible(claim);
-    await tester.tap(claim);
-    await waitFor(tester, find.textContaining('claimed successfully'));
-    final newStatus = await tester.runAsync(() async {
-      return Supabase.instance.client.from('maintenance_reports')
-          .select('status').eq('id', id).single();
-    });
-    expect(newStatus?['status'], 'in_progress');
-  });
-
   testWidgets('Maintenance Staff claims and resolves a report in Flutter UI',
       (tester) async {
     const title = 'FLUTTER_WEB_E2E_STAFF';
@@ -147,14 +106,16 @@ void main() {
         of: reportCard, matching: find.text('Claim report'));
     await tester.ensureVisible(claimButton);
     await tester.tap(claimButton);
-    await waitFor(tester, find.textContaining('claimed successfully'));
+    await waitFor(tester, find.textContaining('claimed successfully'),
+        reason: 'Staff Claim success notice did not appear in Flutter UI');
 
     final resolveButton = find.descendant(
         of: reportCard, matching: find.text('Mark resolved'));
     await waitFor(tester, resolveButton);
     await tester.ensureVisible(resolveButton);
     await tester.tap(resolveButton);
-    await waitFor(tester, find.textContaining('marked resolved'));
+    await waitFor(tester, find.textContaining('marked resolved'),
+        reason: 'Staff Resolve success notice did not appear in Flutter UI');
 
     final state = await tester.runAsync(() async {
       return Supabase.instance.client.from('maintenance_reports')
@@ -179,7 +140,8 @@ void main() {
 
     await waitFor(tester, find.text('Review report #$id'));
     await tester.tap(find.text('Save decision'));
-    await waitFor(tester, find.textContaining('Review saved for report #$id'));
+    await waitFor(tester, find.textContaining('Review saved for report #$id'),
+        reason: 'Moderator review persistence notice did not appear');
 
     final review = await tester.runAsync(() async {
       return Supabase.instance.client.from('report_reviews')
@@ -224,4 +186,47 @@ void main() {
     expect(review?['outcome'], 'duplicate');
     expect(review?['reason'], 'Same repair already reported');
   });
+  testWidgets('Admin assigns a new report; status waits for staff claim',
+      (tester) async {
+    const title = 'FLUTTER_WEB_E2E_ADMIN_ASSIGN';
+    final id = (await tester.runAsync(() => createTestReport(title)))!;
+    await loginAs(tester, 'admin.fixmate@example.com');
+
+    final heading = find.text('#$id  $title');
+    await waitFor(tester, heading, reason: 'Admin report was not listed');
+    final reportCard = find.ancestor(of: heading, matching: find.byType(Card));
+    final assign = find.descendant(
+        of: reportCard, matching: find.text('Assign to maintenance staff'));
+    await tester.ensureVisible(assign);
+    await tester.tap(assign);
+
+    await waitFor(tester, find.text('Assign report #$id'));
+    await tester.tap(find.text('Assign employee'));
+    await waitFor(tester, find.textContaining('Report #$id assigned.'),
+        reason: 'Admin assignment notice did not appear');
+
+    final assigned = await tester.runAsync(() async {
+      return Supabase.instance.client.from('maintenance_reports')
+          .select('status,assigned_to').eq('id', id).single();
+    });
+    expect(assigned?['status'], 'new');
+    expect(assigned?['assigned_to'], isNotNull);
+
+    await loginAs(tester, 'staff.fixmate@example.com');
+    final staffHeading = find.text('#$id  $title');
+    await waitFor(tester, staffHeading);
+    final staffCard = find.ancestor(of: staffHeading, matching: find.byType(Card));
+    final claim = find.descendant(
+        of: staffCard, matching: find.text('Claim report'));
+    await tester.ensureVisible(claim);
+    await tester.tap(claim);
+    await waitFor(tester, find.textContaining('claimed successfully'));
+    final newStatus = await tester.runAsync(() async {
+      return Supabase.instance.client.from('maintenance_reports')
+          .select('status').eq('id', id).single();
+    });
+    expect(newStatus?['status'], 'in_progress');
+  });
+
+
 }
