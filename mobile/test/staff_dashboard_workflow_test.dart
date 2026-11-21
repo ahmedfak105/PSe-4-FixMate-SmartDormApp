@@ -116,7 +116,7 @@ void main() {
     await tester.tap(find.text('Mark resolved'));
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('marked resolved'), findsOneWidget);
+    expect(find.text('Report #77 marked resolved.'), findsOneWidget);
     expect(find.text('resolved'), findsOneWidget);
     expect(repo.claimCalls, 1);
     expect(repo.resolveCalls, 1);
