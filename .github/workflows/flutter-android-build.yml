@@ -1,0 +1,45 @@
+name: FixMate Flutter Android APK Build
+
+on:
+  push:
+    paths:
+      - '.github/workflows/flutter-android-build.yml'
+      - 'mobile/android/**'
+      - 'mobile/pubspec.yaml'
+      - 'mobile/pubspec.lock'
+  workflow_dispatch:
+
+jobs:
+  android-debug:
+    name: Compile Android debug APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - name: Check out branch
+        uses: actions/checkout@v4
+      - name: Setup Java 17 for Android Gradle
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Setup stable Flutter SDK
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Install Flutter dependencies
+        run: flutter pub get
+      - name: Generate translations
+        run: flutter gen-l10n
+      - name: Build Android debug APK (offline-demo configuration)
+        run: flutter build apk --debug
+      - name: Upload built APK for review
+        uses: actions/upload-artifact@v4
+        with:
+          name: fixmate-flutter-android-debug-demo
+          path: mobile/build/app/outputs/flutter-apk/app-debug.apk
+          if-no-files-found: error
+          retention-days: 7
