@@ -7,13 +7,14 @@ This is the **standalone administrator web interface** for FixMate – SmartDorm
 ## What the dashboard does
 
 - Supabase connection setup with a **publishable / legacy anon key** and project URL.
-- Email/password sign-in using an **existing** Supabase Auth account whose `profiles.role` equals `system_admin`.
+- Email/password sign-in using existing Supabase Auth accounts: `system_admin` enters the Admin Dashboard; `maintenance_staff` is redirected to `staff.html` with a separate role guard.
 - **Overview:** counts by report status and recent reports.
 - **All reports:** report list, text search and status filter.
 - **Assignments:** assign an eligible, unassigned new report to a maintenance staff account using the protected `assign_maintenance_report` RPC. Assignment retains the report's `new` status; maintenance staff then claim it in their Flutter interface.
 - **People & Roles:** **read-only** listing of profiles and roles.
+- **Maintenance staff web workspace (`staff.html`):** authorized staff can view available reports and their assigned jobs, claim with the protected RPC, resolve their own in-progress reports, and view submission/status-history timestamps where permitted by RLS.
 
-There is **no** admin user creation, direct role editing, category management, or general-purpose unrestricted SQL access in this MVP.
+There is **no** admin user creation, direct role editing, category management, moderator review workflow, or general-purpose unrestricted SQL access in this MVP. Moderator functionality still requires a persisted review operation and its own authorized interface.
 
 ## Run locally
 
@@ -37,7 +38,7 @@ The HTML loads Supabase JavaScript SDK v2 via jsDelivr, so an internet connectio
 1. Supply the **HTTPS Supabase project URL**.
 2. Supply the project's **publishable key** (`sb_publishable_...`) or legacy anon key. Never use `service_role` or `sb_secret_`.
 3. Select **Connect to Supabase**.
-4. Sign in using an existing **system_admin** test account.
+4. Sign in using an existing **system_admin** test account (or **maintenance_staff** to open the new staff web page).
 5. Open **Overview**, **All reports**, **Assignments**, or **People & Roles**.
 
 The current code persists the connection in browser `localStorage`. Use **Change Supabase connection** to replace it, or **Sign out** to end the current session.
