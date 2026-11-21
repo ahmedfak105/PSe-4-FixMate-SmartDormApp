@@ -130,3 +130,17 @@ Two small initial smoke-test assertion mistakes were fixed before the successful
 - Added a third CLI-named migration with nine FK indexes for further local replay verification.
 - **Status remains In Progress** pending test of the index migration, team review, and a safe migration reconciliation plan for the already-populated remote database. No production schema modifications.
 
+
+
+## Task issue closure evidence — 22 November 2026 (supersedes earlier status snapshots)
+
+The following **existing GitHub TASK issues were closed as completed** after their written Acceptance Criteria were matched to implementation and reproducible automated evidence. This is **issue-level completion**, not a claim that draft PRs have been merged, that remote Supabase migrations were pushed, or that every future enhancement is complete.
+
+| TASK | Issue state | Supporting evidence |
+|---|---|---|
+| [#30 Flutter auth & registration](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/30) | **Closed / Done** | [Flutter CI signup navigation](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/44956654131), [local Supabase Auth signup/login](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/44956986519), existing forced Resident profile trigger |
+| [#33 My Reports & details](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/33) | **Closed / Done** | Submitted-date UI/widget test, [Flutter CI](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/44956654131), cross-Resident RLS and resolved-status API |
+| [#34 Database schema](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/34) | **Closed / Done** | Three ordered CLI-named migrations in `supabase/migrations/`, [clean local Supabase db reset and real API success](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/44957264386) |
+| [#35 Profiles & RBAC](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/35) | **Closed / Done** | Verified live Auth trigger and role grants, [local Supabase API RLS/Storage/role tests](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/44956711120), operator-provisioning guide |
+
+Other Tasks retain their earlier issue states. **#36 and #39 are still pending live/staging deployment of their separately proposed SQL; #38/#40/#41 still need authenticated browser workflow acceptance.** The GitHub Project V2 **status field** may require separate synchronization; issue state updates alone do not guarantee the project board card has changed. The active Supabase project's schema/data are unchanged by these tests.
