@@ -11,6 +11,10 @@ on:
       - '.github/workflows/flutter-web-operations-build.yml'
   workflow_dispatch:
 
+concurrency:
+  group: flutter-web-build-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   web-operations:
     runs-on: ubuntu-latest
