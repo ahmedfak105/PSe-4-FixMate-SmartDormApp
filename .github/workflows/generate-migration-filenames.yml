@@ -1,0 +1,24 @@
+name: FixMate Generate CLI Migration Filenames
+
+on:
+  push:
+    paths:
+      - '.github/workflows/generate-migration-filenames.yml'
+
+jobs:
+  names:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with:
+          version: '3.2.0'
+      - name: Generate unique migration names with Supabase CLI
+        run: |
+          supabase --version
+          supabase init
+          supabase migration new fixmate_baseline
+          supabase migration new fixmate_categories_seed
+          supabase migration new fixmate_fk_indexes
+          echo 'CLI-GENERATED-MIGRATION-PATHS:'
+          find supabase/migrations -maxdepth 1 -name '*.sql' -type f | sort
