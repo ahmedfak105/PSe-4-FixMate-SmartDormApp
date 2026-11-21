@@ -36,7 +36,7 @@ The HTML loads Supabase JavaScript SDK v2 via jsDelivr, so an internet connectio
 
 ## First-time connection and login
 
-1. Supply the **HTTPS Supabase project URL**.
+1. Supply the **HTTPS Supabase project URL**. For isolated local integration testing only, a dashboard served from `http://localhost:5500` or `http://127.0.0.1:5500` can also connect to a Supabase CLI API at `http://127.0.0.1:54321`; a remotely served page cannot use this HTTP exception.
 2. Supply the project's **publishable key** (`sb_publishable_...`) or legacy anon key. Never use `service_role` or `sb_secret_`.
 3. Select **Connect to Supabase**.
 4. Sign in using an existing **system_admin** test account (or **maintenance_staff** / **moderator** to open their role-specific pages).
@@ -64,3 +64,7 @@ The dashboard uses `supabase-js` rather than custom credentialed REST requests. 
 ## Repository status
 
 This dashboard is currently developed on `feature/admin-web-dashboard` and reviewed through **PR #44**, separately from the Flutter app (PR #43) and database/documentation (PR #42). Review all branches and their acceptance criteria before merging into `main`.
+
+## Automated browser test status
+
+A real-browser Playwright integration check was added in the separate documentation branch at `docs/sql/test/local_web_browser_smoke.cjs`, using disposable local Supabase accounts to exercise Admin, Staff, Moderator and denied Resident navigation. It must **not** be declared passing until its GitHub Actions workflow finishes successfully. The manually tested Admin dashboard and static JS CI are independent evidence.
