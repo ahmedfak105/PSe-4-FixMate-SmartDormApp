@@ -297,10 +297,16 @@ class _SummaryCard extends StatelessWidget {
             child: Row(children: [
               Icon(icon),
               const SizedBox(width: 12),
-              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text('$count', style: Theme.of(context).textTheme.headlineSmall),
-                Text(label),
-              ]),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text('$count', style: Theme.of(context).textTheme.headlineSmall),
+                    Text(label, softWrap: true),
+                  ],
+                ),
+              ),
             ]),
           ),
         ),
