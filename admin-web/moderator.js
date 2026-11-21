@@ -118,6 +118,9 @@ async function refresh() {
   } finally {
     state.busy = false;
     get('refresh').disabled = false;
+    // Render again after clearing busy: refresh() initially renders while
+    // busy=true, which otherwise leaves every review/photo button disabled.
+    render();
   }
 }
 function openReview(id) {
