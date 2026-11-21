@@ -104,3 +104,15 @@ The moderator review schema/RPC remains **proposed only**; no `report_reviews` t
 - [Two concurrent staff claims](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/44956576887) yielded exactly one successful claim and one status-history entry.
 - GitHub TASK issues **#30, #33, #34, #35** were closed after written acceptance review. Details are in [Task Reconciliation](TASK_STATUS_RECONCILIATION.md).
 - **Do not demonstrate Moderator as live production functionality** until its separate proposed migration is deployed/tested on approved staging. Production still contains the original six-table schema, and the three PRs remain Draft.
+
+## Flutter Web lecturer proof and latest task status — 22 Nov 2026
+
+This project now includes a **genuine Flutter Web operations build**, separate from the earlier standalone HTML/JS dashboard. [Draft PR #45](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/pull/45) implements role-gated Flutter Web Admin, Staff and Moderator screens, a runtime public Supabase connection form, read-only people directory, Admin assignment RPC, Staff Claim/Resolve and Moderator private-photo/decision workflow.
+
+- **Actual Flutter Web Chrome integration passed:** [run 44959849054](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/44959849054), using isolated Supabase Auth and PostgreSQL with synthetic users.
+- **Staff widget/role CI passed:** [run 44960549741](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/44960549741), **35 tests** including claim-conflict UX, status timestamps, and narrow-screen card-layout fix.
+- **Web compilation and downloadable build artifact passed:** [run 44960549877](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/44960549877).
+- [English Flutter Web demonstration transcript/checklist](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/blob/feature/flutter-web-operations/mobile/FLUTTER_WEB_LECTURER_DEMO.md).
+- **Student implementation tasks:** 10/12 Done (Closed), 2/12 In Progress (#36 backend validation/storage production acceptance; #39 Moderator SQL still staging-only). This does not update the GitHub Project V2 board field automatically.
+
+**No production deployment:** PRs #42–#45 remain Draft. Live Supabase has not received the proposed input validation and Moderator table/RPC; a full Moderator workflow must be shown on approved local/staging Supabase, **not misrepresented as live**.
