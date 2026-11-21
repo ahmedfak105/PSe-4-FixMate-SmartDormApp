@@ -24,7 +24,7 @@ Open the Flutter resident/staff app, the local admin dashboard (e.g. `http://loc
 
 "The resident and staff application is developed in Flutter. The current admin dashboard is a separate HTML, CSS and JavaScript website. Both connect to the same Supabase project. Supabase Auth handles sign-in, PostgreSQL stores relational data, private Storage holds report photos, RLS protects records, and database functions validate important report actions."
 
-**Implementation note:** the initial backlog mentions Flutter Web admin; the standalone web dashboard should be confirmed with the lecturer.
+**Implementation note:** the initial backlog mentions Flutter Web administration, but the project team reported on 21 Nov 2026 that the lecturer approved the standalone HTML/CSS/JavaScript dashboard. This approval concerns the technology choice; it does not imply that unfinished admin functions are complete.
 
 ## 3. ER diagram (show the ERD)
 
