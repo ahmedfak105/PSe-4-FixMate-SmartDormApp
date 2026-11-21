@@ -1,0 +1,39 @@
+name: FixMate Admin Web Static Checks
+
+on:
+  push:
+    paths:
+      - 'admin-web/**'
+      - '.github/workflows/admin-web-check.yml'
+  pull_request:
+    paths:
+      - 'admin-web/**'
+      - '.github/workflows/admin-web-check.yml'
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Validate JavaScript syntax
+        run: |
+          node --check admin-web/app.js
+          node --check admin-web/staff.js
+          node --check admin-web/moderator.js
+      - name: Verify linked web workspace files
+        run: |
+          test -f admin-web/index.html
+          test -f admin-web/staff.html
+          test -f admin-web/moderator.html
+          test -f admin-web/moderator.js
+          test -f admin-web/staff.js
+          test -f admin-web/styles.css
+          grep -q 'staff.js' admin-web/staff.html
+          grep -q 'moderator.js' admin-web/moderator.html
+          grep -q 'app.js' admin-web/index.html
+          grep -q 'createClient' admin-web/app.js
+          grep -q 'claim_maintenance_report' admin-web/staff.js
+          grep -q 'resolve_maintenance_report' admin-web/staff.js
+          grep -q 'review_maintenance_report' admin-web/moderator.js
+          grep -q "profile.role === 'moderator'" admin-web/app.js
