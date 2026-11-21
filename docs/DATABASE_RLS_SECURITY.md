@@ -5,7 +5,7 @@
 **Evidence date:** 2026-11-21  
 **Evidence source:** SQL Editor exports of `pg_class` and `pg_policies`, plus `has_table_privilege`, `has_column_privilege` and `pg_trigger` catalog checks supplied by the project team.
 
-> **Evidence-based documentation, not a security certification.** Policy definitions and table flags were observed. Basic `profiles` UPDATE privileges and user-defined triggers have also been checked. Other grants, helper function definitions, Storage RLS and RPC authorizations still require separate checks. The checks below must be run with an account that can inspect catalog metadata.
+> **Evidence-based documentation, not a security certification.** Policy definitions and table flags were observed. Basic `profiles` UPDATE privileges and user-defined triggers have also been checked. RPC metadata and EXECUTE permissions have now also been checked. Function bodies, schema USAGE grants, other grants, Storage RLS and end-to-end RPC authorizations still require separate checks. The checks below must be run with an account that can inspect catalog metadata.
 
 ## Overview
 
@@ -98,9 +98,32 @@ SELECT
   ) AS profile_triggers;
 ```
 
+## Verified RPC function metadata (2026-11-21)
+
+Source: SQL Editor export from `pg_proc` and `pg_namespace`. **These results describe function metadata and PostgreSQL role EXECUTE grants, not yet the internal authorization logic.**
+
+| Schema | Function signature | Security mode | EXECUTE: authenticated | EXECUTE: anon |
+|---|---|---|---|---|
+| `fixmate_private` | `assign_maintenance_report(bigint, uuid)` | DEFINER | true | false |
+| `fixmate_private` | `claim_maintenance_report(bigint)` | DEFINER | true | false |
+| `fixmate_private` | `current_user_is_system_admin()` | DEFINER | true | false |
+| `fixmate_private` | `resolve_maintenance_report(bigint)` | DEFINER | true | false |
+| `public` | `assign_maintenance_report(bigint, uuid)` | INVOKER | true | false |
+| `public` | `claim_maintenance_report(bigint)` | INVOKER | true | false |
+| `public` | `resolve_maintenance_report(bigint)` | INVOKER | true | false |
+
+All seven functions return `boolean` and report `search_path=""` in their function settings. The private implementations run with function-owner privileges, while the public functions use invoker privileges. This pattern may implement a restricted public RPC layer forwarding requests to privileged internal functions, but **the actual bodies have not yet been inspected**.
+
+**Security interpretation:**
+- `anon` has no EXECUTE privilege according to the supplied check.
+- `authenticated` has EXECUTE privilege on all seven, but invoking a function can additionally depend on schema USAGE privileges; investigate `has_schema_privilege` on `fixmate_private`.
+- A role-level EXECUTE grant is **not** sufficient proof that the caller can claim, assign or resolve any report: the body must validate the current user's application role and the relevant report state/ownership.
+- Before approving `SECURITY DEFINER` code, inspect `pg_get_functiondef` and verify explicit schema-qualified object references, role checks, report-state guards, and the security of any nested calls.
+- Do not claim privilege-escalation protection for RPC until those checks are complete.
+
 ## Remaining evidence needed before claiming full security verification
 
-1. `pg_proc` metadata and authorizations for claim, assign, resolve and `fixmate_private.current_user_is_system_admin()` functions; check `SECURITY DEFINER`, search path, and EXECUTE grants.
+1. Inspect all seven RPC function bodies and verify each role/ownership/state check, plus `fixmate_private` schema USAGE grants and actual callable access.
 2. `storage.objects` RLS and the `report-photos` bucket privacy settings.
 3. Direct API negative tests for each role (not just UI gate tests).
 4. Database indexes, other schema triggers and any additional schema objects for a full deployment/backup script.
