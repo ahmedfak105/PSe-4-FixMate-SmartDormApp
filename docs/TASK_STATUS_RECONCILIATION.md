@@ -91,3 +91,11 @@ Direct connector inspection of FixMate's **existing** Supabase project `epsvagzt
 For **TASK #39**, live catalog inspection confirmed `report_reviews` and `review_maintenance_report` are absent and no maintenance-report triggers exist. Proposed moderator migration has **not** been applied. No current `moderator` account was found (resident 3, staff 2, admin 1), so role-specific testing requires a test moderator in a separate environment.
 
 **Database delivery caveat:** `list_migrations` returned zero tracked migrations and `list_branches` returned zero development branches. Do not claim a reproducible deployment or an existing staging database. The migration history and staging strategy need attention before task #34 can be Done.
+
+## Task #34 — catalog-derived baseline draft (22 Nov 2026)
+
+**Task #34 stays In Progress.** A new [baseline reconstruction draft](sql/VERIFIED_BASELINE_RECONSTRUCTION_DRAFT.sql) was generated from Supabase catalog inspection of the actual live project: 6 original public tables, 20 constraints, 8 exact function definitions, 16 RLS policies (13 public + 3 Storage), current grants, Auth creation trigger and private Storage bucket. The original `report_attachments_storage_path_unique` index is included.
+
+An [eight-category seed](sql/VERIFIED_CATEGORY_SEED_DRAFT.sql), [read-only post-restore verification SQL](sql/BASELINE_READ_ONLY_VERIFICATION.sql), and [reproduction guide](DATABASE_REPRODUCTION_GUIDE.md) were also committed. The baseline script has been **static-inventory checked**, but **not executed/replayed on a clean Supabase project**; we have neither a staging instance nor recorded remote migration history. No production schema or user data was changed.
+
+**Acceptance gate:** Run a reviewed CLI-generated migration and fresh-environment replay, verify RLS/API auth and report workflows with test accounts, and capture results before closing #34. Keep proposed nine indexes and moderator review schema separate from the current baseline.
