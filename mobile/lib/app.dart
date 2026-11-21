@@ -92,7 +92,9 @@ class FixMateApp extends StatelessWidget {
               },
               )
             : const BottomTabsPage(),
-        onGenerateRoute: const RouteGenerator().getRoute,
+        // Operations build has no Resident navigation routes. Its only
+        // entry point is the authenticated, role-gated AuthGate.
+        onGenerateRoute: operationsOnly ? null : const RouteGenerator().getRoute,
         builder: (context, child) => requireLogin
             ? child!
             : Banner(
