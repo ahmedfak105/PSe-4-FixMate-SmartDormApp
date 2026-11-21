@@ -21,13 +21,13 @@ From the repository root with Flutter SDK installed:
     cd mobile
     flutter pub get
     flutter gen-l10n
-    flutter run -d chrome --dart-define=FIXMATE_OPERATIONS_WEB=true --dart-define=SUPABASE_URL=https://YOUR_STAGING_PROJECT.supabase.co --dart-define=SUPABASE_PUBLISHABLE_KEY=YOUR_PUBLIC_KEY
+    flutter run -d chrome --dart-define=FIXMATE_OPERATIONS_WEB=true
 
-To compile deployable web assets, replace flutter run with flutter build web --release and keep the same three dart-define values. Review hosting and routing configuration.
+To compile deployable web assets, use flutter build web --release --dart-define=FIXMATE_OPERATIONS_WEB=true. The app now opens a one-time connection form to enter the HTTPS Supabase URL and publishable/anon key at runtime. GitHub Actions uploads the static Web bundle as an artifact for HTTPS hosting; no server credentials are embedded. Optional SUPABASE_URL / SUPABASE_PUBLISHABLE_KEY build defines are supported for your own controlled deployment. Review hosting and routing configuration.
 
 Never supply a service-role key or an sb_secret key in Flutter builds or commits. The anonymous/publishable key is public; authorization belongs to Auth, RLS and RPC checks.
 
-The operations-only build does not start an offline demo when Supabase settings are absent, or when launched on an Android device. Resident registration is not available in the operations login. Maintenance, moderator and admin roles must be provisioned by a trusted operator.
+The operations-only build does not start an offline demo. When web settings are missing it shows the public Supabase connection screen, and on Android it refuses the operations-only mode. Resident registration is not available in the operations login. Maintenance, moderator and admin roles must be provisioned by a trusted operator.
 
 The original Resident/Staff mobile application continues to run without the operations-only flag.
 
@@ -44,9 +44,9 @@ Do not deploy unreviewed migration scripts to the active Supabase project merely
     cd mobile
     flutter analyze --no-fatal-infos
     flutter test
-    flutter build web --release --dart-define=FIXMATE_OPERATIONS_WEB=true --dart-define=SUPABASE_URL=https://ci-only-placeholder.supabase.co --dart-define=SUPABASE_PUBLISHABLE_KEY=sb_publishable_ci_only_placeholder
+    flutter build web --release --dart-define=FIXMATE_OPERATIONS_WEB=true
 
-CI placeholders check code compilation only; they do not represent a deployable connected demonstration. See .github/workflows/flutter-web-operations-build.yml.
+GitHub Actions compiles a runtime-configurable Web bundle without connection placeholders, verifies its output and attaches a seven-day artifact. It still requires an HTTPS host, a Supabase public key and valid role-specific staging accounts. See .github/workflows/flutter-web-operations-build.yml.
 
 ## Outstanding acceptance
 
