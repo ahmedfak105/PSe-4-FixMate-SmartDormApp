@@ -83,3 +83,7 @@ A feature-flagged Flutter resident sign-up form is now in [PR #43](https://githu
 Connected to the existing FixMate Supabase project in **read-only mode**. All six `public` application tables have RLS enabled. Six Auth accounts have matching profiles (no missing profile). The existing `on_auth_user_created` trigger calls `private.handle_new_user()` and forces new profiles to role `resident`; do **not** install a second signup trigger. The previously proposed signup SQL file was revised to contain **read-only verification queries**. Flutter registration is still feature-flagged off until fresh-account end-to-end tests pass.
 
 The moderator review schema/RPC remains **proposed only**; no `report_reviews` table exists in live Supabase and there are no moderator profiles in the current database snapshot. The Supabase project has **no tracked migration history and no development branch** in the connector results. Do not run the moderator migration on live production solely to make the demo work.
+
+## Task #34 — backend rebuild documentation (draft)
+
+[Reproduction guide](DATABASE_REPRODUCTION_GUIDE.md) links to the [catalog-derived SQL baseline draft](sql/VERIFIED_BASELINE_RECONSTRUCTION_DRAFT.sql), [8-category seed](sql/VERIFIED_CATEGORY_SEED_DRAFT.sql), and [read-only verification queries](sql/BASELINE_READ_ONLY_VERIFICATION.sql). This is substantial documentation progress on Task #34, but has **not been replayed on a clean Supabase environment**, so deployment reproducibility remains unverified. **No changes were made to the active project's database.**
