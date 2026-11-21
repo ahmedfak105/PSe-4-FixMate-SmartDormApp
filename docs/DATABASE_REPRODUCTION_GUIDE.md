@@ -2,9 +2,11 @@
 
 **TASK #34 — Design Supabase database schema**, including the acceptance criterion **"Schema changes are documented and reproducible."**
 
-## Current verified status (22 Nov 2026)
+> **Current state — 22 November 2026:** The baseline and FK-index migrations are reproducible on a full disposable local Supabase stack and TASK #34 is closed at *implementation* level. The existing populated remote has no recorded migration history and must **not** be initialized by running the baseline again. For Tasks #36 and #39, see [controlled rollout and rollback gates](CONTROLLED_SUPABASE_ROLLOUT_TASK36_TASK39.md). Sections marked “initial” below record the earlier review snapshot, not the latest verification result.
 
-The existing active FixMate project has **6 public tables**, **20 constraints**, **8 application functions**, **13 public RLS policies**, **3 Storage RLS policies**, a private `report-photos` bucket, and an Auth-to-profile trigger. However **no migration history and no Supabase development branches** were returned by the project. The existing setup currently works but **has not yet been reproduced from scratch**.
+## Initial baseline reconstruction snapshot (superseded by verified CI below)
+
+The existing active FixMate project has **6 public tables**, **20 constraints**, **8 application functions**, **13 public RLS policies**, **3 Storage RLS policies**, a private `report-photos` bucket, and an Auth-to-profile trigger. However **no migration history and no Supabase development branches** were returned by the project. The original state described in this section **had not yet been reproduced from scratch**. Since then, the clean local Supabase CLI rebuild and real Auth/REST/RLS/Storage tests have passed, as documented later on this page.
 
 This folder now contains the following staging-only working drafts:
 
@@ -27,7 +29,7 @@ This folder now contains the following staging-only working drafts:
 
 Relevant official instructions: [Local development workflow](https://supabase.com/docs/guides/local-development/cli-workflows), [Pull schema](https://supabase.com/docs/reference/cli/supabase-db-pull), [Database migrations](https://supabase.com/docs/guides/local-development/database-migrations).
 
-## 2. Fresh-environment test sequence (not yet performed)
+## 2. Fresh-environment acceptance sequence (now automated locally)
 
 1. Start a clean Supabase environment that has standard managed `auth`, `storage`, builtin roles and PostgreSQL 17. Do not test against an empty plain PostgreSQL instance without the Supabase services.
 2. Review the baseline draft **especially SECURITY DEFINER functions, schema ownership, grants, and storage.objects RLS**. It mirrors current policies without silently hardening them. There may be SQL compatibility issues from fresh-service defaults or changes in Supabase. Resolve these first on staging.
@@ -43,18 +45,18 @@ Relevant official instructions: [Local development workflow](https://supabase.co
 
 The draft mirrors current public application tables, PK/FK/CHECK constraints, the extra unique attachment-storage-path index, existing PostgreSQL functions, selected table/column grants and exact policy expressions. It also includes an Auth signup trigger and private photo bucket metadata. It **does not** contain passwords, session data, reports or photo bytes.
 
-It does **not** capture all Supabase platform configuration, global Auth settings, JWT/email configuration, Storage API server configuration, default privileges outside the six application tables, Supabase-managed database setup, or CLI migration history. Its replayability **has not yet been proved** on a fresh environment.
+It does **not** capture all Supabase platform configuration, global Auth settings, JWT/email configuration, Storage API server configuration, default privileges outside the six application tables, Supabase-managed database setup, or CLI migration history. Its replayability has **since been proved on fresh local Supabase** by the linked CI run, although this still does not copy hosted Auth/Storage settings or establish safe remote rollout.
 
 **Special note about Data API behavior:** New `public` tables may not be automatically available to clients under Supabase's 2026 Data API grant changes. The draft grants `SELECT`/`INSERT` to `authenticated` for the needed original tables and enables RLS; verify actual exposure in staging. `anon` should never gain broad app-data access merely to make a failing UI query work. The proposed `report_reviews` table likewise needs explicit `GRANT SELECT` and RLS.
 
-## 4. Why TASK #34 cannot be marked Done yet
+## 4. Historical initial TASK #34 acceptance gaps (now closed at implementation level)
 
 - Full baseline has been captured and documented; however **no fresh-environment replay** or integration/negative-role test has succeeded.
 - There is **no tracked migration history** on the remote project.
 - Proposed new indexes, Moderator review, and any future signup changes are separate, not proven part of the deployed baseline.
 - Team signoff is needed to make the final migration an assessed, reproducible deliverable.
 
-Do not merge or close TASK #34 based only on the existence of this document. Its acceptance requires replay evidence.
+This original caution applied before replay evidence existed. TASK #34 was subsequently **closed at implementation level**, supported by clean CLI reset, repeatable migration files and local API tests. Production synchronization and a reviewed deployment plan remain independent requirements.
 
 ## Automated PostgreSQL 17 smoke status
 
@@ -68,7 +70,7 @@ The Supabase CLI generated the migration filenames in [GitHub Actions run 449568
 
 The full local Supabase stack rebuilt them successfully using **`supabase db reset`**, then applied proposed validation and Moderator SQL to its disposable database, and passed Auth/REST/RLS/Storage checks: [full Supabase migration replay and API success](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/44956986519). This **does establish local reproducibility** of the current baseline, while no migrations were applied remotely.
 
-A third CLI-named `supabase/migrations/20261121223150_fixmate_fk_indexes.sql` contains the nine supporting FK indexes; its full local replay needs a successful fresh CI run before being treated as validated.
+The third CLI-named `supabase/migrations/20261121223150_fixmate_fk_indexes.sql` contains the nine supporting FK indexes; it was included in the later [successful local migration replay](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/44957264386). The indexes are **not applied to the populated remote**.
 
 **Remaining:** Production/remote has zero recorded migrations. Do not run `db push` on the live project: first reconcile its existing schema and migration history to avoid duplicate table creation. Moderator/reports-input SQL is still applied as separate disposable test scripts, not deployed remotely. A full-coverage regression on Android/browser UI remains a separate acceptance gate.
 
