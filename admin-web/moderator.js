@@ -197,7 +197,13 @@ async function previewPhoto(photoId) {
 async function initialize() {
   try {
     const config = JSON.parse(localStorage.getItem(CONFIG_KEY) || 'null');
-    if (!config || !/^https:\/\/[^/]+\.supabase\.co$/.test(config.url || '') ||
+    const parsed = new URL(config?.url || '');
+    const hosted = parsed.protocol === 'https:' && parsed.hostname.endsWith('.supabase.co');
+    const devApi = ['localhost', '127.0.0.1'].includes(window.location.hostname) &&
+      parsed.protocol === 'http:' &&
+      ['localhost', '127.0.0.1'].includes(parsed.hostname) &&
+      parsed.port === '54321';
+    if (!config || !(hosted || devApi) ||
       !(config.key?.startsWith('sb_publishable_') || config.key?.split('.').length === 3)) {
       throw new Error('Open index.html first and connect with a public Supabase key.');
     }
