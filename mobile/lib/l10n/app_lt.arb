@@ -13,6 +13,7 @@
   "noReports": "Pranešimų nerasta",
   "reportDetails": "Pranešimo informacija",
   "reportId": "Pranešimo ID",
+  "submittedOn": "Pateikimo data",
   "reportTitle": "Pavadinimas",
   "category": "Kategorija",
   "location": "Vieta / kambarys",
