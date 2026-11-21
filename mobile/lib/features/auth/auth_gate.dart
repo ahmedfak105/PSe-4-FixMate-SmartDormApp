@@ -114,7 +114,10 @@ class _AuthGateState extends State<AuthGate> {
 
   @override
   Widget build(BuildContext context) {
-    if (_userId == null) return LoginPage(connectionError: _authError);
+    if (_userId == null) return LoginPage(
+      connectionError: _authError,
+      allowResidentSignup: !widget.operationsOnly,
+    );
 
     return FutureBuilder<ResidentProfile>(
       future: _profileFuture,
