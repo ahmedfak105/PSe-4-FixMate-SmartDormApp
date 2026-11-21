@@ -55,3 +55,7 @@ It does **not** capture all Supabase platform configuration, global Auth setting
 - Team signoff is needed to make the final migration an assessed, reproducible deliverable.
 
 Do not merge or close TASK #34 based only on the existence of this document. Its acceptance requires replay evidence.
+
+## Automated PostgreSQL 17 smoke status
+
+The [Database Baseline & Moderator Smoke workflow](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/44956106507) **passed on 22 Nov 2026**. It uses disposable PostgreSQL 17 plus **minimal Supabase schema stubs** (not a real Supabase service) to verify SQL replay and synthetic role checks. The job includes the [proposed server-side report-validation script](sql/PROPOSED_REPORT_INPUT_VALIDATION.sql) before the proposed Moderator migration. These test results are strong first-stage syntax/authorization evidence, **not** proof that the project has a tested Supabase Auth/Storage/API deployment. A full local or approved staging Supabase replay remains the final acceptance gate.
