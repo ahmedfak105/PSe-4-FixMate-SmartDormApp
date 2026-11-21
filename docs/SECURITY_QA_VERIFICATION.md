@@ -7,7 +7,7 @@
 ## Tested application and backend scope
 
 - Resident interface built with Flutter; maintenance staff screens built with Flutter.
-- Standalone admin web dashboard built with HTML, CSS, and JavaScript and connected to Supabase. **Note:** the existing product backlog describes a Flutter Web admin panel; this implementation differs and needs team/lecturer confirmation.
+- Standalone admin web dashboard built with HTML, CSS, and JavaScript and connected to Supabase. **Technology note:** the backlog originally describes a Flutter Web admin panel, but the project team reported lecturer approval of the standalone HTML/CSS/JS implementation on 21 Nov 2026. Other security and functional checks remain outstanding.
 - Supabase Auth, PostgreSQL with row-level security (RLS), Storage private bucket `report-photos`, and role-checked public/privileged RPC functions.
 
 ## Functional evidence
@@ -53,7 +53,7 @@ The latest reviewed Flutter CI runs for commit `b8803f0` completed successfully:
 4. **Branch-level test run and CI are complete:** 19/19 Flutter tests passed in the cloned repository, and GitHub Actions passed on the Flutter PR branch. Re-run after merging and review the analyzer's 22 informational findings; do not claim the final merged source has been tested yet.
 5. Verify mobile device builds and browser compatibility; only Chrome/Flutter Web evidence is recorded here.
 6. Finish password-recovery flow, notifications, user/role administration, and other backlog features that have not been demonstrated.
-7. Obtain lecturer/team approval for the standalone HTML/JS admin implementation if the assessed requirement remains Flutter Web.
+7. **Framework approval reported:** on 21 Nov 2026 the project team confirmed lecturer acceptance of the standalone HTML/JS admin implementation. Document any formal written evidence if needed; this does not close functional or security gaps.
 8. Use separate deployment configurations and do not publish `service_role`, `sb_secret_`, or other server-side secrets in source control.
 
 ## Evidence and traceability
@@ -62,4 +62,4 @@ The detailed **Security & QA Verification Report** is retained separately as a W
 
 **Current repository state (verified 21 November 2026):** Flutter source is committed in `mobile/` on `feature/flutter-resident-staff` (commit `bd539ef`, plus CI workflow commits), Admin Web source is committed in `admin-web/` on `feature/admin-web-dashboard` (commit `c8b437f`), and documentation lives on `docs/security-qa-evidence-2026-11-21`. Draft PRs [#43 Flutter](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/pull/43), [#44 Admin](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/pull/44), and [#42 Docs](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/pull/42) are open and not merged into `main`.
 
-**Current next step:** Review the three draft PRs and acceptance criteria, confirm the standalone admin web implementation with the lecturer, complete remaining end-to-end permission tests, and then merge through the team's normal process. Do not mark unverified features as complete.
+**Current next step:** Review the three draft PRs and acceptance criteria, complete remaining end-to-end permission tests, and then merge through the team's normal process; the admin technology choice has been approved according to the project team. Do not mark unverified features as complete.
