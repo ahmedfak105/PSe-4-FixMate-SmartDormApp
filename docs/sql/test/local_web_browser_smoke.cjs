@@ -138,6 +138,33 @@ async function assertAdmin(browser){
     console.log('PASS admin: sign-in, dashboard, all reports list');
   }finally{await context.close();}
 }
+async function assertRejectServerSideApiKey(browser) {
+  const context = await browser.newContext();
+  const page = await context.newPage();
+  try {
+    await page.goto(APP+'/index.html',{waitUntil:'domcontentloaded'});
+    const payload = Buffer.from(JSON.stringify({role:'service_role'})).toString('base64url');
+    const legacyServiceRoleJwt = 'eyJhbGciOiJIUzI1NiJ9.' + payload + '.dummy_signature';
+    await page.evaluate(({url,key}) => {
+      localStorage.setItem('fixmate_admin_public_connection_v1', JSON.stringify({url,key}));
+    },{url:API,key:legacyServiceRoleJwt});
+    await page.reload({waitUntil:'domcontentloaded'});
+    await page.locator('#setupScreen').waitFor({state:'visible',timeout:15000});
+    await page.locator('#setupError').getByText('Service-role',{exact:false})
+      .waitFor({timeout:15000});
+
+    // Modern secret keys must also fail locally, before any network request.
+    await page.evaluate((url) => {
+      localStorage.setItem('fixmate_admin_public_connection_v1',
+        JSON.stringify({url,key:'sb_secret_ci_only_do_not_use'}));
+    },API);
+    await page.reload({waitUntil:'domcontentloaded'});
+    await page.locator('#setupError').getByText('Service-role',{exact:false})
+      .waitFor({timeout:15000});
+    console.log('PASS security: legacy service_role JWT and sb_secret keys rejected');
+  }finally{await context.close();}
+}
+
 async function assertResidentDenied(browser){
   const {context,page,errors}=await login(browser,'resident.b.fixmate@example.com');
   try{
@@ -155,6 +182,7 @@ async function assertResidentDenied(browser){
     await assertModerator(browser,moderatorReport);
     await assertAdmin(browser);
     await assertResidentDenied(browser);
+    await assertRejectServerSideApiKey(browser);
     const rows=await apiReq('/rest/v1/maintenance_reports?select=status&id=eq.'+staffReport,token);
     assert.equal(rows[0].status,'resolved');
     console.log('PASS all browser-role acceptance checks against isolated Supabase');
