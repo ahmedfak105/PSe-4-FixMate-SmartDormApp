@@ -41,3 +41,18 @@ These three verified issues were marked **closed/completed** in the issue tracke
 - The PowerShell script `FixMate_Update_Project_Board.ps1`, prepared separately for the project team, uses GitHub CLI to synchronize **only these 12 existing board issues**. It previews changes before applying.
 
 **Review principle:** task status reflects the original issue's stated acceptance criteria, not merely the existence of some related code.
+
+
+## Follow-up implementation evidence — 21 November 2026 (after original review)
+
+The approved **Goals, Scope, and Acceptance Criteria in the individual GitHub TASK issues remain unchanged**. The team reported that the lecturer accepted standalone HTML/CSS/JavaScript as the Admin Web implementation technology in place of Flutter Web. The implementation still must satisfy role-specific features and backend rules.
+
+| TASK | New code/evidence | Remaining verification |
+|---|---|---|
+| **#33 — My Reports & details** | Resident list and details now display the submitted date from `createdAt`, with English/Lithuanian labels; Flutter CI passed on commit `5b980a8` | Re-check resident ownership and UI against test Supabase in browser/mobile before closing |
+| **#38 — Role-based Admin Web** | `admin-web/staff.html` and `staff.js` add a maintenance-staff-only web workspace; login redirects staff from Admin sign-in, with role guard on the staff page | Moderator-specific web navigation, live access checks for all roles and review workflow are outstanding |
+| **#40 — Staff available queue & claim UI** | Staff Web now displays Available/My Jobs and calls role-checked `claim_maintenance_report` with conflict feedback and refresh | Test with real staff sessions, concurrent claims and role denials before closing |
+| **#41 — Staff status update UI** | Staff Web includes Resolve action through `resolve_maintenance_report`; status-history update timestamp is shown when readable | Test live report transitions, latest timestamp and Resident status visibility before closing |
+| **#39 — Moderator review UI** | Not yet implemented | Requires an approved/persisted review outcome for valid, duplicate and inappropriate reports, with photo visibility and role checks |
+
+Admin Web static CI passed on commit `545e943`. These are **code-level progress updates**, not a declaration that the complete tasks are Done. The previous task classifications and Board field status should not be changed merely because code was committed.
