@@ -21,10 +21,10 @@
 
   <main id="authScreen" class="entry-screen" hidden>
     <div class="entry-art"><div class="art-top"><span class="logo-mark">F<span>.</span></span><span class="art-eyebrow">FIXMATE / ADMIN</span></div><div class="art-content"><div class="art-number">02 / 03</div><h1>Better care.<br><em>Better living.</em></h1><p>Monitor campus maintenance requests and coordinate the teams who keep things running.</p></div><div class="art-bottom"><span class="status-dot"></span> CONNECTED TO SUPABASE AUTH</div></div>
-    <section class="entry-pane"><div class="entry-inner"><div class="step-label">ADMINISTRATOR ACCESS</div><h2>Welcome back</h2><p class="muted">Sign in with a FixMate account that has the <code>system_admin</code> role.</p>
+    <section class="entry-pane"><div class="entry-inner"><div class="step-label">ADMINISTRATOR ACCESS</div><h2>Welcome back</h2><p class="muted">Sign in with an existing <code>system_admin</code> or <code>maintenance_staff</code> account. Staff accounts open their own workspace.</p>
       <form id="loginForm" class="entry-form"><label for="email">Email address</label><input type="email" id="email" autocomplete="username" placeholder="admin@example.com" required><label for="password">Password</label><input type="password" id="password" autocomplete="current-password" placeholder="Your account password" required><button type="submit" class="primary-btn full" id="loginSubmit">Sign in to workspace <span>→</span></button></form>
       <p id="authError" class="form-error" role="alert" hidden></p><button id="editConnection" class="text-link" type="button">Change Supabase connection</button>
-      <div class="entry-foot">Only <code>system_admin</code> can enter. Database permissions are enforced by RLS and backend RPC functions.</div>
+      <div class="entry-foot">The Admin dashboard requires <code>system_admin</code>. Maintenance staff use a separate page; Supabase RLS and RPC functions enforce permissions.</div>
     </div></section>
   </main>
 
