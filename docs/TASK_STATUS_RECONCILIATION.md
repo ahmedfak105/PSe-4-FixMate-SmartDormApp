@@ -99,3 +99,7 @@ For **TASK #39**, live catalog inspection confirmed `report_reviews` and `review
 An [eight-category seed](sql/VERIFIED_CATEGORY_SEED_DRAFT.sql), [read-only post-restore verification SQL](sql/BASELINE_READ_ONLY_VERIFICATION.sql), and [reproduction guide](DATABASE_REPRODUCTION_GUIDE.md) were also committed. The baseline script has been **static-inventory checked**, but **not executed/replayed on a clean Supabase project**; we have neither a staging instance nor recorded remote migration history. No production schema or user data was changed.
 
 **Acceptance gate:** Run a reviewed CLI-generated migration and fresh-environment replay, verify RLS/API auth and report workflows with test accounts, and capture results before closing #34. Keep proposed nine indexes and moderator review schema separate from the current baseline.
+
+## TASK #35 — trusted role provisioning documented (22 Nov 2026)
+
+The [trusted provisioning runbook](TRUSTED_ROLE_PROVISIONING.md) now documents how an authorized operator can create a test Auth user and promote only a verified staging profile to `maintenance_staff`, `moderator` or `system_admin`. Its procedure is based on the confirmed existing Auth trigger and lack of ordinary `authenticated` UPDATE permission on `profiles.role`. It also lists required negative-role tests; **none of these have been run with new staging accounts yet**. The task remains **In Progress**.
