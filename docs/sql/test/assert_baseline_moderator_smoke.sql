@@ -13,7 +13,7 @@ BEGIN
   WHERE s.nspname='public' AND c.relkind='r'
     AND c.relname IN ('profiles','maintenance_categories',
       'maintenance_reports','report_attachments','report_notes',
-      'report_status_history');
+      'report_status_history','report_reviews');
   IF n<>7 THEN
     -- The six baseline tables + the new report_reviews table.
     RAISE EXCEPTION 'Expected seven tables (baseline+moderator), found %',n;
