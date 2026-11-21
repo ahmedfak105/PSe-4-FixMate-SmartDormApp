@@ -55,8 +55,15 @@ function checkConnection(url, key) {
   let parsed;
   try { parsed = new URL(url); }
   catch { throw new Error('Please enter a valid HTTPS Supabase project URL.'); }
-  if (parsed.protocol !== 'https:' || !parsed.hostname.endsWith('.supabase.co'))
-    throw new Error('Project URL must be an HTTPS *.supabase.co address.');
+  // Production connections remain HTTPS-only. A local Supabase CLI stack is
+  // permitted ONLY while the dashboard itself is served from localhost.
+  const hosted = parsed.protocol === 'https:' && parsed.hostname.endsWith('.supabase.co');
+  const localPage = ['127.0.0.1', 'localhost'].includes(window.location.hostname);
+  const localApi = parsed.protocol === 'http:' &&
+    ['127.0.0.1', 'localhost'].includes(parsed.hostname) &&
+    parsed.port === '54321';
+  if (!hosted && !(localPage && localApi))
+    throw new Error('Use an HTTPS *.supabase.co project or local Supabase CLI on localhost:54321.');
   if (!key || (!key.startsWith('sb_publishable_') && key.split('.').length !== 3))
     throw new Error('Use a publishable key (sb_publishable_…) or legacy anon key. Never use a secret key.');
   if (key.startsWith('sb_secret_')) throw new Error('Secret API keys must never be used in a browser.');
