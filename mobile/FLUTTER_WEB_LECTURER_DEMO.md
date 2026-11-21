@@ -53,7 +53,8 @@ Open the Moderator workspace, view a permitted photo, and review an unassigned r
 > We tested authorization with five separate synthetic Auth accounts, including negative role tests. An ordinary resident could not promote their own role, inspect another resident's report or private photo, or invoke the Moderator review RPC. We also tested two concurrent Staff claims and verified exactly one succeeded. Our GitHub Actions CI rebuilds the baseline from committed Supabase migrations on a clean disposable database.
 
 Show:
-- [Flutter Web build](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/44959035836)
+- [Flutter Web build — latest tested code](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/44961977303)
+- [Real Flutter Web Chrome E2E — six passing role/workflow tests](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/44961977375)
 - [Supabase + Chromium HTML dashboard browser test](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/44958916137)
 - [Concurrent claim test](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/44956576887)
 
@@ -63,9 +64,9 @@ Show:
 
 ## Test checklist before lecturer demonstration
 
-- [ ] Latest Flutter Web release build and widget CI are green.
-- [ ] The **actual Flutter Web** browser integration test passes against local Supabase, not just the HTML dashboard test.
-- [ ] Four users can sign in and show only their authorized views.
+- [x] Flutter Web release build and widget CI passed on the tested application code (22 November 2026).
+- [x] The **actual Flutter Web** Chrome integration passed six Auth/Staff/Admin/Moderator scenarios on disposable local Supabase; this is not evidence of deployment.
+- [x] Synthetic Resident, Staff, Moderator and Admin Auth sessions exercised in local Supabase, with Resident denied from Operations.
 - [ ] Moderator review table/RPC are present on the isolated demo database.
 - [ ] Test report is visible end-to-end from Resident submission through staff resolution.
 - [ ] Private photo is accessible by an authorized reviewer and denied to another Resident.
@@ -73,3 +74,9 @@ Show:
 - [ ] Record the lecturer's approval for any technology or acceptance changes in GitHub.
 
 **Repository delivery:** [Draft PR #45](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/pull/45) and the other unmerged feature/documentation PRs. **Do not use the production database for demonstration test writes.**
+
+## Additional verified acceptance evidence
+
+After fixing a narrow-screen Staff card overflow and moving Claim/Resolve confirmation to a visible SnackBar, [GitHub Actions 44961977375](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/44961977375) passed **all six actual Flutter Web Chrome integration tests**: Resident denied, Admin dashboard visible, Staff Claim→Resolve saved, Moderator Valid review saved, Moderator Duplicate review with required reason saved, and Admin assignment leaving report New until Staff claims it. [Web release artifact 44961977303](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/44961977303) and [Flutter CI 44961977318](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/44961977318) passed on the same SHA.
+
+All E2E accounts, photos and reports belonged to an isolated local Supabase test instance; Moderator review SQL has **not** been deployed to the remote original project. The GitHub PRs still await review/merge.
