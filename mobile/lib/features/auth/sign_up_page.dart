@@ -3,7 +3,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// TASK #30: resident registration only. No role chooser is present or sent.
 /// The database trigger must create the resident profile securely.
-/// Keep registration disabled until staging verification of that trigger.
+/// Existing private.handle_new_user trigger provisions the Resident role.
+/// Keep registration disabled until sign-up is verified with test accounts.
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
 
@@ -17,8 +18,6 @@ class _SignUpPageState extends State<SignUpPage> {
   final _email = TextEditingController();
   final _password = TextEditingController();
   final _confirmPassword = TextEditingController();
-  final _building = TextEditingController();
-  final _room = TextEditingController();
   bool _busy = false;
   String? _error;
   String? _success;
@@ -29,8 +28,6 @@ class _SignUpPageState extends State<SignUpPage> {
     _email.dispose();
     _password.dispose();
     _confirmPassword.dispose();
-    _building.dispose();
-    _room.dispose();
     super.dispose();
   }
 
@@ -47,8 +44,6 @@ class _SignUpPageState extends State<SignUpPage> {
         password: _password.text,
         data: {
           'full_name': _fullName.text.trim(),
-          'building': _building.text.trim(),
-          'room_number': _room.text.trim(),
         },
       );
       if (!mounted) return;
@@ -125,32 +120,6 @@ class _SignUpPageState extends State<SignUpPage> {
                         }
                         return null;
                       },
-                    ),
-                    const SizedBox(height: 14),
-                    TextFormField(
-                      key: const Key('signup_building'),
-                      controller: _building,
-                      decoration: const InputDecoration(
-                        labelText: 'Dormitory building (optional)',
-                        border: OutlineInputBorder(),
-                      ),
-                      validator: (value) =>
-                          (value ?? '').trim().length > 80
-                              ? 'Maximum 80 characters'
-                              : null,
-                    ),
-                    const SizedBox(height: 14),
-                    TextFormField(
-                      key: const Key('signup_room'),
-                      controller: _room,
-                      decoration: const InputDecoration(
-                        labelText: 'Room number (optional)',
-                        border: OutlineInputBorder(),
-                      ),
-                      validator: (value) =>
-                          (value ?? '').trim().length > 30
-                              ? 'Maximum 30 characters'
-                              : null,
                     ),
                     const SizedBox(height: 14),
                     TextFormField(
