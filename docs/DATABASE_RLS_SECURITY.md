@@ -3,9 +3,9 @@
 **Project:** FixMate – SmartDormApp  
 **Scope:** `public` schema, six application tables  
 **Evidence date:** 2026-11-21  
-**Evidence source:** SQL Editor export of `pg_class` and `pg_policies` supplied by the project team.
+**Evidence source:** SQL Editor exports of `pg_class` and `pg_policies`, plus `has_table_privilege`, `has_column_privilege` and `pg_trigger` catalog checks supplied by the project team.
 
-> **Evidence-based documentation, not a security certification.** Policy definitions and table flags were observed. Database grants, triggers, helper function definitions, Storage RLS and RPC authorizations were *not* included in this export and require separate checks. The checks below must be run with an account that can inspect catalog metadata.
+> **Evidence-based documentation, not a security certification.** Policy definitions and table flags were observed. Basic `profiles` UPDATE privileges and user-defined triggers have also been checked. Other grants, helper function definitions, Storage RLS and RPC authorizations still require separate checks. The checks below must be run with an account that can inspect catalog metadata.
 
 ## Overview
 
@@ -39,7 +39,7 @@ No direct UPDATE or DELETE policy for `maintenance_reports` appeared in the expo
 - **View own profile** — SELECT when `id = auth.uid()`.
 - **Update own profile** — UPDATE using and checking only `id = auth.uid()`.
 
-**Important authorization question:** the UPDATE policy checks *row ownership*, not whether the `role` column remains unchanged. If `authenticated` can UPDATE `profiles.role` and no trigger or other database guard blocks that change, a user could potentially promote their own profile to `system_admin`. **This is a potential risk, not a confirmed vulnerability.** Verify column privileges and update triggers before claiming RBAC protection is complete.
+**Role-column authorization verified:** the UPDATE policy checks row ownership, but grants limit which columns can be changed. The team's read-only privilege query returned `authenticated` table UPDATE = `false`, `role` column UPDATE = `false`, `full_name` column UPDATE = `true`, and user-defined triggers = `[]`. Thus direct self-promotion through an `authenticated` UPDATE of `profiles.role` is **not permitted by the checked grants**; updating the allowed `full_name` field remains subject to the own-row RLS policy. This does not establish the safety of privileged RPC functions or other indirect write paths.
 
 ### 4. `report_attachments`
 - **FixMate view report attachments** — SELECT if a corresponding row exists in `maintenance_reports`. Visibility of that referenced report is subject to the effective privileges/RLS of the querying context.
@@ -70,34 +70,39 @@ No direct INSERT/UPDATE/DELETE policy was listed for history. The existence, beh
 
 The `profiles` admin SELECT policy additionally exposes all profiles *if* its helper returns true. The admin UI has also been observed denying a signed-in `maintenance_staff` user and allowing `system_admin` access; this is a UI/role-gate observation, **not a substitute for direct database authorization testing**.
 
-## Priority verification: can an ordinary user edit `profiles.role`?
+## Verified: can an ordinary user directly edit `profiles.role`?
 
-Run this **read-only** query in Supabase SQL Editor; do not change any permissions yet:
+A **read-only** catalog query supplied by the team on 2026-11-21 returned:
+
+| Check | Result | Interpretation |
+|---|---|---|
+| `has_table_privilege('authenticated', 'public.profiles', 'UPDATE')` | `false` | No general table-level UPDATE grant |
+| `has_column_privilege('authenticated', 'public.profiles', 'role', 'UPDATE')` | `false` | No direct UPDATE permission on role column |
+| `has_column_privilege('authenticated', 'public.profiles', 'full_name', 'UPDATE')` | `true` | Column-specific UPDATE permission on full_name |
+| User-defined `pg_trigger` entries on `public.profiles` | `[]` | No non-internal triggers found |
+
+**Conclusion:** In the inspected grants, an ordinary `authenticated` database role cannot directly modify `profiles.role` via an UPDATE statement. RLS further restricts updates of permitted profile fields to the current user's own row. Review RPC functions and EXECUTE permissions before making a system-wide authorization claim.
+
+The query used was:
 
 ```sql
 SELECT
-  has_table_privilege('authenticated', 'public.profiles', 'UPDATE')
-    AS authenticated_table_update,
-  has_column_privilege('authenticated', 'public.profiles', 'role', 'UPDATE')
-    AS authenticated_role_update,
-  has_column_privilege('authenticated', 'public.profiles', 'full_name', 'UPDATE')
-    AS authenticated_full_name_update,
+  has_table_privilege('authenticated', 'public.profiles', 'UPDATE') AS table_update_allowed,
+  has_column_privilege('authenticated', 'public.profiles', 'role', 'UPDATE') AS role_update_allowed,
+  has_column_privilege('authenticated', 'public.profiles', 'full_name', 'UPDATE') AS full_name_update_allowed,
   (
     SELECT COALESCE(jsonb_agg(pg_get_triggerdef(t.oid, true)), '[]'::jsonb)
     FROM pg_trigger AS t
     WHERE t.tgrelid = 'public.profiles'::regclass
       AND NOT t.tgisinternal
-  ) AS profiles_user_triggers;
+  ) AS profile_triggers;
 ```
-
-If `authenticated_role_update = true`, carefully review the trigger implementations and test a role-change attempt in an isolated test account before concluding escalation is possible or impossible. Do **not** grant additional UPDATE rights or run an actual role-changing UPDATE during this catalog inspection.
 
 ## Remaining evidence needed before claiming full security verification
 
-1. `profiles` column-level UPDATE privileges and relevant trigger definitions.
-2. `pg_proc` metadata and authorizations for claim, assign, resolve and `fixmate_private.current_user_is_system_admin()` functions; check `SECURITY DEFINER`, search path, and EXECUTE grants.
-3. `storage.objects` RLS and the `report-photos` bucket privacy settings.
-4. Direct API negative tests for each role (not just UI gate tests).
-5. Database indexes, triggers and any additional schema objects for a full deployment/backup script.
+1. `pg_proc` metadata and authorizations for claim, assign, resolve and `fixmate_private.current_user_is_system_admin()` functions; check `SECURITY DEFINER`, search path, and EXECUTE grants.
+2. `storage.objects` RLS and the `report-photos` bucket privacy settings.
+3. Direct API negative tests for each role (not just UI gate tests).
+4. Database indexes, other schema triggers and any additional schema objects for a full deployment/backup script.
 
 **Documentation status:** Evidence gathered and organized; security review is ongoing.
