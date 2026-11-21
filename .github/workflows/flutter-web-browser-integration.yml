@@ -1,0 +1,114 @@
+name: FixMate Flutter Web Browser E2E
+
+on:
+  push:
+    paths:
+      - '.github/workflows/flutter-web-browser-integration.yml'
+      - 'mobile/integration_test/**'
+      - 'mobile/test_driver/**'
+      - 'mobile/lib/**'
+      - 'mobile/pubspec.yaml'
+  pull_request:
+    paths:
+      - '.github/workflows/flutter-web-browser-integration.yml'
+      - 'mobile/integration_test/**'
+      - 'mobile/test_driver/**'
+      - 'mobile/lib/**'
+      - 'mobile/pubspec.yaml'
+  workflow_dispatch:
+
+concurrency:
+  group: fixmate-flutter-web-browser-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  real-chrome-e2e:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - name: Check out Flutter Web operations branch
+        uses: actions/checkout@v4
+      - name: Check out verified database migrations and local smoke fixtures
+        uses: actions/checkout@v4
+        with:
+          ref: docs/security-qa-evidence-2026-11-21
+          path: db-reference
+      - name: Install pinned Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: '3.2.0'
+      - name: Start fresh disposable Supabase and replay CLI migrations
+        run: |
+          supabase init
+          cp db-reference/supabase/migrations/*.sql supabase/migrations/
+          supabase start
+          supabase db reset
+      - name: Install PostgreSQL client
+        run: |
+          if ! command -v psql >/dev/null; then
+            sudo apt-get update -qq
+            sudo apt-get install -y -qq postgresql-client
+          fi
+      - name: Apply proposed validations and moderator review to LOCAL only
+        env:
+          PGHOST: 127.0.0.1
+          PGPORT: 54322
+          PGUSER: postgres
+          PGPASSWORD: postgres
+          PGDATABASE: postgres
+        run: |
+          psql -X -v ON_ERROR_STOP=1 -f db-reference/docs/sql/PROPOSED_REPORT_INPUT_VALIDATION.sql
+          psql -X -v ON_ERROR_STOP=1 -f db-reference/docs/sql/PROPOSED_MODERATOR_REVIEW_MIGRATION.sql
+          psql -X -v ON_ERROR_STOP=1 -c "NOTIFY pgrst, 'reload schema';"
+      - name: Seed five synthetic accounts and validate their local roles
+        env:
+          PGHOST: 127.0.0.1
+          PGPORT: 54322
+          PGUSER: postgres
+          PGPASSWORD: postgres
+          PGDATABASE: postgres
+          SUPABASE_URL: http://127.0.0.1:54321
+        run: |
+          supabase status -o env > "$RUNNER_TEMP/fixture_supabase.env"
+          export SUPABASE_ANON_KEY="$(sed -n 's/^ANON_KEY=//p' "$RUNNER_TEMP/fixture_supabase.env" | tr -d '"')"
+          test -n "$SUPABASE_ANON_KEY"
+          bash db-reference/docs/sql/test/local_supabase_api_smoke.sh
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Prepare Flutter dependencies
+        working-directory: mobile
+        run: |
+          flutter pub get
+          flutter gen-l10n
+          dart analyze integration_test/operations_e2e_test.dart
+      - name: Install compatible ChromeDriver
+        run: |
+          google-chrome --version
+          npx --yes @puppeteer/browsers install chromedriver@stable --path "$RUNNER_TEMP/chromedriver-install"
+          DRIVER="$(find "$RUNNER_TEMP/chromedriver-install" -type f -name chromedriver | head -n 1)"
+          test -x "$DRIVER"
+          "$DRIVER" --version
+          "$DRIVER" --port=4444 > "$RUNNER_TEMP/chromedriver.log" 2>&1 &
+          for i in $(seq 1 25); do
+            if curl -fsS http://127.0.0.1:4444/status > /dev/null; then break; fi
+            sleep 1
+          done
+          curl -fsS http://127.0.0.1:4444/status
+      - name: Test REAL Flutter Web screens in Chrome against local Supabase
+        working-directory: mobile
+        run: |
+          supabase status -o env > "$RUNNER_TEMP/flutter_browser_supabase.env"
+          export SUPABASE_ANON_KEY="$(sed -n 's/^ANON_KEY=//p' "$RUNNER_TEMP/flutter_browser_supabase.env" | tr -d '"')"
+          test -n "$SUPABASE_ANON_KEY"
+          flutter drive \
+            --driver=test_driver/integration_test.dart \
+            --target=integration_test/operations_e2e_test.dart \
+            -d web-server \
+            --dart-define=SUPABASE_TEST_URL=http://127.0.0.1:54321 \
+            --dart-define=SUPABASE_TEST_ANON_KEY="$SUPABASE_ANON_KEY"
+      - name: Stop disposable Supabase
+        if: always()
+        run: supabase stop --no-backup || true
