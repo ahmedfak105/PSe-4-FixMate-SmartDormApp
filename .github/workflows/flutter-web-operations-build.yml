@@ -37,11 +37,16 @@ jobs:
         run: flutter analyze --no-fatal-infos
       - name: Run role routing and all Flutter tests
         run: flutter test
-      - name: Compile web operations app with nonfunctional CI-only connection placeholders
+      - name: Compile deployable Web app with runtime public connection form
         run: |
           flutter build web --release \
-            --dart-define=FIXMATE_OPERATIONS_WEB=true \
-            --dart-define=SUPABASE_URL=https://ci-only-placeholder.supabase.co \
-            --dart-define=SUPABASE_PUBLISHABLE_KEY=sb_publishable_ci_only_placeholder
+            --dart-define=FIXMATE_OPERATIONS_WEB=true
       - name: Verify Flutter Web output
         run: test -s build/web/index.html && test -s build/web/main.dart.js
+      - name: Upload operations Web build (serve from HTTPS)
+        uses: actions/upload-artifact@v4
+        with:
+          name: fixmate-flutter-web-operations
+          path: mobile/build/web/
+          if-no-files-found: error
+          retention-days: 7
