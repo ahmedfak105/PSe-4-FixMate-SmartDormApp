@@ -93,6 +93,47 @@ void main() {
     expect(find.text('People'), findsWidgets);
   });
 
+  testWidgets('Admin assigns a new report; status waits for staff claim',
+      (tester) async {
+    const title = 'FLUTTER_WEB_E2E_ADMIN_ASSIGN';
+    final id = (await tester.runAsync(() => createTestReport(title)))!;
+    await loginAs(tester, 'admin.fixmate@example.com');
+
+    final heading = find.text('#$id  $title');
+    await waitFor(tester, heading, reason: 'Admin report was not listed');
+    final reportCard = find.ancestor(of: heading, matching: find.byType(Card));
+    final assign = find.descendant(
+        of: reportCard, matching: find.text('Assign to maintenance staff'));
+    await tester.ensureVisible(assign);
+    await tester.tap(assign);
+
+    await waitFor(tester, find.text('Assign report #$id'));
+    await tester.tap(find.text('Assign employee'));
+    await waitFor(tester, find.textContaining('Report #$id assigned.'));
+
+    final assigned = await tester.runAsync(() async {
+      return Supabase.instance.client.from('maintenance_reports')
+          .select('status,assigned_to').eq('id', id).single();
+    });
+    expect(assigned?['status'], 'new');
+    expect(assigned?['assigned_to'], isNotNull);
+
+    await loginAs(tester, 'staff.fixmate@example.com');
+    final staffHeading = find.text('#$id  $title');
+    await waitFor(tester, staffHeading);
+    final staffCard = find.ancestor(of: staffHeading, matching: find.byType(Card));
+    final claim = find.descendant(
+        of: staffCard, matching: find.text('Claim report'));
+    await tester.ensureVisible(claim);
+    await tester.tap(claim);
+    await waitFor(tester, find.textContaining('claimed successfully'));
+    final newStatus = await tester.runAsync(() async {
+      return Supabase.instance.client.from('maintenance_reports')
+          .select('status').eq('id', id).single();
+    });
+    expect(newStatus?['status'], 'in_progress');
+  });
+
   testWidgets('Maintenance Staff claims and resolves a report in Flutter UI',
       (tester) async {
     const title = 'FLUTTER_WEB_E2E_STAFF';
@@ -145,5 +186,42 @@ void main() {
           .select('outcome').eq('report_id', id).single();
     });
     expect(review?['outcome'], 'valid');
+  });
+
+  testWidgets('Moderator rejects a duplicate only with a stored reason',
+      (tester) async {
+    const title = 'FLUTTER_WEB_E2E_DUPLICATE';
+    final id = (await tester.runAsync(() => createTestReport(title)))!;
+    await loginAs(tester, 'moderator.fixmate@example.com');
+
+    final heading = find.text('#$id  $title');
+    await waitFor(tester, heading);
+    final card = find.ancestor(of: heading, matching: find.byType(Card));
+    final button = find.descendant(
+        of: card, matching: find.text('Review report'));
+    await tester.ensureVisible(button);
+    await tester.tap(button);
+    await waitFor(tester, find.text('Review report #$id'));
+
+    await tester.tap(find.byType(DropdownButtonFormField<String>));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Duplicate').last);
+    await tester.pumpAndSettle();
+
+    // Empty rejection notes must not allow the dialog to close or the
+    // moderation RPC to be called.
+    await tester.tap(find.text('Save decision'));
+    await tester.pump();
+    expect(find.text('Review report #$id'), findsOneWidget);
+    await tester.enterText(find.byType(TextField).last, 'Same repair already reported');
+    await tester.tap(find.text('Save decision'));
+    await waitFor(tester, find.textContaining('Review saved for report #$id'));
+
+    final review = await tester.runAsync(() async {
+      return Supabase.instance.client.from('report_reviews')
+          .select('outcome,reason').eq('report_id', id).single();
+    });
+    expect(review?['outcome'], 'duplicate');
+    expect(review?['reason'], 'Same repair already reported');
   });
 }
