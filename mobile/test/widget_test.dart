@@ -32,9 +32,12 @@ void main() {
     await start(tester);
     await tab(tester, 'myReports');
     expect(find.text('Leaking bathroom tap'), findsOneWidget);
+    expect(find.textContaining('Submitted on:'), findsNWidgets(2));
     await tester.tap(find.text('Leaking bathroom tap'));
     await tester.pumpAndSettle();
     expect(find.text('The tap leaks even when turned off.'), findsOneWidget);
+    expect(find.text('Submitted on'), findsOneWidget);
+    expect(find.textContaining('2026'), findsWidgets);
     expect(find.byType(NavigationBar), findsOneWidget);
     await tab(tester, 'myReports');
     expect(find.text('Broken corridor light'), findsOneWidget);
