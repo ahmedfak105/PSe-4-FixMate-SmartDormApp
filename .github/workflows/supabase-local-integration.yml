@@ -1,11 +1,10 @@
-name: FixMate Full Local Supabase API Integration
+name: FixMate Integrated Supabase API Integration
 
 on:
   push:
     paths:
       - '.github/workflows/supabase-local-integration.yml'
       - 'docs/sql/test/local_supabase_api_smoke.sh'
-      - 'docs/sql/test/local_web_browser_smoke.cjs'
       - 'supabase/migrations/**'
   workflow_dispatch:
 
@@ -81,35 +80,9 @@ jobs:
           fi
           bash docs/sql/test/local_supabase_api_smoke.sh
 
-      - name: Check out separate Admin/Staff/Moderator web branch
-        uses: actions/checkout@v4
-        with:
-          ref: feature/admin-web-dashboard
-          path: web-client
-      - name: Setup Node.js for isolated browser smoke
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-      - name: Install pinned Playwright Chromium in runner
-        run: |
-          npm install --no-save --prefix "$RUNNER_TEMP/fixmate-browser" playwright@1.58.2
-          "$RUNNER_TEMP/fixmate-browser/node_modules/.bin/playwright" install --with-deps chromium
-      - name: Browser E2E against local Supabase (no real users)
-        env:
-          SUPABASE_URL: http://127.0.0.1:54321
-        run: |
-          supabase status -o env > "$RUNNER_TEMP/local_supabase_browser.env"
-          export SUPABASE_ANON_KEY="$(sed -n 's/^ANON_KEY=//p' "$RUNNER_TEMP/local_supabase_browser.env" | tr -d '"')"
-          test -n "$SUPABASE_ANON_KEY"
-          export NODE_PATH="$RUNNER_TEMP/fixmate-browser/node_modules"
-          python3 -m http.server 5500 --bind 127.0.0.1 --directory web-client/admin-web > "$RUNNER_TEMP/fixmate_web_server.log" 2>&1 &
-          server_pid=$!
-          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
-          for i in $(seq 1 20); do
-            if curl -fsS http://127.0.0.1:5500/index.html >/dev/null; then break; fi
-            sleep 1
-          done
-          node docs/sql/test/local_web_browser_smoke.cjs
+      # Flutter Web browser E2E runs in flutter-web-browser-integration.yml.
+      # This API-only job intentionally has NO dependency on the older
+      # HTML/JavaScript admin-web branch. All fixtures come from this commit.
       - name: Stop disposable Supabase
         if: always()
         run: supabase stop --no-backup || true
