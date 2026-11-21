@@ -159,7 +159,7 @@ class _ReportDetailsPageState extends State<ReportDetailsPage> {
           ListTile(
             title: Text(l10n.submittedOn),
             subtitle: Text(MaterialLocalizations.of(context)
-                .formatMediumDate(report.createdAt.toLocal())),
+                .formatCompactDate(report.createdAt.toLocal())),
           ),
           ListTile(title: Text(l10n.category), subtitle: Text(report.category)),
           ListTile(title: Text(l10n.location), subtitle: Text(report.location)),
