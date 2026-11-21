@@ -12,9 +12,12 @@
 
 ## Functional evidence
 
+The latest reviewed Flutter CI runs for commit `b8803f0` completed successfully: [pull-request check](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/44840755094) and [branch push check](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/44840755397).
+
+
 | Area | Evidence observed | Result |
 | --- | --- | --- |
-| Flutter tests | `flutter test` output reported **8/8 passed** after the real reports integration. Later patches were installed and exercised, but a final full test run was not supplied for every patch. | Passed for the recorded run |
+| Flutter tests | Earlier integration test evidence was **8/8 passed**; after the Flutter source was committed on `feature/flutter-resident-staff`, `flutter pub get` succeeded and `flutter test` reported **19/19 passed**. | Passed on the uploaded Flutter branch |
 | Authentication and profile | Resident authenticated; profile role/name/building/room displayed from Supabase | Passed |
 | Report submission | Report **#9**, `Broken bathroom light`, saved to `maintenance_reports` and appeared after application restart | Passed |
 | Photo attachment | Report #9 JPG present in private Storage and referenced by `report_attachments` | Passed |
@@ -47,7 +50,7 @@
 1. Test negative operations with real staff/admin sessions, and validate each role across the public API, not solely simulated SQL claims.
 2. Review all RPC function ownership, schema privileges, grants and security-definer behavior (including functions beyond the three tested operations).
 3. Check orphaned Storage objects and attachment records after upload failures; ensure file upload and database insertion have reliable cleanup/retry behavior.
-4. Re-run the full Flutter test suite against the **final merged local source**, add CI, and record any analyzer messages.
+4. **Branch-level test run and CI are complete:** 19/19 Flutter tests passed in the cloned repository, and GitHub Actions passed on the Flutter PR branch. Re-run after merging and review the analyzer's 22 informational findings; do not claim the final merged source has been tested yet.
 5. Verify mobile device builds and browser compatibility; only Chrome/Flutter Web evidence is recorded here.
 6. Finish password-recovery flow, notifications, user/role administration, and other backlog features that have not been demonstrated.
 7. Obtain lecturer/team approval for the standalone HTML/JS admin implementation if the assessed requirement remains Flutter Web.
@@ -57,4 +60,6 @@
 
 The detailed **Security & QA Verification Report** is retained separately as a Word document in the project's ChatGPT files/Library. SQL outputs, Flutter test logs, and report #9/#11 workflow records were supplied during the project discussion. This summary records outcomes without claiming that every untested feature has been completed.
 
-**Next release step:** Commit the latest tested Flutter project in `mobile/` and the web admin dashboard in `admin-web/`, then link the resulting commits and verification evidence to the matching issues before marking work Done.
+**Current repository state (verified 21 November 2026):** Flutter source is committed in `mobile/` on `feature/flutter-resident-staff` (commit `bd539ef`, plus CI workflow commits), Admin Web source is committed in `admin-web/` on `feature/admin-web-dashboard` (commit `c8b437f`), and documentation lives on `docs/security-qa-evidence-2026-11-21`. Draft PRs [#43 Flutter](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/pull/43), [#44 Admin](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/pull/44), and [#42 Docs](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/pull/42) are open and not merged into `main`.
+
+**Current next step:** Review the three draft PRs and acceptance criteria, confirm the standalone admin web implementation with the lecturer, complete remaining end-to-end permission tests, and then merge through the team's normal process. Do not mark unverified features as complete.
