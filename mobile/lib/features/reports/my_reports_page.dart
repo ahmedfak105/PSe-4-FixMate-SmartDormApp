@@ -57,6 +57,8 @@ class MyReportsPage extends StatelessWidget {
             itemCount: state.items.length,
             itemBuilder: (context, index) {
               final report = state.items[index];
+              final submittedDate = MaterialLocalizations.of(context)
+                  .formatMediumDate(report.createdAt.toLocal());
               return Card(
                 margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                 child: ListTile(
@@ -64,7 +66,7 @@ class MyReportsPage extends StatelessWidget {
                   leading: const Icon(Icons.home_repair_service_outlined),
                   title: Text(report.title),
                   subtitle: Text(
-                    '${report.id} · ${report.category} · ${statusLabel(report.status, l10n)}',
+                    '${report.id} · ${report.category} · ${statusLabel(report.status, l10n)} · ${l10n.submittedOn}: $submittedDate',
                   ),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => Navigator.of(context).pushNamed(
