@@ -3,7 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'sign_up_page.dart';
 
-/// Sign-in only: use an existing Supabase Auth account.
+/// Sign in with Supabase Auth or register a new Resident account.
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key, this.connectionError});
 
@@ -73,7 +73,7 @@ class _LoginPageState extends State<LoginPage> {
                         textAlign: TextAlign.center,
                         style: Theme.of(context).textTheme.headlineSmall),
                     const SizedBox(height: 8),
-                    const Text('Sign in using your existing Supabase account.',
+                    const Text('Sign in or create a resident account.',
                         textAlign: TextAlign.center),
                     const SizedBox(height: 28),
                     TextFormField(
@@ -139,10 +139,11 @@ class _LoginPageState extends State<LoginPage> {
                             : const Text('Sign in'),
                       ),
                     ),
-                    // Enable only after the resident profile provisioning
-                    // migration has passed staging verification.
+                    // Enabled after isolated local Supabase Auth + profile/RLS
+                    // API tests passed. Set ENABLE_RESIDENT_SIGNUP=false
+                    // to hide registration for deployments that disable signup.
                     if (const bool.fromEnvironment(
-                      'ENABLE_RESIDENT_SIGNUP', defaultValue: false,
+                      'ENABLE_RESIDENT_SIGNUP', defaultValue: true,
                     )) ...[
                       const SizedBox(height: 8),
                       TextButton(
