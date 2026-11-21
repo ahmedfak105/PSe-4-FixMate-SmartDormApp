@@ -59,3 +59,16 @@ Do not merge or close TASK #34 based only on the existence of this document. Its
 ## Automated PostgreSQL 17 smoke status
 
 The [Database Baseline & Moderator Smoke workflow](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/44956106507) **passed on 22 Nov 2026**. It uses disposable PostgreSQL 17 plus **minimal Supabase schema stubs** (not a real Supabase service) to verify SQL replay and synthetic role checks. The job includes the [proposed server-side report-validation script](sql/PROPOSED_REPORT_INPUT_VALIDATION.sql) before the proposed Moderator migration. These test results are strong first-stage syntax/authorization evidence, **not** proof that the project has a tested Supabase Auth/Storage/API deployment. A full local or approved staging Supabase replay remains the final acceptance gate.
+
+## CLI migrations successfully replayed in full local Supabase (22 Nov 2026)
+
+The Supabase CLI generated the migration filenames in [GitHub Actions run 44956896466](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/44956896466). The verified baseline and eight-category seed now exist in:
+- `supabase/migrations/20261121222817_fixmate_baseline.sql`
+- `supabase/migrations/20261121222818_fixmate_categories_seed.sql`
+
+The full local Supabase stack rebuilt them successfully using **`supabase db reset`**, then applied proposed validation and Moderator SQL to its disposable database, and passed Auth/REST/RLS/Storage checks: [full Supabase migration replay and API success](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/44956986519). This **does establish local reproducibility** of the current baseline, while no migrations were applied remotely.
+
+A third CLI-named `supabase/migrations/20261121223150_fixmate_fk_indexes.sql` contains the nine supporting FK indexes; its full local replay needs a successful fresh CI run before being treated as validated.
+
+**Remaining:** Production/remote has zero recorded migrations. Do not run `db push` on the live project: first reconcile its existing schema and migration history to avoid duplicate table creation. Moderator/reports-input SQL is still applied as separate disposable test scripts, not deployed remotely. A full-coverage regression on Android/browser UI remains a separate acceptance gate.
+
