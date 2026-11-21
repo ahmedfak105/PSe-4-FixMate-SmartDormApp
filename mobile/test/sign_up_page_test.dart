@@ -1,8 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fixmate_mobile/features/auth/sign_up_page.dart';
+import 'package:fixmate_mobile/features/auth/login_page.dart';
 
 void main() {
+  testWidgets('Supabase login provides resident registration navigation', (tester) async {
+    tester.view.physicalSize = const Size(390, 940);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(const MaterialApp(home: LoginPage()));
+    await tester.ensureVisible(find.byKey(const Key('go_to_signup')));
+    await tester.tap(find.byKey(const Key('go_to_signup')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Register for FixMate'), findsOneWidget);
+    expect(find.byKey(const Key('signup_email')), findsOneWidget);
+  });
+
   testWidgets('Resident sign-up has no privileged role selector', (tester) async {
     tester.view.physicalSize = const Size(390, 940);
     tester.view.devicePixelRatio = 1.0;
