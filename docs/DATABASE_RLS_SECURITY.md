@@ -174,14 +174,30 @@ The team supplied three policy definitions from `pg_policies` for `storage.objec
 - The resident upload policy checks ownership but does **not** explicitly check that the caller's profile role is `resident`. If former residents retain ownership of reports after role changes, the ownership-only rule would still match.
 - The resident read/upload policies do **not** require an exact folder count. For example, a path containing further nested subfolders may match their first two folder checks. The staff/admin SELECT policy requires exactly two folders, and `report_attachments` metadata INSERT policy also checks exactly two folders. This inconsistency may permit additional storage objects outside the normal app metadata format. Review and test before tightening rules to avoid breaking existing object paths.
 - Multiple permissive RLS SELECT policies can combine with OR. The rules above have been interpreted together.
-- The supplied `pg_policies` output alone does **not** establish `storage.objects.relrowsecurity` (RLS enabled) or the effective privileges/grants. Check that separately before treating the policy conditions as an enforced security boundary.
+- **The subsequent catalog check confirmed `storage.objects.relrowsecurity = true`; effective SELECT/INSERT grants and the anon SELECT grant are documented below.**
 - No direct authenticated negative tests for unauthorized photo reads/uploads were supplied in this step. Code/policy review is not a penetration test.
 
 
 
+## Verified storage.objects table privileges and RLS status (2026-11-21)
+
+A subsequent read-only SQL Editor query of `pg_class` and `has_table_privilege` returned:
+
+| Catalog check | Value | Meaning |
+|---|---|---|
+| `rls_enabled` | `true` | RLS is enabled on `storage.objects` |
+| `rls_forced` | `false` | Ordinary RLS rules apply; owner/bypass exceptions remain |
+| `authenticated_can_select` | `true` | Table SELECT privilege exists, still subject to RLS |
+| `authenticated_can_insert` | `true` | Table INSERT privilege exists, still subject to RLS |
+| `anon_can_select` | `true` | Anonymous PostgreSQL role has table SELECT privilege; **not equivalent to permission to read rows** |
+
+**Security interpretation:** All three enumerated `storage.objects` policies are directed to the `authenticated` role, and none authorizes the `anon` role. Under the observed ordinary RLS setup, a non-bypass `anon` request should be filtered from the stored photo rows despite the underlying SELECT grant. The `report-photos` bucket is also private. This is an evidence-based expectation, **not a completed anonymous-access test**. Avoid claiming that `anon_can_select = true` is an exposed-photo vulnerability without verifying effective row access. Conversely, do not claim all Storage endpoints are secure without exercising direct anonymous and cross-user download/list tests.
+
+**No GRANT or RLS policy changes were made** based on this inspection. Catalog review alone is not a production security audit.
+
 ## Remaining evidence needed before claiming full security verification
 
-1. Confirm `storage.objects` RLS is enabled and review effective grants; test cross-account Storage reads and uploads with real test users.
+1. Perform direct anonymous (without login) and cross-account Storage list/read/upload negative tests; the `storage.objects` RLS flag and relevant table grants are now verified.
 2. Run live direct-API negative tests for each role and RPC path (beyond UI denial), including unassigned/assigned reports and invalid role transitions.
 3. Confirm API-exposed schemas, function owner roles and effective runtime privileges for `SECURITY DEFINER` routines.
 4. Gather database indexes, remaining schema triggers and additional objects for a full deployment/backup script.
