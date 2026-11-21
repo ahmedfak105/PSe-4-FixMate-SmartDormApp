@@ -87,3 +87,7 @@ The moderator review schema/RPC remains **proposed only**; no `report_reviews` t
 ## Task #34 — backend rebuild documentation (draft)
 
 [Reproduction guide](DATABASE_REPRODUCTION_GUIDE.md) links to the [catalog-derived SQL baseline draft](sql/VERIFIED_BASELINE_RECONSTRUCTION_DRAFT.sql), [8-category seed](sql/VERIFIED_CATEGORY_SEED_DRAFT.sql), and [read-only verification queries](sql/BASELINE_READ_ONLY_VERIFICATION.sql). This is substantial documentation progress on Task #34, but has **not been replayed on a clean Supabase environment**, so deployment reproducibility remains unverified. **No changes were made to the active project's database.**
+
+## Role-based account provisioning evidence
+
+[Trusted Staff / Moderator / Admin Provisioning](TRUSTED_ROLE_PROVISIONING.md) documents safe operator-only role changes and the negative API tests required by TASK #35. Ordinary resident signup cannot grant privileged roles. This is documentation of an existing security model, **not evidence that the Moderator end-to-end workflow has passed**.
