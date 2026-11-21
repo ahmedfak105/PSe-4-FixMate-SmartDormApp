@@ -75,7 +75,7 @@ class FixMateApp extends StatelessWidget {
                           client: Supabase.instance.client,
                           staffId: profile.id,
                         ),
-                      )
+                      ),
                     FixMateWorkspace.resident => BlocProvider<ReportsCubit>(
                   key: ValueKey('reports-${profile.id}'),
                   create: (_) => ReportsCubit(
