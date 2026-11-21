@@ -156,6 +156,11 @@ class _ReportDetailsPageState extends State<ReportDetailsPage> {
           const SizedBox(height: 12),
           Chip(label: Text(statusLabel(report.status, l10n))),
           ListTile(title: Text(l10n.reportId), subtitle: Text(report.id)),
+          ListTile(
+            title: Text(l10n.submittedOn),
+            subtitle: Text(MaterialLocalizations.of(context)
+                .formatMediumDate(report.createdAt.toLocal())),
+          ),
           ListTile(title: Text(l10n.category), subtitle: Text(report.category)),
           ListTile(title: Text(l10n.location), subtitle: Text(report.location)),
           ListTile(title: Text(l10n.description), subtitle: Text(report.description)),
