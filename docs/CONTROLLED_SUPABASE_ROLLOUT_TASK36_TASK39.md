@@ -57,3 +57,13 @@ There is **no universal safe automatic rollback** for the Moderator migration on
 Demonstrate: (1) real schema and ERD, (2) clean CLI rebuild and role/RLS tests, (3) successful Flutter Web browser workflow and APK/Web builds, (4) the preflight inventory showing why remote deployment is **still a separate gate**, and (5) the exact scripts that implement the missing features.
 
 **Task status:** #36 and #39 remain In Progress until reviewed remote/staging rollout and project-specific acceptance are documented. The Flutter Web feature tests passing locally does not mean the review RPC exists on the original live project.
+
+## Latest remote advisor snapshot — read-only, 22 November 2026
+
+Running Supabase's advisors on the **existing** remote project returned:
+
+- **Security WARN:** Leaked Password Protection is disabled. This is an Auth configuration decision requiring project-owner review; no setting was modified. [Supabase password protection guide](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection).
+- **Performance INFO:** 9 unindexed foreign keys. Nine dedicated indexes already exist in the fresh-database migration set and have local-rebuild test evidence; they have **not** been pushed into the existing remote database. [Foreign key index advisor](https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys).
+- **Performance WARN:** 3 cases of multiple permissive SELECT RLS policies on `maintenance_reports`, `profiles` and `report_attachments`. These are potential performance optimizations, **not proof of an authorization bypass**. Do not combine/remove them without preserving each role's allowed rows and rerunning negative RLS tests. [Multiple permissive policies advisor](https://supabase.com/docs/guides/database/database-linter?lint=0006_multiple_permissive_policies).
+
+The advisor snapshot is an audit finding, not a blocker automatically fixed by this documentation. These settings and performance improvements need separate review and approval; never weaken RLS just to clear a warning.
