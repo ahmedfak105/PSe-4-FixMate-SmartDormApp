@@ -209,6 +209,48 @@ bad="$(jq -nc --arg owner "$a" --argjson category "$category_id" \
 status="$(status_code POST "$rest/maintenance_reports" "$a_token" "$bad")"
 if [[ "$status" -lt 400 ]]; then echo "Blank title was accepted" >&2; exit 1; fi
 
+# Task #36 API negative matrix: verify HTTP 4xx, not merely any failure.
+# These queries run on disposable Supabase only; the new validation SQL is
+# still proposed and has NOT been applied to active remote FixMate.
+expect_rejected_report() {
+  local label="$1" actor_token="$2" payload="$3"
+  local http
+  http="$(status_code POST "$rest/maintenance_reports" "$actor_token" "$payload")"
+  if [[ ! "$http" =~ ^4[0-9][0-9]$ ]]; then
+    echo "Unexpected API response for $label: HTTP $http (expected a 4xx)" >&2
+    cat "$workdir/error_response" >&2 || true
+    exit 1
+  fi
+}
+valid_payload="$(jq -nc --arg owner "$a" --argjson category "$category_id" \
+  '{resident_id:$owner,category_id:$category,title:"Valid report title",
+    description:"Clear description",location:"Room 101",status:"new"}')"
+expect_rejected_report 'blank title' "$a_token" \
+  "$(echo "$valid_payload" | jq -c '.title="   "')"
+expect_rejected_report 'blank description' "$a_token" \
+  "$(echo "$valid_payload" | jq -c '.description="   "')"
+expect_rejected_report 'blank location' "$a_token" \
+  "$(echo "$valid_payload" | jq -c '.location="   "')"
+long_title="$(printf 'T%.0s' {1..121})"
+expect_rejected_report 'title over 120 chars' "$a_token" \
+  "$(echo "$valid_payload" | jq -c --arg title "$long_title" '.title=$title')"
+expect_rejected_report 'invalid initial status' "$a_token" \
+  "$(echo "$valid_payload" | jq -c '.status="in_progress"')"
+expect_rejected_report 'foreign resident report owner' "$a_token" \
+  "$(echo "$valid_payload" | jq -c --arg owner "$b" '.resident_id=$owner')"
+expect_rejected_report 'staff creating a resident report' "$staff_token" "$valid_payload"
+expect_rejected_report 'unknown maintenance category' "$a_token" \
+  "$(echo "$valid_payload" | jq -c '.category_id=999999999')"
+inactive_category="$(psql -X -qAt -v ON_ERROR_STOP=1 -c \
+  "INSERT INTO public.maintenance_categories(name,is_active)
+   VALUES ('Inactive API integration category',false) RETURNING id;")"
+if [[ ! "$inactive_category" =~ ^[0-9]+$ ]]; then
+  echo 'Could not create isolated inactive test category' >&2; exit 1
+fi
+expect_rejected_report 'inactive maintenance category' "$a_token" \
+  "$(echo "$valid_payload" | jq -c --argjson category "$inactive_category" '.category_id=$category')"
+echo 'PASS: nine negative report-input/role cases returned HTTP 4xx'
+
 # An ordinary authenticated staff account sees zero private review rows.
 get_json "$rest/report_reviews?select=report_id" "$staff_token" | jq -e 'length==0' >/dev/null
 
