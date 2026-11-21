@@ -156,11 +156,32 @@ The team supplied this **read-only** SQL Editor result for `storage.buckets`:
 | File size limit | `5242880` bytes = **5 MiB** |
 | Allowed MIME types | `image/jpeg`, `image/png`, `image/webp` |
 
-**Important:** a private bucket does not by itself prove that resident, staff or admin file reads are correctly isolated. The `storage.objects` policies (including any broad SELECT rules) and effective bucket-related authorization still need review. The team has not yet provided policy query results; the SQL query text alone is not evidence of its output.
+**Storage policies have now been reviewed (see below).** A private bucket does not on its own establish per-user isolation; effective storage-object RLS and authorization should also be checked.
+
+## Verified Storage object policies (2026-11-21)
+
+The team supplied three policy definitions from `pg_policies` for `storage.objects`, all scoped to PostgreSQL role `authenticated`. There were two `SELECT` policies and one `INSERT` policy, with no `UPDATE` or `DELETE` policy in the supplied export.
+
+| Policy | Command | Evidence-based access rule |
+|---|---|---|
+| `fixmate_resident_read_photos` | SELECT | Bucket must be `report-photos`; first folder name equals `auth.uid()`; second folder names a report whose `resident_id` matches the caller |
+| `fixmate_resident_upload_photos` | INSERT | Bucket must be `report-photos`; first folder name equals `auth.uid()`; second folder names a report whose `resident_id` matches the caller |
+| `fixmate_staff_admin_read_photos` | SELECT | Bucket must be `report-photos`; path must have exactly two folders; first folder must match `maintenance_reports.resident_id` and second folder the report ID; maintenance staff require `assigned_to = auth.uid()`, while `moderator` and `system_admin` roles are permitted |
+
+**Implications:** A resident's read/upload access is tied to ownership of the referenced report. Maintenance staff can read photos tied to their own assigned reports; moderator and system admin roles can read report photos via the staff/admin policy. The latter policy explicitly validates two folder segments. None of these observed policies independently allows unauthenticated access.
+
+**Review notes:**
+- The resident upload policy checks ownership but does **not** explicitly check that the caller's profile role is `resident`. If former residents retain ownership of reports after role changes, the ownership-only rule would still match.
+- The resident read/upload policies do **not** require an exact folder count. For example, a path containing further nested subfolders may match their first two folder checks. The staff/admin SELECT policy requires exactly two folders, and `report_attachments` metadata INSERT policy also checks exactly two folders. This inconsistency may permit additional storage objects outside the normal app metadata format. Review and test before tightening rules to avoid breaking existing object paths.
+- Multiple permissive RLS SELECT policies can combine with OR. The rules above have been interpreted together.
+- The supplied `pg_policies` output alone does **not** establish `storage.objects.relrowsecurity` (RLS enabled) or the effective privileges/grants. Check that separately before treating the policy conditions as an enforced security boundary.
+- No direct authenticated negative tests for unauthorized photo reads/uploads were supplied in this step. Code/policy review is not a penetration test.
+
+
 
 ## Remaining evidence needed before claiming full security verification
 
-1. Inspect `storage.objects` RLS policies and verify owner/staff/admin access rules for the verified private `report-photos` bucket.
+1. Confirm `storage.objects` RLS is enabled and review effective grants; test cross-account Storage reads and uploads with real test users.
 2. Run live direct-API negative tests for each role and RPC path (beyond UI denial), including unassigned/assigned reports and invalid role transitions.
 3. Confirm API-exposed schemas, function owner roles and effective runtime privileges for `SECURITY DEFINER` routines.
 4. Gather database indexes, remaining schema triggers and additional objects for a full deployment/backup script.
