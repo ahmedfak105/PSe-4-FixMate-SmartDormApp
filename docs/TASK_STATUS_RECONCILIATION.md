@@ -67,3 +67,11 @@ Admin Web static CI passed on commit `545e943`. These are **code-level progress 
 - **Not completed:** staging deployment, live browser/API tests, security verification, and lecturer/team review of database migration. Do **not** close TASK #39 or report it as Done yet.
 
 This proposed change adds a seventh public table **only if deployed**; existing six-table documentation records the verified baseline and is not automatically updated.
+
+## Resident registration progress — TASKS #30 and #35 (proposed, not deployed)
+
+- Added `mobile/lib/features/auth/sign_up_page.dart`: email/password/confirmation and name + optional building/room; **no user-selectable role**. The Login screen exposes the signup link **only** when `ENABLE_RESIDENT_SIGNUP=true` is supplied at launch.
+- Added `mobile/test/sign_up_page_test.dart` for local field validation and the absence of privileged role selection.
+- Added [proposed resident Auth provisioning trigger](sql/PROPOSED_RESIDENT_SIGNUP_PROVISIONING.sql). It uses the new auth user's UUID and forces `role = 'resident'` regardless of metadata.
+- The SQL has **not** been applied to Supabase. Leave signup disabled by default until trigger ownership, account creation, confirmation behavior and role isolation are tested in staging. Do not close #30/#35 yet.
+- Existing trusted staff/moderator/admin profile provisioning remains separate; this trigger does not authorize assigning privileged roles.
