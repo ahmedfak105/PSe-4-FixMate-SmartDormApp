@@ -98,6 +98,25 @@ staff_token="$(login "$staff_email")"
 moderator_token="$(login "$moderator_email")"
 admin_token="$(login "$admin_email")"
 
+# Invalid email/password must be rejected by GoTrue Auth API.
+bad_login="$(jq -nc --arg email "$a_email" '{email:$email,password:"not-the-correct-password"}')"
+bad_status="$(curl -sS --max-time 20 -o "$workdir/invalid_login" -w '%{http_code}' \
+  -X POST "$auth/token?grant_type=password" \
+  -H "apikey: $SUPABASE_ANON_KEY" -H 'Content-Type: application/json' \
+  --data "$bad_login")"
+if [[ "$bad_status" -lt 400 ]]; then echo "Bad credentials were accepted" >&2; exit 1; fi
+
+# Sign out a test account and verify the Auth endpoint accepts its session.
+logout_status="$(curl -sS --max-time 20 -o "$workdir/logout_response" -w '%{http_code}' \
+  -X POST "$auth/logout" \
+  -H "apikey: $SUPABASE_ANON_KEY" -H "Authorization: Bearer $b_token")"
+if [[ "$logout_status" -lt 200 || "$logout_status" -ge 300 ]]; then
+  echo "Supabase logout failed ($logout_status)" >&2; exit 1
+fi
+# Log in again for the cross-resident RLS tests below.
+b_token="$(login "$b_email")"
+
+
 # Auth-to-profile trigger always creates Resident from untrusted signup metadata.
 a_profile="$(get_json "$rest/profiles?select=id,role&id=eq.$a" "$a_token")"
 echo "$a_profile" | jq -e --arg id "$a" 'length == 1 and .[0].id==$id and .[0].role=="resident"' >/dev/null
