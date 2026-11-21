@@ -103,3 +103,22 @@ An [eight-category seed](sql/VERIFIED_CATEGORY_SEED_DRAFT.sql), [read-only post-
 ## TASK #35 — trusted role provisioning documented (22 Nov 2026)
 
 The [trusted provisioning runbook](TRUSTED_ROLE_PROVISIONING.md) now documents how an authorized operator can create a test Auth user and promote only a verified staging profile to `maintenance_staff`, `moderator` or `system_admin`. Its procedure is based on the confirmed existing Auth trigger and lack of ordinary `authenticated` UPDATE permission on `profiles.role`. It also lists required negative-role tests; **none of these have been run with new staging accounts yet**. The task remains **In Progress**.
+
+## Automated PostgreSQL 17 smoke evidence — 22 November 2026
+
+**Confirmed CI pass:** [Database Baseline & Moderator Smoke — run 44956106507](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/44956106507). The workflow recreates the extracted baseline on a **disposable PostgreSQL 17 service**, with **minimal mock equivalents** of `auth.users`, `auth.uid()`, `storage.objects` and `storage.foldername()`. It then runs the eight-category seed, *proposed* report-input validation, and *proposed* Moderator migration, with synthetic users and role negative tests.
+
+| Task | New verified (CI only) | Still missing |
+|---|---|---|
+| **#34** | Six-table baseline/20 constraints/8 functions/16 RLS policies parse and execute on stub-equipped PostgreSQL; eight categories seed | Rebuild inside **real Supabase local/staging stack**, migration history/CLI, full Storage/Auth/API settings |
+| **#35** | Synthetic `auth.users` trigger creates Resident profiles despite malicious `role` metadata; direct Resident role UPDATE fails | Actual Auth sign-up/email/login/role routing on staging; negative real API tokens |
+| **#36** | Proposed [input-validation SQL](sql/PROPOSED_REPORT_INPUT_VALIDATION.sql) rejects blank title/description/location, >120-char title, archived category and forged resident ID in smoke tests | Apply/review on real Supabase staging; test mobile UX, image paths and error handling |
+| **#37** | Synthetic valid report claim and resolve succeed; rejected reports blocked by proposed Moderator trigger | Real concurrent claims with separate authenticated sessions, transition/persistence API verification |
+| **#39** | Synthetic Moderator and Admin review valid/duplicate/inappropriate successfully; second review and unauthorized Resident blocked; staff cannot claim rejected report | Moderation migration is **not deployed**; actual Moderator account, photo/API tests and browser E2E still pending |
+
+Two small initial smoke-test assertion mistakes were fixed before the successful run. **Do not mark these tasks Done yet**: a PostgreSQL stub harness is **not a full Supabase local test** and the Moderator, validation and FK-index changes have not been applied to the live database.
+
+- [Baseline smoke setup](sql/test/prepare_postgres_smoke.sql)
+- [Role and moderation checks](sql/test/assert_baseline_moderator_smoke.sql)
+- [Invalid-input tests](sql/test/assert_report_input_validation.sql)
+- [Proposed Moderator ERD](erd/FIXMATE_PROPOSED_MODERATOR_ERD.mmd) (not live schema)
