@@ -5,6 +5,21 @@
  */
 'use strict';
 
+// Reject legacy service_role JWTs as well as modern sb_secret API keys.
+// A three-section JWT is not proof that a browser key is anonymous.
+function isSafePublicApiKey(key) {
+  if (typeof key !== 'string') return false;
+  if (key.startsWith('sb_publishable_')) return key.length > 'sb_publishable_'.length;
+  if (key.startsWith('sb_secret_') || key.startsWith('service_role')) return false;
+  const parts = key.split('.');
+  if (parts.length !== 3 || parts.some(x => !x)) return false;
+  try {
+    const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+    return payload.role === 'anon';
+  } catch { return false; }
+}
+
+
 const CONFIG_KEY = 'fixmate_admin_public_connection_v1';
 const SESSION_KEY = 'fixmate-admin-session';
 const state = {
@@ -207,7 +222,7 @@ async function initialize() {
       ['localhost', '127.0.0.1'].includes(parsed.hostname) &&
       parsed.port === '54321';
     if (!config || !(hosted || devApi) ||
-      !(config.key?.startsWith('sb_publishable_') || config.key?.split('.').length === 3)) {
+      !isSafePublicApiKey(config.key)) {
       throw new Error('Open index.html first and connect with a public Supabase key.');
     }
     if (!window.supabase?.createClient) throw new Error('Supabase JavaScript SDK failed to load.');
