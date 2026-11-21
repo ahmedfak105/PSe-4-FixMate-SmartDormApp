@@ -73,3 +73,7 @@ The [Feature & Epic Status Reconciliation](FEATURE_EPIC_STATUS_PLAN.md) classifi
 ## Moderator feature progress (not yet part of the tested baseline)
 
 TASK #39 has a proposed implementation in PRs #42/#44: the new [Moderator Review page](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/blob/feature/admin-web-dashboard/admin-web/moderator.html), a [proposed database migration](sql/PROPOSED_MODERATOR_REVIEW_MIGRATION.sql), and the [staging test plan](MODERATOR_REVIEW_STAGING_TEST_PLAN.md). **The migration has not been applied to Supabase**; the feature must not be demonstrated as working end-to-end until staging and permission tests succeed. The six-table/13-policy counts elsewhere in this index remain the baseline observed before this proposed schema change.
+
+## Resident registration progress (not yet part of the tested baseline)
+
+A feature-flagged Flutter resident sign-up form is now in [PR #43](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/pull/43) and the matching [proposed Auth-to-profile trigger](sql/PROPOSED_RESIDENT_SIGNUP_PROVISIONING.sql) is documented in PR #42. The default remains **disabled** until the backend trigger is reviewed and deployed/tested on staging, so the lecturer should not be told that registration is end-to-end complete yet.
