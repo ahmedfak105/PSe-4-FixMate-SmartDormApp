@@ -23,6 +23,20 @@ using (exists (
   where id = (select auth.uid()) and role = 'system_admin'
 ));
 
+create or replace function public.can_manage_user_roles()
+returns boolean language sql stable security definer set search_path = ''
+as $
+  select (select auth.uid()) is not null and exists (
+    select 1 from public.profiles where id = (select auth.uid())
+      and role = 'system_admin'
+  );
+$;
+
+revoke all on function public.can_manage_user_roles()
+  from public, anon, authenticated;
+grant execute on function public.can_manage_user_roles()
+  to authenticated;
+
 create or replace function public.manage_user_role(
   p_user_id uuid, p_expected_role text, p_new_role text
 )
