@@ -431,6 +431,50 @@ test -s "$workdir/staff_photo.png"
 post_json "$rest/rpc/resolve_maintenance_report" "$staff_token" "$payload1" | jq -e '. == true' >/dev/null
 get_json "$rest/maintenance_reports?select=status&id=eq.$id1" "$a_token" | jq -e '.[0].status=="resolved"' >/dev/null
 
+# F05.1: changing status creates exactly owner-only notification rows.
+notifications="$(get_json "$rest/report_notifications?select=id,report_id,new_status,read_at&report_id=eq.$id1&order=id.asc" "$a_token")"
+echo "$notifications" | jq -e --argjson id "$id1" \
+  'length==2 and .[0].report_id==$id and .[0].new_status=="in_progress" and
+   .[1].report_id==$id and .[1].new_status=="resolved"' >/dev/null
+get_json "$rest/report_notifications?select=id&report_id=eq.$id1" "$b_token" |
+  jq -e 'length==0' >/dev/null
+get_json "$rest/report_notifications?select=id&report_id=eq.$id1" "$staff_token" |
+  jq -e 'length==0' >/dev/null
+
+notification_id="$(echo "$notifications" | jq -er '.[0].id')"
+read_status="$(curl -sS --max-time 20 -o "$workdir/read_notification" \
+  -w '%{http_code}' -X PATCH \
+  "$rest/report_notifications?id=eq.$notification_id&select=id,read_at" \
+  -H "apikey: $SUPABASE_ANON_KEY" \
+  -H "Authorization: Bearer $a_token" \
+  -H 'Content-Type: application/json' -H 'Prefer: return=representation' \
+  --data '{"read_at":"2026-11-22T00:00:00Z"}')"
+if [[ "$read_status" != "200" ]]; then
+  echo "Owner could not mark notification read ($read_status)" >&2; exit 1
+fi
+jq -e 'length==1 and .[0].read_at != null' \
+  "$workdir/read_notification" >/dev/null
+foreign_read="$(curl -sS --max-time 20 -o "$workdir/foreign_notification_read" \
+  -w '%{http_code}' -X PATCH \
+  "$rest/report_notifications?id=eq.$notification_id&select=id" \
+  -H "apikey: $SUPABASE_ANON_KEY" \
+  -H "Authorization: Bearer $b_token" \
+  -H 'Content-Type: application/json' -H 'Prefer: return=representation' \
+  --data '{"read_at":"2026-11-22T01:00:00Z"}')"
+if [[ "$foreign_read" == "200" ]]; then
+  jq -e 'length==0' "$workdir/foreign_notification_read" >/dev/null ||
+    { echo "Foreign resident modified notification" >&2; exit 1; }
+elif [[ ! "$foreign_read" =~ ^4[0-9][0-9]$ ]]; then
+  echo "Unexpected foreign notification PATCH HTTP $foreign_read" >&2; exit 1
+fi
+forged_notification="$(status_code POST "$rest/report_notifications" \
+  "$a_token" "$(jq -nc --arg owner "$a" --argjson rid "$id1" \
+    '{resident_id:$owner,report_id:$rid,new_status:"resolved"}')")"
+if [[ ! "$forged_notification" =~ ^4[0-9][0-9]$ ]]; then
+  echo "Resident forged a notification" >&2; exit 1
+fi
+echo 'PASS: transactional status notifications, resident ownership, read-only audit and no client-side inserts'
+
 # Negative backend validation: whitespace title must be rejected via API.
 bad="$(jq -nc --arg owner "$a" --argjson category "$category_id" \
   '{resident_id:$owner,category_id:$category,title:"   ",description:"Invalid",location:"Room 101",status:"new"}')"
