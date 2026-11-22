@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import '../../l10n/fixmate_i18n.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -106,7 +107,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
       if (!mounted || !_mySession) return;
       setState(() => _avatar = bytes);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Profile photo updated.')),
+        const SnackBar(content: FixMateText('Profile photo updated.')),
       );
     } catch (_) {
       // A failed upload or missing avatar migration must not block text edits.
@@ -145,7 +146,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
         ? _name.text.trim().substring(0, 1).toUpperCase() : '?';
     final resident = widget.profile.isResident;
     return Scaffold(
-      appBar: AppBar(title: const Text('Edit profile')),
+      appBar: AppBar(title: const FixMateText('Edit profile')),
       body: Center(child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 580),
         child: ListView(padding: const EdgeInsets.all(20), children: [
@@ -162,7 +163,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       backgroundColor: FixMateTheme.mint,
                       backgroundImage: _avatar == null ? null : MemoryImage(_avatar!),
                       child: _avatar == null
-                          ? Text(initial, style: const TextStyle(
+                          ? FixMateText(initial, style: const TextStyle(
                               color: FixMateTheme.teal,
                               fontSize: 34, fontWeight: FontWeight.w800))
                           : null,
@@ -184,10 +185,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     ),
                   ])),
                   const SizedBox(height: 15),
-                  const Text('Your account', textAlign: TextAlign.center,
+                  const FixMateText('Your account', textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 19, fontWeight: FontWeight.w800)),
                   const SizedBox(height: 4),
-                  Text(_client.auth.currentUser?.email ?? '',
+                  FixMateText(_client.auth.currentUser?.email ?? '',
                     textAlign: TextAlign.center,
                     style: const TextStyle(color: Color(0xFF607B83))),
                   const SizedBox(height: 25),
@@ -221,12 +222,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       prefixIcon: const Icon(Icons.meeting_room_outlined)),
                   ),
                   const SizedBox(height: 12),
-                  const Text('Account role and email are managed separately '
+                  const FixMateText('Account role and email are managed separately '
                       'and cannot be changed here.',
                     style: TextStyle(fontSize: 12, color: Color(0xFF607B83))),
                   if (_error != null) ...[
                     const SizedBox(height: 12),
-                    Text(_error!, style: TextStyle(
+                    FixMateText(_error!, style: TextStyle(
                         color: Theme.of(context).colorScheme.error)),
                   ],
                   const SizedBox(height: 20),
@@ -234,7 +235,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     key: const Key('save_profile'),
                     onPressed: _saving || !_mySession ? null : _save,
                     icon: const Icon(Icons.save_outlined),
-                    label: Text(_saving ? 'Saving...' : 'Save changes'),
+                    label: FixMateText(_saving ? 'Saving...' : 'Save changes'),
                   ),
                 ],
               ),
