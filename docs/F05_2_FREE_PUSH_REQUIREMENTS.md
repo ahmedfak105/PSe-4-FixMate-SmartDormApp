@@ -32,7 +32,7 @@ must remain open until verified on hosted Supabase and a real phone.
    - `FIREBASE_SERVICE_ACCOUNT_JSON` — a dedicated Firebase service-account JSON limited to the necessary **Firebase Cloud Messaging API Admin** permissions.
    - `FIREBASE_PROJECT_ID=pse-4-fixmate-smartdormapp`.
    - `FIXMATE_PUSH_WEBHOOK_SECRET` — a randomly generated 32+ character secret; never display this publicly.
-   - `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are supplied by the trusted Supabase runtime; never bundle their values in Flutter.
+   - `SUPABASE_URL` and `SUPABASE_SECRET_KEYS` are supplied by the trusted Supabase runtime (current named `default` `sb_secret_` API key). Older *disposable local* runtimes may still inject the legacy `SUPABASE_SERVICE_ROLE_KEY`. Never put either privileged key in Flutter, GitHub, a browser, or the Database Webhook header.
 4. Deploy `supabase/functions/send-report-push` with **`verify_jwt=false` only for this server-to-server endpoint**. Its own `x-fixmate-push-secret` check is mandatory. All other functions must keep their existing authorization.
 5. Configure a **Database Webhook** on INSERT to `public.push_delivery_outbox` calling the Edge Function with the same secret header. The function claims jobs from the queue rather than trusting any arbitrary recipient ID in the webhook payload. Add a low-frequency trusted scheduler for retries after observing free-tier quotas; a webhook alone cannot retry delayed failed sends. Limit scheduled invocations and disable if usage approaches any paid threshold.
 6. Test with a **controlled Resident Android phone**, a second Resident, and Maintenance Staff: opt in, change status, confirm Android receives the expected alert while backgrounded, confirm role isolation and no cross-account delivery, revoke token/sign out and confirm no further sends.
@@ -62,3 +62,14 @@ Official references: [Google Cloud Free Trial](https://cloud.google.com/free/doc
 - [ ] Sender secrets stored and database webhook/scheduled retry configured by authorized operator.
 - [ ] Real Android background-delivery test completed; no sends to non-owner.
 - [ ] Feature #24 marked Done only after all acceptance requirements pass.
+
+
+## November 2026 Supabase key compatibility and sender tests
+
+- PR #48 prepares the server for Supabase's **new secret API keys**: it selects `SUPABASE_SECRET_KEYS.default` when present, sends `sb_secret_...` **only** in the `apikey` header, and never sends an opaque key as an `Authorization: Bearer` JWT. An existing legacy `service_role` JWT remains a fallback **only** when the new secret-key dictionary is absent (local CLI compatibility). Malformed/missing privileged keys fail closed. This is a code-only proposal, not a live rotation.
+- The extra no-network Node 22 guard tests check webhook authentication, typed FCM `UNREGISTERED`, new/legacy privileged header rules, and malformed server configuration. Workflow: `.github/workflows/fcm-sender-guard-tests.yml`.
+- Supabase's privileged `claim_fixmate_push_jobs` RPC retains server-role-only `EXECUTE` and a separate role check. **Before switching hosted credentials**, explicitly verify an atomic claim with the project's actual new `sb_secret_` key in an approved isolated environment. The two key formats and gateway role context must be tested end-to-end; helper tests alone cannot prove live Data API authorization.
+- Never put a Supabase secret key or Firebase service-account JSON into the phone app, GitHub Actions logs, screenshots, or chat. The webhook authenticates to the dispatcher with its own independent high-entropy `x-fixmate-push-secret` header; that secret must be stored securely in the approved backend/webhook configuration.
+- After any successful FCM end-to-end device test, test a second resident and sign-out/revocation. Do not close #24 or #47 merely because unit tests or backend builds passed.
+
+Sources: [Supabase key migration](https://supabase.com/docs/guides/getting-started/migrating-to-new-api-keys), [Supabase Edge secrets](https://supabase.com/docs/guides/functions/secrets), [FCM error codes](https://firebase.google.com/docs/cloud-messaging/error-codes).

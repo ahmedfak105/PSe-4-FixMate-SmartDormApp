@@ -1,3 +1,10 @@
+import {
+  fcmTokenIsUnregistered,
+  matchesPushWebhookSecret,
+  privilegedSupabaseRestHeaders,
+  selectSupabaseServiceKey,
+} from "./push_guards.ts";
+
 // FixMate F05.2: server-only FCM HTTP v1 sender.
 // Deploy only AFTER Release Gate #47, as verify_jwt=false with a strong
 // FIXMATE_PUSH_WEBHOOK_SECRET. No user JWT or browser access is accepted.
@@ -38,18 +45,6 @@ function requireConfig(name: string): string {
   const value = Deno.env.get(name);
   if (!value) throw Error(`Missing server configuration: ${name}`);
   return value;
-}
-
-// A simple constant-time comparison for two small, server-side secrets.
-function verifySecret(actual: string | null, expected: string): boolean {
-  if (!actual || expected.length < 32) return false;
-  const a = encoder.encode(actual);
-  const b = encoder.encode(expected);
-  let difference = a.length ^ b.length;
-  for (let i = 0; i < Math.max(a.length, b.length); i++) {
-    difference |= (a[i] ?? 0) ^ (b[i] ?? 0);
-  }
-  return difference === 0;
 }
 
 async function googleAccessToken(account: ServiceAccount): Promise<string> {
@@ -104,13 +99,6 @@ async function googleAccessToken(account: ServiceAccount): Promise<string> {
   return result.access_token;
 }
 
-function restHeaders(serviceKey: string): HeadersInit {
-  return {
-    apikey: serviceKey,
-    Authorization: `Bearer ${serviceKey}`,
-    "Content-Type": "application/json",
-  };
-}
 
 async function rest<T>(
   baseUrl: string, serviceKey: string, path: string,
@@ -119,7 +107,7 @@ async function rest<T>(
   const response = await fetch(`${baseUrl}/rest/v1/${path}`, {
     method,
     headers: {
-      ...restHeaders(serviceKey),
+      ...privilegedSupabaseRestHeaders(serviceKey),
       Prefer: "return=representation",
     },
     body: payload === undefined ? undefined : JSON.stringify(payload),
@@ -197,19 +185,18 @@ async function send(
   if (response.ok) return "sent";
   if (response.status === 404) {
     // FCM 404 UNREGISTERED is terminal for an individual device token.
-    const error = await response.json().catch(() => ({}));
-    const details: unknown[] = error?.error?.details ?? [];
-    const unregistered = details.some((item: unknown) =>
-      typeof item === "object" && item !== null &&
-      JSON.stringify(item).includes("UNREGISTERED"));
-    if (unregistered) return "invalid";
+    const error: unknown = await response.json().catch(() => ({}));
+    if (fcmTokenIsUnregistered(response.status, error)) return "invalid";
   }
   return "retry";
 }
 
 async function deliver(): Promise<Record<string, number>> {
   const baseUrl = requireConfig("SUPABASE_URL");
-  const serviceKey = requireConfig("SUPABASE_SERVICE_ROLE_KEY");
+  const serviceKey = selectSupabaseServiceKey(
+    Deno.env.get("SUPABASE_SECRET_KEYS") ?? null,
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? null,
+  );
   const account = JSON.parse(requireConfig("FIREBASE_SERVICE_ACCOUNT_JSON"))
     as ServiceAccount;
   const expectedProject = requireConfig("FIREBASE_PROJECT_ID");
@@ -265,7 +252,7 @@ Deno.serve(async (request) => {
     return new Response("Method not allowed", { status: 405 });
   }
   const expectedSecret = Deno.env.get("FIXMATE_PUSH_WEBHOOK_SECRET") ?? "";
-  if (!verifySecret(request.headers.get("x-fixmate-push-secret"),
+  if (!matchesPushWebhookSecret(request.headers.get("x-fixmate-push-secret"),
     expectedSecret)) {
     return new Response("Unauthorized", { status: 401 });
   }
