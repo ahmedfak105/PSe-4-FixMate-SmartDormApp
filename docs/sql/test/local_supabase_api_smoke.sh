@@ -227,6 +227,86 @@ if [[ ! "$avatar_foreign_upload" =~ ^4[0-9][0-9]$ ]]; then
 fi
 echo 'PASS: own profile edits, immutable role, and private avatar ownership'
 
+# F06.3: category management is admin-only and must preserve history.
+capability="$(get_json "$rest/rpc/can_manage_maintenance_categories" "$admin_token")"
+echo "$capability" | jq -e '. == true' >/dev/null
+get_json "$rest/rpc/can_manage_maintenance_categories" "$a_token" |
+  jq -e '. == false' >/dev/null
+
+category_payload='{"p_category_id":null,"p_name":"Elevator","p_is_active":true}'
+for unauthorized in "$a_token" "$staff_token" "$moderator_token"; do
+  deny="$(status_code POST "$rest/rpc/manage_maintenance_category" \
+    "$unauthorized" "$category_payload")"
+  if [[ ! "$deny" =~ ^4[0-9][0-9]$ ]]; then
+    echo "Non-admin category mutation succeeded (HTTP $deny)" >&2; exit 1
+  fi
+done
+
+# Even a real admin cannot bypass the vetted RPC with direct table writes.
+direct_insert="$(status_code POST "$rest/maintenance_categories" \
+  "$admin_token" '{"name":"Unauthorized direct insert","is_active":true}')"
+if [[ ! "$direct_insert" =~ ^4[0-9][0-9]$ ]]; then
+  echo "Direct category INSERT was permitted" >&2; exit 1
+fi
+
+category_original="$(post_json "$rest/rpc/manage_maintenance_category" \
+  "$admin_token" "$category_payload")"
+old_category_id="$(echo "$category_original" | jq -er \
+  'if type == "array" then .[0].id else .id end')"
+get_json "$rest/maintenance_categories?select=id&name=eq.Elevator" "$a_token" |
+  jq -e --argjson id "$old_category_id" \
+    'length==1 and .[0].id==$id' >/dev/null
+
+# A report created while the original category is active must keep its
+# historical category ID and label after the admin renames that category.
+test_category_report="$(jq -nc --arg uid "$a" \
+  --argjson category "$old_category_id" \
+  '{resident_id:$uid,category_id:$category,title:"Elevator category history test",description:"Original category label should survive a rename",location:"Dorm A, Room 101",status:"new"}')"
+test_category_report_id="$(post_json \
+  "$rest/maintenance_reports?select=id,category_id" "$a_token" \
+  "$test_category_report" | jq -er '.[0].id')"
+
+rename_payload="$(jq -nc --argjson id "$old_category_id" \
+  '{p_category_id:$id,p_name:"Lift",p_is_active:true}')"
+category_renamed="$(post_json "$rest/rpc/manage_maintenance_category" \
+  "$admin_token" "$rename_payload")"
+new_category_id="$(echo "$category_renamed" | jq -er \
+  'if type=="array" then .[0].id else .id end')"
+if [[ "$new_category_id" == "$old_category_id" ]]; then
+  echo "Renaming mutated a historical category in place" >&2; exit 1
+fi
+get_json "$rest/maintenance_categories?select=id,name,is_active&id=eq.$old_category_id" \
+  "$admin_token" | jq -e --argjson id "$old_category_id" \
+  'length==1 and .[0].id==$id and .[0].name=="Elevator" and .[0].is_active==false' >/dev/null
+get_json "$rest/maintenance_reports?select=category_id&id=eq.$test_category_report_id" \
+  "$a_token" | jq -e --argjson id "$old_category_id" \
+  'length==1 and .[0].category_id==$id' >/dev/null
+get_json "$rest/maintenance_categories?select=id&name=eq.Elevator" "$a_token" |
+  jq -e 'length==0' >/dev/null
+get_json "$rest/maintenance_categories?select=id&name=eq.Lift" "$a_token" |
+  jq -e --argjson id "$new_category_id" 'length==1 and .[0].id==$id' >/dev/null
+
+deactivate_payload="$(jq -nc --argjson id "$new_category_id" \
+  '{p_category_id:$id,p_name:"Lift",p_is_active:false}')"
+post_json "$rest/rpc/manage_maintenance_category" \
+  "$admin_token" "$deactivate_payload" >/dev/null
+get_json "$rest/maintenance_categories?select=id&name=eq.Lift" "$a_token" |
+  jq -e 'length==0' >/dev/null
+
+reactivate_payload="$(jq -nc --argjson id "$new_category_id" \
+  '{p_category_id:$id,p_name:"Lift",p_is_active:true}')"
+post_json "$rest/rpc/manage_maintenance_category" \
+  "$admin_token" "$reactivate_payload" >/dev/null
+get_json "$rest/maintenance_categories?select=id&name=eq.Lift" "$a_token" |
+  jq -e --argjson id "$new_category_id" 'length==1 and .[0].id==$id' >/dev/null
+
+bad_category="$(status_code POST "$rest/rpc/manage_maintenance_category" \
+  "$admin_token" '{"p_category_id":null,"p_name":" ","p_is_active":true}')"
+if [[ ! "$bad_category" =~ ^4[0-9][0-9]$ ]]; then
+  echo "Blank maintenance category was accepted" >&2; exit 1
+fi
+echo 'PASS: admin-only category create/rename/version/toggle, resident visibility, historical FK and input validation'
+
 # Resident submits a report with an active category, owner and NEW status.
 category_id="$(get_json "$rest/maintenance_categories?select=id&name=eq.Plumbing" "$a_token" | jq -er '.[0].id')"
 new_report() {
