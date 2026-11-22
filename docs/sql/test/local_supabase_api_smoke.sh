@@ -356,6 +356,49 @@ get_json "$rest/user_role_audit?select=id" "$a_token" |
 
 echo 'PASS: admin-only role management, optimistic role guard, role audit and protected self/different-account access'
 
+# F05.2: Android FCM token registry (no external Firebase API calls).
+# Tokens below are synthetic, never usable to send push messages.
+device_token='TEST_ONLY_ANDROID_FCM_TOKEN_FOR_RESIDENT_A_00001'
+device_row="$(jq -nc --arg token "$device_token" --arg owner "$a" \
+  '{token:$token,user_id:$owner,platform:"android"}')"
+post_json "$rest/push_device_tokens?select=token,user_id" "$a_token" \
+  "$device_row" | jq -e --arg owner "$a" \
+  'length==1 and .[0].user_id==$owner' >/dev/null
+
+get_json "$rest/push_device_tokens?select=token&user_id=eq.$a" "$b_token" |
+  jq -e 'length==0' >/dev/null
+get_json "$rest/push_device_tokens?select=token&user_id=eq.$a" "$staff_token" |
+  jq -e 'length==0' >/dev/null
+
+stolen_device="$(jq -nc --arg token "$device_token" --arg owner "$b" \
+  '{token:$token,user_id:$owner,platform:"android"}')"
+stolen_status="$(status_code POST "$rest/push_device_tokens" \
+  "$b_token" "$stolen_device")"
+if [[ ! "$stolen_status" =~ ^4[0-9][0-9]$ ]]; then
+  echo "Foreign resident hijacked FCM token" >&2; exit 1
+fi
+staff_device="$(jq -nc --arg owner "$staff_id" \
+  '{token:"TEST_ONLY_ANDROID_FCM_TOKEN_FOR_STAFF_NOT_ALLOWED",user_id:$owner,platform:"android"}')"
+staff_status="$(status_code POST "$rest/push_device_tokens" \
+  "$staff_token" "$staff_device")"
+if [[ ! "$staff_status" =~ ^4[0-9][0-9]$ ]]; then
+  echo "Maintenance Staff registered a Resident FCM token" >&2; exit 1
+fi
+
+owner_delete="$(curl -sS --max-time 20 -o "$workdir/push_delete" \
+  -w '%{http_code}' -X DELETE \
+  "$rest/push_device_tokens?token=eq.$device_token&user_id=eq.$a" \
+  -H "apikey: $SUPABASE_ANON_KEY" \
+  -H "Authorization: Bearer $a_token" \
+  -H 'Prefer: return=representation')"
+if [[ "$owner_delete" != "200" ]]; then
+  echo "Resident failed to revoke own push device" >&2; exit 1
+fi
+jq -e 'length==1' "$workdir/push_delete" >/dev/null
+get_json "$rest/push_device_tokens?select=token&user_id=eq.$a" "$a_token" |
+  jq -e 'length==0' >/dev/null
+echo 'PASS: FCM device registration, resident-only RLS, no token theft, and revocation'
+
 # Resident submits a report with an active category, owner and NEW status.
 category_id="$(get_json "$rest/maintenance_categories?select=id&name=eq.Plumbing" "$a_token" | jq -er '.[0].id')"
 new_report() {
