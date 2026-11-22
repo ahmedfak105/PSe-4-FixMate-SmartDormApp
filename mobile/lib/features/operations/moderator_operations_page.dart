@@ -117,9 +117,9 @@ class _ModeratorOperationsPageState extends State<ModeratorOperationsPage> {
     } catch (error) {
       if (mounted) setState(() {
         _loading = false;
-        _error = 'Moderator data unavailable: $error. '
-          'Verify that the proposed review migration, table grants and RLS '
-          'are installed on an approved staging project.';
+        debugPrint('FixMate review service load failed: $error');
+        _error = 'The review service is temporarily unavailable. '
+            'Please contact your system administrator.';
       });
     }
   }
