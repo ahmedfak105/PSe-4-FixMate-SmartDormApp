@@ -307,6 +307,55 @@ if [[ ! "$bad_category" =~ ^4[0-9][0-9]$ ]]; then
 fi
 echo 'PASS: admin-only category create/rename/version/toggle, resident visibility, historical FK and input validation'
 
+# F06.2: role-management RPC is System Admin only and auditable.
+role_payload="$(jq -nc --arg id "$b" \
+  '{p_user_id:$id,p_expected_role:"resident",p_new_role:"maintenance_staff"}')"
+for token in "$a_token" "$staff_token" "$moderator_token"; do
+  denied="$(status_code POST "$rest/rpc/manage_user_role" "$token" "$role_payload")"
+  if [[ ! "$denied" =~ ^4[0-9][0-9]$ ]]; then
+    echo "Non-admin role assignment succeeded" >&2; exit 1
+  fi
+done
+
+# A role update through the public profiles table must remain denied even
+# when a user can update their own name/room.
+b_role_patch="$(curl -sS --max-time 20 -o "$workdir/b_role_patch" \
+  -w '%{http_code}' -X PATCH "$rest/profiles?id=eq.$b" \
+  -H "apikey: $SUPABASE_ANON_KEY" \
+  -H "Authorization: Bearer $b_token" \
+  -H 'Content-Type: application/json' --data '{"role":"system_admin"}')"
+if [[ ! "$b_role_patch" =~ ^4[0-9][0-9]$ ]]; then
+  echo "User escalated through profile API" >&2; exit 1
+fi
+
+post_json "$rest/rpc/manage_user_role" "$admin_token" \
+  "$role_payload" | jq -e '.role=="maintenance_staff"' >/dev/null
+get_json "$rest/profiles?select=role&id=eq.$b" "$b_token" |
+  jq -e 'length==1 and .[0].role=="maintenance_staff"' >/dev/null
+stale_role="$(status_code POST "$rest/rpc/manage_user_role" "$admin_token" "$role_payload")"
+if [[ ! "$stale_role" =~ ^4[0-9][0-9]$ ]]; then
+  echo "Stale role update overwrote concurrent change" >&2; exit 1
+fi
+
+self_change="$(jq -nc --arg id "$admin_id" \
+  '{p_user_id:$id,p_expected_role:"system_admin",p_new_role:"resident"}')"
+self_status="$(status_code POST "$rest/rpc/manage_user_role" \
+  "$admin_token" "$self_change")"
+if [[ ! "$self_status" =~ ^4[0-9][0-9]$ ]]; then
+  echo "Admin was allowed to demote own role" >&2; exit 1
+fi
+
+revert_payload="$(jq -nc --arg id "$b" \
+  '{p_user_id:$id,p_expected_role:"maintenance_staff",p_new_role:"resident"}')"
+post_json "$rest/rpc/manage_user_role" "$admin_token" \
+  "$revert_payload" | jq -e '.role=="resident"' >/dev/null
+get_json "$rest/user_role_audit?select=old_role,new_role&target_id=eq.$b" \
+  "$admin_token" | jq -e 'length==2' >/dev/null
+get_json "$rest/user_role_audit?select=id" "$a_token" |
+  jq -e 'length==0' >/dev/null
+
+echo 'PASS: admin-only role management, optimistic role guard, role audit and protected self/different-account access'
+
 # Resident submits a report with an active category, owner and NEW status.
 category_id="$(get_json "$rest/maintenance_categories?select=id&name=eq.Plumbing" "$a_token" | jq -er '.[0].id')"
 new_report() {
