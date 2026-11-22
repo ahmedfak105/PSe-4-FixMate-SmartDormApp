@@ -86,10 +86,10 @@ Future<void> main() async {
       theme: FixMateTheme.light,
       home: Scaffold(
         appBar: AppBar(title: const Text('FixMate')),
-        body: const Center(
+        body: Center(
           child: ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: 440),
-            child: Padding(
+            constraints: const BoxConstraints(maxWidth: 440),
+            child: const Padding(
               padding: EdgeInsets.all(24),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
