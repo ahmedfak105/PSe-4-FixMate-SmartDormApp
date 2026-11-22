@@ -112,7 +112,11 @@ void main() {
 
     expect(find.textContaining('claimed successfully'), findsOneWidget);
     expect(find.text('Mark resolved'), findsOneWidget);
-    expect(find.textContaining('2026-11-21 16:45'), findsOneWidget);
+    final expectedLocalTime = DateTime.utc(2026, 11, 21, 16, 45)
+        .toLocal()
+        .toString()
+        .substring(0, 16);
+    expect(find.textContaining(expectedLocalTime), findsOneWidget);
     await tester.tap(find.text('Mark resolved'));
     await tester.pumpAndSettle();
 
