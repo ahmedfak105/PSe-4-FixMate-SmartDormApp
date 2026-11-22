@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../data/models/resident_profile.dart';
+import '../settings/edit_profile_page.dart';
 
 /// Keep historical decisions visible after Staff changes a reviewed report
 /// to in_progress or resolved. Only unassigned NEW reports can be reviewed.
@@ -44,6 +45,18 @@ class _ModeratorOperationsPageState extends State<ModeratorOperationsPage> {
   Map<int, List<Map<String, dynamic>>> _photos = {};
   bool _loading = false;
   bool _busy = false;
+  ResidentProfile? _editedProfile;
+
+  Future<void> _editOwnProfile() async {
+    final updated = await Navigator.of(context).push<ResidentProfile>(
+      MaterialPageRoute(builder: (_) => EditProfilePage(
+        profile: _editedProfile ?? widget.profile)),
+    );
+    if (updated != null && mounted) {
+      setState(() => _editedProfile = updated);
+    }
+  }
+
   bool _reviewedOnly = false;
   String? _error;
   String? _notice;
@@ -253,6 +266,7 @@ class _ModeratorOperationsPageState extends State<ModeratorOperationsPage> {
       appBar: AppBar(
         title: const Text('FixMate · Review Center'),
         actions: [
+          IconButton(tooltip: 'My profile', icon: const Icon(Icons.account_circle_outlined), onPressed: _editOwnProfile),
           IconButton(tooltip: 'Refresh reviews', onPressed: _loading ? null : _refresh,
               icon: const Icon(Icons.refresh)),
           IconButton(tooltip: 'Sign out', onPressed: _logout,
@@ -270,7 +284,7 @@ class _ModeratorOperationsPageState extends State<ModeratorOperationsPage> {
                 Text('Report review',
                     style: Theme.of(context).textTheme.headlineSmall),
                 const SizedBox(height: 8),
-                Text('Signed in as ${widget.profile.fullName} '
+                Text('Signed in as ${(_editedProfile ?? widget.profile).fullName} '
                     '(${widget.profile.role}). Review only new, unassigned reports.'),
                 const SizedBox(height: 14),
                 SegmentedButton<bool>(
