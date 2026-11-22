@@ -34,3 +34,55 @@ export function fcmTokenIsUnregistered(status: number, payload: unknown): boolea
       typed.errorCode === 'UNREGISTERED';
   });
 }
+
+
+/**
+ * Prefer current Supabase sb_secret keys. Older disposable Supabase CLI
+ * stacks may still inject only the legacy service_role JWT.
+ * Bad or incomplete current-key configuration fails closed.
+ */
+export function selectSupabaseServiceKey(
+  secretKeysJson: string | null,
+  legacyServiceRoleKey: string | null,
+): string {
+  if (secretKeysJson) {
+    let keys: unknown;
+    try {
+      keys = JSON.parse(secretKeysJson);
+    } catch (_) {
+      throw Error('Invalid Supabase secret-key configuration');
+    }
+    const key = typeof keys === 'object' && keys !== null &&
+      !Array.isArray(keys)
+      ? (keys as Record<string, unknown>).default
+      : undefined;
+    if (typeof key !== 'string' || !key.startsWith('sb_secret_') ||
+        key.length <= 'sb_secret_'.length) {
+      throw Error('Supabase default secret key is missing or invalid');
+    }
+    return key;
+  }
+  if (legacyServiceRoleKey && isLegacyServiceRoleJwt(legacyServiceRoleKey)) {
+    return legacyServiceRoleKey;
+  }
+  throw Error('Missing privileged Supabase server credential');
+}
+
+function isLegacyServiceRoleJwt(value: string): boolean {
+  return /^[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+$/.test(value);
+}
+
+/**
+ * New opaque API keys must be passed ONLY as apikey. Passing them as
+ * Authorization: Bearer causes an Invalid JWT response.
+ */
+export function privilegedSupabaseRestHeaders(key: string): Record<string, string> {
+  const common = { apikey: key, 'Content-Type': 'application/json' };
+  if (key.startsWith('sb_secret_') && key.length > 'sb_secret_'.length) {
+    return common;
+  }
+  if (isLegacyServiceRoleJwt(key)) {
+    return { ...common, Authorization: `Bearer ${key}` };
+  }
+  throw Error('Invalid privileged Supabase server credential');
+}
