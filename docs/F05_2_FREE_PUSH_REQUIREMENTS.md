@@ -1,5 +1,8 @@
 # FixMate — F05.2 Android Push Delivery (Firebase FCM)
 
+> **Update 22 Nov 2026:** Live SQL is NOW deployed: device tokens and server-only outbox exist with RLS; **FCM sender deployment, server secrets and phone delivery are still outstanding.** See the verified [hosted 9-migration rollout log](HOSTED_RUNTIME_ROLLOUT_2026-11-22.md). The existing trial data was allowed to be disposable by the project owner, and no backup was performed. The app's backend database extensions are now installed, but user-level role testing and real Firebase push delivery are not fully accepted.
+
+
 **Status: integration code prepared; remote delivery NOT activated or accepted.**
 Feature [#24](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/24)
 and [Release Gate #47](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/47)
