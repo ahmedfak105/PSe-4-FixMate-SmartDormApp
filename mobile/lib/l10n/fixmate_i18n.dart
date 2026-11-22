@@ -179,12 +179,87 @@ const Map<String, String> _lithuanian = {
   "No photos attached yet.": "Nuotraukų dar nepridėta.",
   "Remove selected photo": "Pašalinti pasirinktą nuotrauką",
   "JPEG, PNG or WebP": "JPEG, PNG arba WebP",
+  "FixMate": "FixMate",
+  "OPERATIONS OVERVIEW": "PRIEŽIŪROS APŽVALGA",
+  "Manage requests, teams and maintenance progress.": "Tvarkykite pranešimus, komandos užduotis ir priežiūros eigą.",
+  "Roles are read-only here. Privileged role changes must use trusted operator provisioning, never browser SQL keys.": "Čia vaidmenys rodomi tik skaitymui. Juos keisti gali tik įgaliotas administratorius saugiu būdu.",
+  "FixMate · Review Center": "FixMate · Peržiūros centras",
+  "FixMate · Maintenance Workspace": "FixMate · Priežiūros darbo sritis",
+  "No status action available for this report.": "Šiam pranešimui nėra galimo būsenos veiksmo.",
+  "New accounts always start with the Resident role. Staff and administrator accounts are created by authorized personnel.": "Naujos paskyros visada turi gyventojo vaidmenį. Darbuotojų ir administratorių paskyras sukuria įgalioti asmenys.",
+  "If an account matches that email address, you will receive a password reset link. Check your inbox and spam folder. The link may expire.": "Jei šiuo el. pašto adresu yra paskyra, gausite slaptažodžio atkūrimo nuorodą. Patikrinkite gautuosius ir šlamšto aplanką. Nuorodos galiojimas gali baigtis.",
+  "This password reset link is invalid or expired. Return to sign in and request a new link.": "Ši slaptažodžio atkūrimo nuoroda neteisinga arba nebegalioja. Grįžkite į prisijungimo langą ir paprašykite naujos nuorodos.",
+  "Use at least 8 characters. You will sign in again after your password changes.": "Naudokite bent 8 simbolius. Pakeitę slaptažodį turėsite prisijungti iš naujo.",
+  "Only authorized maintenance staff and managers can see these notes.": "Šias pastabas mato tik įgalioti priežiūros darbuotojai ir vadovai.",
+  "Available reports can be claimed. Only reports assigned to you can be marked resolved.": "Galite perimti laisvus pranešimus. Tik jums paskirti pranešimai gali būti pažymėti išspręstais.",
+  "Account role and email are managed separately and cannot be changed here.": "Paskyros vaidmuo ir el. paštas tvarkomi atskirai; čia jų pakeisti negalima.",
+  "Category editing is not enabled on this server yet. You can view active categories, but changes are disabled.": "Šiame serveryje kategorijų redagavimas dar neįjungtas. Galite peržiūrėti aktyvias kategorijas, bet jų pakeisti negalima.",
+  "Renaming creates a new category. Existing reports retain their original category.": "Pakeitus pavadinimą sukuriama nauja kategorija. Ankstesni pranešimai išsaugo savo pradinę kategoriją.",
+  "Could not sign out. Please retry.": "Nepavyko atsijungti. Bandykite dar kartą.",
+  "Could not load categories from Supabase.": "Nepavyko įkelti kategorijų.",
+  "No active maintenance categories available.": "Aktyvių priežiūros kategorijų nėra.",
+  "Photo uploaded to private Storage.": "Nuotrauka saugiai įkelta.",
+  "Could not save your profile. Please try again.": "Nepavyko išsaugoti profilio. Bandykite dar kartą.",
+  "Choose an image smaller than 2 MB.": "Pasirinkite mažesnę nei 2 MB nuotrauką.",
+  "Photo upload is not available on this server yet. Your other profile details can still be saved.": "Šiame serveryje dar negalima įkelti profilio nuotraukos. Kitus profilio duomenis vis tiek galite išsaugoti.",
+  "Your account details could not be loaded. Please retry or contact support.": "Nepavyko įkelti paskyros duomenų. Bandykite dar kartą arba kreipkitės pagalbos.",
+  "Profile updated.": "Profilis atnaujintas.",
+  "Save changes": "Išsaugoti pakeitimus",
+  "Account role": "Paskyros vaidmuo",
+  "Room": "Kambarys",
+  "Not available": "Nepasiekiama",
+  "resident": "Gyventojas",
+  "maintenance_staff": "Priežiūros darbuotojas",
+  "moderator": "Moderatorius",
+  "system_admin": "Administratorius",
+  "new": "Naujas",
+  "in_progress": "Vykdomas",
+  "resolved": "Išspręstas",
+  "maintenance": "Priežiūra",
+  "Home": "Pradžia",
+  "My Reports": "Mano pranešimai",
+  "New Report": "Naujas pranešimas",
+  "Profile": "Profilis",
+};
+
+const Map<String, String> _dynamicPrefixes = {
+  'Welcome, ': 'Sveiki, ',
+  'Welcome back, ': 'Sveiki sugrįžę, ',
+  'Available (': 'Laisvi (',
+  'My jobs (': 'Mano užduotys (',
+  'Report #': 'Pranešimas Nr. ',
+  'Review report #': 'Peržiūrėti pranešimą Nr. ',
+  'Internal notes · Report #': 'Vidinės pastabos · pranešimas Nr. ',
+  'Category #': 'Kategorija Nr. ',
+  'Category ID: ': 'Kategorijos ID: ',
+  'Location: ': 'Vieta: ',
+  'Resident: ': 'Gyventojas: ',
+  'Assigned to: ': 'Paskirtas darbuotojui: ',
+  'Submitted: ': 'Pateikta: ',
+  'Decision: ': 'Sprendimas: ',
+  'Signed in as ': 'Prisijungta kaip ',
+  'Photo unavailable: ': 'Nuotrauka nepasiekiama: ',
+  'Photo upload failed: ': 'Nepavyko įkelti nuotraukos: ',
+  'Could not select photo: ': 'Nepavyko pasirinkti nuotraukos: ',
 };
 
 String fmTr(BuildContext context, String english) {
   final locale = Localizations.maybeLocaleOf(context)?.languageCode;
   if (locale != 'lt') return english;
-  return _lithuanian[english] ?? english;
+  final exact = _lithuanian[english];
+  if (exact != null) return exact;
+  for (final entry in _dynamicPrefixes.entries) {
+    if (english.startsWith(entry.key)) {
+      return entry.value + english.substring(entry.key.length);
+    }
+  }
+  if (english.endsWith(' matching reports')) {
+    return english.replaceFirst(' matching reports', ' atitinkančių pranešimų');
+  }
+  if (english.endsWith(' total requests')) {
+    return english.replaceFirst(' total requests', ' pranešimų iš viso');
+  }
+  return english;
 }
 
 class FixMateText extends StatelessWidget {
