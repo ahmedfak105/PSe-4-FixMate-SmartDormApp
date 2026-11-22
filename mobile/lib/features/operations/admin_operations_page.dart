@@ -377,13 +377,9 @@ class _AdminOperationsPageState extends State<AdminOperationsPage> {
           Icon(Icons.home_repair_service_rounded, color: FixMateTheme.teal),
           SizedBox(width: 9),
           FixMateText('FixMate'),
-          SizedBox(width: 12),
-          FixMateText('Operations', style: TextStyle(fontSize: 13,
-              fontWeight: FontWeight.w500, color: Color(0xFF65818B))),
         ]),
         actions: [
-          const FixMateLanguageButton(),
-          const FixMateSupportMenu(),
+          const FixMateUtilityMenu(),
           Tooltip(
             message: 'My profile',
             child: InkWell(
