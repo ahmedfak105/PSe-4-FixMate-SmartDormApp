@@ -25,12 +25,12 @@ using (exists (
 
 create or replace function public.can_manage_user_roles()
 returns boolean language sql stable security definer set search_path = ''
-as $
+as $can_roles$
   select (select auth.uid()) is not null and exists (
     select 1 from public.profiles where id = (select auth.uid())
       and role = 'system_admin'
   );
-$;
+$can_roles$;
 
 revoke all on function public.can_manage_user_roles()
   from public, anon, authenticated;
