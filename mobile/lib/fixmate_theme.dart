@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 /// FixMate visual system shared by the mobile and operations web clients.
 /// Presentation only: authentication, RLS and RPC permissions are unchanged.
 class FixMateTheme {
-  static const ink = Color(0xFF102B35);
-  static const teal = Color(0xFF087E83);
-  static const mint = Color(0xFFE7F6F3);
-  static const canvas = Color(0xFFF4F8F9);
-  static const outline = Color(0xFFE1E9EC);
+  static const ink = Color(0xFF18323F);
+  static const teal = Color(0xFF127F76);
+  static const mint = Color(0xFFDFF5ED);
+  static const canvas = Color(0xFFEEF4F5);
+  static const outline = Color(0xFFDBE8E8);
 
   static ThemeData get light {
     final scheme = ColorScheme.fromSeed(
@@ -36,7 +36,7 @@ class FixMateTheme {
         elevation: 0,
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(20),
           side: const BorderSide(color: outline),
         ),
       ),
@@ -58,7 +58,7 @@ class FixMateTheme {
           backgroundColor: teal,
           foregroundColor: Colors.white,
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         ),
       ),
       navigationRailTheme: const NavigationRailThemeData(
