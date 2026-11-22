@@ -12,8 +12,8 @@
 
 The connected GitHub and Supabase integrations cannot create or configure a Firebase project/device directly. A project owner must:
 
-1. Create a **Firebase Spark (no-cost)** project for FixMate and register the exact Android application ID, as declared in the Android Gradle configuration.
-2. Download the application's public Firebase configuration `google-services.json` into the Android project (check repository sharing policy before committing). Never share or commit Firebase service-account private keys.
+1. Create a **Firebase Spark (no-cost)** project named **FixMate** and register the Android app using this exact, case-sensitive package ID: `lt.kaunokolegija.vp_mobile` (verified from `mobile/android/app/build.gradle.kts` on the integration branch). **Do not use** the separate password-recovery callback URI `com.fixmate.smartdorm://reset-password`. If Firebase requests a display nickname, use `FixMate Android`.
+2. Download the app's Firebase client configuration `google-services.json` after registration. Its eventual Android path is `mobile/android/app/google-services.json`. You can provide the file to the project workflow through an authorized connection or a controlled upload; do not paste private keys into chat. **Do not** confuse it with any Firebase service-account JSON, which is a server secret and must never go in the browser, mobile bundle or GitHub repository.
 3. Approve configuring FCM sender credentials as **Supabase Function secrets** on the existing project, and authorize the relevant additive-only backend migration under release gate #47.
 4. Provide a test Android phone/account for a real foreground/background delivery acceptance test.
 
@@ -32,3 +32,15 @@ The connected GitHub and Supabase integrations cannot create or configure a Fire
 ## Security and costs
 
 Never use client-facing publishable keys as FCM sender secrets. Never place service-account JSON in Dart, the web bundle, or source control. Use Firebase Spark and existing no-cost tiers; stop if quotas or pricing would create charges.
+
+
+## Verification at next continuation
+
+- [x] Exact Gradle `applicationId` independently checked: `lt.kaunokolegija.vp_mobile`.
+- [x] Free FCM/Spark setup instructions checked against official Firebase Flutter/Android setup guidance.
+- [ ] Firebase ChatGPT plugin installed/connected (plugin discovery currently reports installed=false); this requires explicit user action.
+- [ ] Firebase Spark project created and Android app registered with matching package.
+- [ ] Config retrieved, Gradle/FlutterFire integration reviewed and tested in a disposable release build.
+- [ ] Server sender credentials stored only in approved private secrets and end-to-end delivery tested before claiming F05.2 Done.
+
+Free setup references: https://firebase.google.com/docs/android/setup and https://firebase.google.com/docs/flutter/setup .
