@@ -73,8 +73,8 @@ class _ProfilePageState extends State<ProfilePage> {
       setState(() {
         _pushEnabled = enabled;
         _pushMessage = enabled
-            ? 'Push notifications enabled on this Android device.'
-            : 'Push notifications disabled on this Android device.';
+            ? 'Device registered for push. Delivery requires the server sender to be enabled.'
+            : 'Push registration removed from this device.';
       });
     } on PostgrestException {
       if (mounted) setState(() => _pushMessage =
@@ -112,8 +112,12 @@ class _ProfilePageState extends State<ProfilePage> {
       // Revoke the previous resident's FCM token before the Supabase
       // session disappears. The service never blocks sign-out on FCM errors.
       if (_supportsPush) {
-        await FixMatePushService.instance.disable(
-          Supabase.instance.client, widget.profile!.id);
+        try {
+          await FixMatePushService.instance.disable(
+            Supabase.instance.client, widget.profile!.id);
+        } catch (_) {
+          // Network or device storage faults must never block sign-out.
+        }
       }
       await Supabase.instance.client.auth.signOut();
     } catch (_) {
