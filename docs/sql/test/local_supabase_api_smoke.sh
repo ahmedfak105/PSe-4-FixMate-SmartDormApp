@@ -128,6 +128,84 @@ status="$(curl -sS --max-time 20 -o "$workdir/error_response" -w '%{http_code}' 
   -H 'Content-Type: application/json' --data '{"role":"system_admin"}')"
 if [[ "$status" -lt 400 ]]; then echo "Resident could update their own role" >&2; exit 1; fi
 
+# Self-service profile editing and private avatars (isolated local migrations).
+# The owner can update only editable contact columns, never role/id.
+profile_update='{"full_name":"Updated Resident A","building":"Building C","room_number":"204"}'
+updated_status="$(curl -sS --max-time 20 -o "$workdir/profile_update" -w '%{http_code}' \
+  -X PATCH "$rest/profiles?id=eq.$a&select=id,full_name,building,room_number,role" \
+  -H "apikey: $SUPABASE_ANON_KEY" -H "Authorization: Bearer $a_token" \
+  -H 'Content-Type: application/json' -H 'Prefer: return=representation' \
+  --data "$profile_update")"
+if [[ "$updated_status" != "200" ]]; then
+  echo "Own profile edit failed (HTTP $updated_status)" >&2
+  cat "$workdir/profile_update" >&2; exit 1
+fi
+jq -e --arg uid "$a" 'length == 1 and .[0].id==$uid and
+  .[0].full_name=="Updated Resident A" and .[0].building=="Building C" and
+  .[0].room_number=="204" and .[0].role=="resident"' "$workdir/profile_update" >/dev/null
+
+foreign_status="$(curl -sS --max-time 20 -o "$workdir/foreign_update" -w '%{http_code}' \
+  -X PATCH "$rest/profiles?id=eq.$a&select=id" \
+  -H "apikey: $SUPABASE_ANON_KEY" -H "Authorization: Bearer $b_token" \
+  -H 'Content-Type: application/json' -H 'Prefer: return=representation' \
+  --data '{"full_name":"Unauthorized rename"}')"
+if [[ "$foreign_status" == "200" ]]; then
+  jq -e 'length == 0' "$workdir/foreign_update" >/dev/null ||
+    { echo "Foreign profile modification was allowed" >&2; exit 1; }
+elif [[ ! "$foreign_status" =~ ^4[0-9][0-9]$ ]]; then
+  echo "Unexpected foreign profile PATCH status: $foreign_status" >&2; exit 1
+fi
+
+# Authenticated users never gain column privilege to modify role, including
+# when trying to mix it with an otherwise valid profile update.
+mixed_status="$(curl -sS --max-time 20 -o "$workdir/role_mixed" -w '%{http_code}' \
+  -X PATCH "$rest/profiles?id=eq.$a" \
+  -H "apikey: $SUPABASE_ANON_KEY" -H "Authorization: Bearer $a_token" \
+  -H 'Content-Type: application/json' --data '{"full_name":"Changed","role":"system_admin"}')"
+if [[ ! "$mixed_status" =~ ^4[0-9][0-9]$ ]]; then
+  echo "Profile role changed through mixed PATCH" >&2; exit 1
+fi
+
+avatar_path="$a/ci-avatar.png"
+printf '%s' 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO2l9mYAAAAASUVORK5CYII=' \
+  | base64 --decode > "$workdir/avatar.png"
+avatar_upload="$(curl -sS --max-time 20 -o "$workdir/avatar_upload" -w '%{http_code}' \
+  -X POST "$storage/object/profile-avatars/$avatar_path" \
+  -H "apikey: $SUPABASE_ANON_KEY" -H "Authorization: Bearer $a_token" \
+  -H 'Content-Type: image/png' --data-binary "@$workdir/avatar.png")"
+if [[ "$avatar_upload" != "200" && "$avatar_upload" != "201" ]]; then
+  echo "Own avatar upload rejected: HTTP $avatar_upload" >&2
+  cat "$workdir/avatar_upload" >&2; exit 1
+fi
+avatar_patch="$(curl -sS --max-time 20 -o "$workdir/avatar_patch" -w '%{http_code}' \
+  -X PATCH "$rest/profiles?id=eq.$a&select=id,avatar_path" \
+  -H "apikey: $SUPABASE_ANON_KEY" -H "Authorization: Bearer $a_token" \
+  -H 'Content-Type: application/json' -H 'Prefer: return=representation' \
+  --data "$(jq -nc --arg path "$avatar_path" '{avatar_path:$path}')")"
+if [[ "$avatar_patch" != "200" ]]; then
+  echo "Own avatar database update rejected: HTTP $avatar_patch" >&2
+  cat "$workdir/avatar_patch" >&2; exit 1
+fi
+jq -e --arg path "$avatar_path" 'length == 1 and .[0].avatar_path==$path' \
+  "$workdir/avatar_patch" >/dev/null
+
+curl -fsS --max-time 20 "$storage/object/profile-avatars/$avatar_path" \
+  -H "apikey: $SUPABASE_ANON_KEY" -H "Authorization: Bearer $a_token" \
+  -o "$workdir/downloaded-avatar.png"
+test -s "$workdir/downloaded-avatar.png"
+avatar_foreign="$(status_code GET "$storage/object/profile-avatars/$avatar_path" "$b_token")"
+if [[ ! "$avatar_foreign" =~ ^4[0-9][0-9]$ ]]; then
+  echo "Foreign account read another user's private avatar" >&2; exit 1
+fi
+avatar_foreign_upload="$(curl -sS --max-time 20 -o "$workdir/avatar_foreign_upload" -w '%{http_code}' \
+  -X POST "$storage/object/profile-avatars/$avatar_path" \
+  -H "apikey: $SUPABASE_ANON_KEY" -H "Authorization: Bearer $b_token" \
+  -H 'Content-Type: image/png' --data-binary "@$workdir/avatar.png")"
+if [[ ! "$avatar_foreign_upload" =~ ^4[0-9][0-9]$ ]]; then
+  echo "Foreign account uploaded to another user's avatar path" >&2; exit 1
+fi
+echo 'PASS: own profile edits, immutable role, and private avatar ownership'
+
 # Resident submits a report with an active category, owner and NEW status.
 category_id="$(get_json "$rest/maintenance_categories?select=id&name=eq.Plumbing" "$a_token" | jq -er '.[0].id')"
 new_report() {
