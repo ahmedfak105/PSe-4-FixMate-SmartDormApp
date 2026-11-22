@@ -44,6 +44,15 @@ The existing hosted project still lacks the schema pieces for:
 
 Do not claim these features work on hosted production yet; newer Flutter screens must remain read-only or show unavailable messages when a required extension is absent. No destructive migrations, role changes, test accounts or mock data were applied to hosted Supabase.
 
+
+## Security and CI recheck — 2026-11-22
+
+- Last checked exact code revision: `8716db4cabb3e49b567e4360b960b3d5a658a74b`. Added **real Chrome** E2E for Admin role changes/revert using synthetic local accounts and Lithuanian navigation through Contacts, Help, About with English restoration. Older runs cancelled by concurrent pushes are **not** accepted evidence of final success.
+- Read-only Supabase security advisor: one warning, `auth_leaked_password_protection`. Supabase's [password-security documentation](https://supabase.com/docs/guides/auth/password-security) explicitly states leaked-password detection is **Pro plan and above**. Zero-cost rule therefore prevents buying that remediation. Prefer available password strength settings, private user role separation, and tested account recovery; retain the warning transparently.
+- Read-only performance advisor: nine unindexed foreign-key suggestions, plus three multiple-permissive-policy performance notes. These are **performance recommendations**, not permission to alter the hosted schema. Evaluate indexes and RLS refactors only through #47.
+- Hosted Supabase migration history is empty, despite populated application tables. **Migration drift confirmed**: never run `supabase db reset` or replay baseline against this project. Only an reviewed additive-only rollout after backup and recovery proof is acceptable.
+- Free Firebase integration is offered for the missing F05.2 push setup, but is **not connected or configured** as of this report update. No FCM delivery was asserted.
+
 ## Go/no-go checks before calling final delivery Done
 
 - [ ] Flutter static analysis and all unit/widget tests pass for exact final revision.
