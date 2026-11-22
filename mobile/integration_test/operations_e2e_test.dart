@@ -397,7 +397,11 @@ void main() {
     await tester.tap(find.text('Apie programėlę').first);
     await waitFor(tester, find.text('Išmani bendrabučio priežiūra'));
 
-    await tester.pageBack();
+    // Real Web navigation may not expose a Material BackButton widget.
+    // Pop the active support route through its navigator instead.
+    Navigator.of(tester.element(
+        find.text('Išmani bendrabučio priežiūra'))).pop();
+    await tester.pumpAndSettle();
     await waitFor(tester, find.text('Apžvalga'));
     await tester.tap(find.byKey(const Key('app_utilities_menu')));
     await tester.pumpAndSettle();
