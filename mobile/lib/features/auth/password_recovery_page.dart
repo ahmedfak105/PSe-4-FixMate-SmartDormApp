@@ -111,9 +111,17 @@ class _PasswordRecoveryRequestPageState
                   decoration: const InputDecoration(
                     labelText: 'Email address',
                     prefixIcon: Icon(Icons.email_outlined)),
-                  validator: (v) => !RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+
-                      .hasMatch((v ?? '').trim())
-                      ? 'Enter a valid email address' : null,
+                  validator: (value) {
+                    final email = (value ?? '').trim();
+                    final parts = email.split('@');
+                    if (parts.length != 2 || parts.first.isEmpty ||
+                        parts.last.isEmpty || email.contains(' ') ||
+                        !parts.last.contains('.') ||
+                        parts.last.startsWith('.') || parts.last.endsWith('.')) {
+                      return 'Enter a valid email address';
+                    }
+                    return null;
+                  },
                 ),
                 if (_error != null) ...[
                   const SizedBox(height: 12),
