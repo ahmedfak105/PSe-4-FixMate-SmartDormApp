@@ -56,10 +56,10 @@ If your Chrome device has a different Flutter device name, run `flutter devices`
 cd mobile
 flutter pub get
 flutter gen-l10n
-flutter run -d chrome
+flutter run -d chrome --dart-define=FIXMATE_OFFLINE_DEMO=true
 ```
 
-With no Supabase dart-defines the app uses `InMemoryReportRepository` and displays a **DEMO DATA** banner. Demo changes do not persist to PostgreSQL.
+With this explicit offline-only flag and no Supabase dart-defines the app uses `InMemoryReportRepository` and displays a **DEMO DATA** banner. Demo changes do not persist to PostgreSQL.
 
 ## Checks
 
@@ -75,7 +75,7 @@ flutter test
 
 ## Relevant source files
 
-- `lib/main.dart`: Supabase configuration via `--dart-define`, or offline demo fallback.
+- `lib/main.dart`: connected Supabase by default; offline demo data is available only with the explicit `FIXMATE_OFFLINE_DEMO=true` build flag.
 - `lib/features/auth/`: sign-in, registration form (feature-flagged), and profile/session gating.
 - `lib/features/reports/`: submission, list and details UI.
 - `lib/features/staff/`: staff queue, claim/resolve and internal notes.
