@@ -30,6 +30,7 @@ class _AdminOperationsPageState extends State<AdminOperationsPage> {
   Map<int, String> _categories = {};
   bool _loading = false;
   bool _busy = false;
+  bool _roleManagementEnabled = false;
   String? _error;
   String? _notice;
   ResidentProfile? _editedProfile;
@@ -97,11 +98,19 @@ class _AdminOperationsPageState extends State<AdminOperationsPage> {
           .order('created_at', ascending: false).limit(500);
       final categories = await _client.from('maintenance_categories')
           .select('id,name').order('name').limit(200);
+      var roleManagementEnabled = false;
+      try {
+        roleManagementEnabled =
+            await _client.rpc('can_manage_user_roles') == true;
+      } on PostgrestException {
+        // Older hosted installations safely present a read-only People tab.
+      }
       if (!mounted) return;
       if (!_authorized) throw StateError('Administrator session changed.');
       setState(() {
         _reports = reports.map((row) => Map<String, dynamic>.from(row)).toList();
         _profiles = profiles.map((row) => Map<String, dynamic>.from(row)).toList();
+        _roleManagementEnabled = roleManagementEnabled;
         _categories = {for (final cat in categories)
           (cat['id'] as num).toInt(): cat['name'] as String};
         _loading = false;
@@ -340,7 +349,7 @@ class _AdminOperationsPageState extends State<AdminOperationsPage> {
 
   Future<void> _changeUserRole(
       Map<String, dynamic> person, String newRole) async {
-    if (!_authorized || _busy) return;
+    if (!_authorized || !_roleManagementEnabled || _busy) return;
     final id = person['id'] as String;
     final existing = person['role'] as String;
     if (id == widget.profile.id || existing == newRole) return;
@@ -398,12 +407,12 @@ class _AdminOperationsPageState extends State<AdminOperationsPage> {
         subtitle: FixMateText('${fmTr(context, p['role'] as String)} · '
             '${p['building'] ?? fmTr(context, 'No building')}'
             ' · ${p['room_number'] ?? fmTr(context, 'No room')}'),
-        trailing: p['id'] == widget.profile.id
+        trailing: p['id'] == widget.profile.id || !_roleManagementEnabled
           ? const Icon(Icons.lock_outline)
           : PopupMenuButton<String>(
               key: Key('user_role_${p['id']}'),
               tooltip: fmTr(context, 'Change user role'),
-              enabled: !_busy && _authorized,
+              enabled: !_busy && _authorized && _roleManagementEnabled,
               icon: const Icon(Icons.manage_accounts_outlined),
               onSelected: (role) => _changeUserRole(p, role),
               itemBuilder: (_) => const [
@@ -418,9 +427,11 @@ class _AdminOperationsPageState extends State<AdminOperationsPage> {
               ],
             ),
       )),
-    const Padding(padding: EdgeInsets.all(12),
-      child: FixMateText('Only authorized administrators can change roles. '
-          'Existing accounts must sign in again after role changes.')),
+    Padding(padding: const EdgeInsets.all(12),
+      child: FixMateText(_roleManagementEnabled
+        ? 'Only authorized administrators can change roles. '
+            'Existing accounts must sign in again after role changes.'
+        : 'User role management is not enabled on this server yet.')),
   ]);
 
   @override
