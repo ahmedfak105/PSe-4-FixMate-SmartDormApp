@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fixmate_mobile/data/models/photo_data.dart';
-import 'package:fixmate_mobile/data/repositories/report_repository.dart';
+import 'support/test_report_repository.dart';
 import 'package:fixmate_mobile/features/reports/reports_cubit.dart';
 
 void main() {
@@ -23,7 +23,7 @@ void main() {
   });
 
   test('Cubit stores new report ID for photo upload', () async {
-    final cubit = ReportsCubit(InMemoryReportRepository());
+    final cubit = ReportsCubit(TestReportRepository());
     final saved = await cubit.create(
       title: 'Photo test', category: 'Electrical',
       location: 'Room 101', description: 'Test description',
