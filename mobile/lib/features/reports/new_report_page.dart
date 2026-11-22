@@ -240,7 +240,7 @@ class _NewReportPageState extends State<NewReportPage> {
                                 title: FixMateText(_photoName ?? 'Selected photo'),
                                 subtitle: const FixMateText('JPEG, PNG or WebP'),
                                 trailing: IconButton(
-                                  tooltip: 'Remove selected photo',
+                                  tooltip: fmTr(context, 'Remove selected photo'),
                                   onPressed: _saving ? null : () => setState(() {
                                     _selectedPhoto = null;
                                     _photoName = null;
