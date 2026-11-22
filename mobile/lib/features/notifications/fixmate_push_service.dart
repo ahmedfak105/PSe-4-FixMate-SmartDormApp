@@ -139,7 +139,7 @@ class FixMatePushService {
   /// Called BEFORE Supabase signOut to prevent a shared phone continuing to
   /// receive the previous resident's alerts.
   Future<void> disable(SupabaseClient client, String userId) async {
-    if (!ready) return;
+    if (!ready || !await isOptedIn(userId)) return;
     _refreshSubscription?.cancel();
     _refreshSubscription = null;
     final prefs = await SharedPreferences.getInstance();
