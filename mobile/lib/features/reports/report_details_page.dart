@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import '../../l10n/fixmate_i18n.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -58,13 +59,13 @@ class _ReportDetailsPageState extends State<ReportDetailsPage> {
       if (!mounted) return;
       _refreshPhotos();
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Photo uploaded to private Storage.')),
+        const SnackBar(content: FixMateText('Photo uploaded to private Storage.')),
       );
     } catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(duration: const Duration(seconds: 8),
-            content: Text('Photo upload failed: $error')),
+            content: FixMateText('Photo upload failed: $error')),
       );
     } finally {
       if (mounted) setState(() => _uploading = false);
@@ -103,12 +104,12 @@ class _ReportDetailsPageState extends State<ReportDetailsPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 18),
-        Text('Report photos', style: Theme.of(context).textTheme.titleMedium),
+        FixMateText('Report photos', style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 8),
         OutlinedButton.icon(
           onPressed: _uploading ? null : _attachPhoto,
           icon: const Icon(Icons.add_photo_alternate_outlined),
-          label: Text(_uploading ? 'Uploading photo...' : 'Add photo to report'),
+          label: FixMateText(_uploading ? 'Uploading photo...' : 'Add photo to report'),
         ),
         if (_listFuture != null)
           FutureBuilder<List<ReportAttachment>>(
@@ -117,7 +118,7 @@ class _ReportDetailsPageState extends State<ReportDetailsPage> {
               if (snapshot.hasError) {
                 return Column(children: [
                   SelectableText('Cannot load photos: ${snapshot.error}'),
-                  TextButton(onPressed: _refreshPhotos, child: const Text('Retry')),
+                  TextButton(onPressed: _refreshPhotos, child: const FixMateText('Retry')),
                 ]);
               }
               if (!snapshot.hasData) {
@@ -126,7 +127,7 @@ class _ReportDetailsPageState extends State<ReportDetailsPage> {
                   child: Center(child: CircularProgressIndicator()),
                 );
               }
-              if (snapshot.data!.isEmpty) return const Text('No photos attached yet.');
+              if (snapshot.data!.isEmpty) return const FixMateText('No photos attached yet.');
               return Column(
                 children: [for (final entry in snapshot.data!) _photoTile(entry)],
               );
@@ -143,30 +144,30 @@ class _ReportDetailsPageState extends State<ReportDetailsPage> {
       final matches = state.items.where((report) => report.id == widget.reportId);
       if (matches.isEmpty) {
         return Scaffold(
-          appBar: AppBar(title: Text(l10n.reportDetails)),
-          body: Center(child: Text(l10n.noReports)),
+          appBar: AppBar(title: FixMateText(l10n.reportDetails)),
+          body: Center(child: FixMateText(l10n.noReports)),
         );
       }
       final report = matches.first;
       final isDemo = context.read<ReportsCubit>().repository is InMemoryReportRepository;
       return Scaffold(
-        appBar: AppBar(title: Text(l10n.reportDetails)),
+        appBar: AppBar(title: FixMateText(l10n.reportDetails)),
         body: ListView(padding: const EdgeInsets.all(20), children: [
-          Text(report.title, style: Theme.of(context).textTheme.headlineSmall),
+          FixMateText(report.title, style: Theme.of(context).textTheme.headlineSmall),
           const SizedBox(height: 12),
-          Chip(label: Text(statusLabel(report.status, l10n))),
-          ListTile(title: Text(l10n.reportId), subtitle: Text(report.id)),
+          Chip(label: FixMateText(statusLabel(report.status, l10n))),
+          ListTile(title: FixMateText(l10n.reportId), subtitle: FixMateText(report.id)),
           ListTile(
-            title: Text(l10n.submittedOn),
-            subtitle: Text(MaterialLocalizations.of(context)
+            title: FixMateText(l10n.submittedOn),
+            subtitle: FixMateText(MaterialLocalizations.of(context)
                 .formatCompactDate(report.createdAt.toLocal())),
           ),
-          ListTile(title: Text(l10n.category), subtitle: Text(report.category)),
-          ListTile(title: Text(l10n.location), subtitle: Text(report.location)),
-          ListTile(title: Text(l10n.description), subtitle: Text(report.description)),
+          ListTile(title: FixMateText(l10n.category), subtitle: FixMateText(report.category)),
+          ListTile(title: FixMateText(l10n.location), subtitle: FixMateText(report.location)),
+          ListTile(title: FixMateText(l10n.description), subtitle: FixMateText(report.description)),
           if (isDemo) ...[
             const SizedBox(height: 16),
-            Text(l10n.demoNotice),
+            FixMateText(l10n.demoNotice),
           ] else if (_attachments != null) _photoSection(),
         ]),
       );
