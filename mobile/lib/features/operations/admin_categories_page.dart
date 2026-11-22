@@ -274,7 +274,7 @@ class _AdminCategoriesPageState extends State<AdminCategoriesPage> {
             )),
             IconButton(
               key: Key('edit_category_${category.id}'),
-              tooltip: 'Edit category',
+              tooltip: fmTr(context, 'Edit category'),
               onPressed: _managementEnabled && !_busy
                   ? () => _manage(existing: category) : null,
               icon: const Icon(Icons.edit_outlined),
@@ -335,7 +335,7 @@ class _CategoryEditorDialogState extends State<_CategoryEditorDialog> {
               maxLength: 80,
               autofocus: true,
               textCapitalization: TextCapitalization.words,
-              decoration: const InputDecoration(labelText: 'Category name'),
+              decoration: InputDecoration(labelText: fmTr(context, 'Category name')),
               validator: validateCategoryName,
             ),
             SwitchListTile(
