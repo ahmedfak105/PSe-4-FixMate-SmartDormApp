@@ -43,7 +43,7 @@ class _AdminOperationsPageState extends State<AdminOperationsPage> {
     if (updated != null && mounted) {
       setState(() { _editedProfile = updated; _avatarRevision++; });
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Profile updated successfully.')),
+        const SnackBar(content: FixMateText('Profile updated successfully.')),
       );
     }
   }
@@ -139,7 +139,7 @@ class _AdminOperationsPageState extends State<AdminOperationsPage> {
       context: context,
       builder: (dialogContext) => StatefulBuilder(
         builder: (dialogContext, update) => AlertDialog(
-          title: Text('Assign report #$reportId'),
+          title: FixMateText('Assign report #$reportId'),
           content: SizedBox(
             width: 420,
             child: DropdownButtonFormField<String>(
@@ -150,7 +150,7 @@ class _AdminOperationsPageState extends State<AdminOperationsPage> {
                 for (final person in candidates)
                   DropdownMenuItem(
                     value: person['id'] as String,
-                    child: Text((person['full_name'] as String?)?.trim().isNotEmpty == true
+                    child: FixMateText((person['full_name'] as String?)?.trim().isNotEmpty == true
                         ? person['full_name'] as String : person['id'] as String,
                         overflow: TextOverflow.ellipsis),
                   ),
@@ -162,9 +162,9 @@ class _AdminOperationsPageState extends State<AdminOperationsPage> {
           ),
           actions: [
             TextButton(onPressed: () => Navigator.pop(dialogContext),
-                child: const Text('Cancel')),
+                child: const FixMateText('Cancel')),
             FilledButton(onPressed: () => Navigator.pop(dialogContext, selected),
-                child: const Text('Assign employee')),
+                child: const FixMateText('Assign employee')),
           ],
         ),
       ),
@@ -255,10 +255,10 @@ class _AdminOperationsPageState extends State<AdminOperationsPage> {
             isExpanded: true,
             decoration: const InputDecoration(labelText: 'Status'),
             items: const [
-              DropdownMenuItem(value: 'all', child: Text('All statuses')),
-              DropdownMenuItem(value: 'new', child: Text('New')),
-              DropdownMenuItem(value: 'in_progress', child: Text('In progress')),
-              DropdownMenuItem(value: 'resolved', child: Text('Resolved')),
+              DropdownMenuItem(value: 'all', child: FixMateText('All statuses')),
+              DropdownMenuItem(value: 'new', child: FixMateText('New')),
+              DropdownMenuItem(value: 'in_progress', child: FixMateText('In progress')),
+              DropdownMenuItem(value: 'resolved', child: FixMateText('Resolved')),
             ],
             onChanged: (v) => setState(() => _statusFilter = v ?? 'all'),
           )),
@@ -268,11 +268,11 @@ class _AdminOperationsPageState extends State<AdminOperationsPage> {
             isExpanded: true,
             decoration: const InputDecoration(labelText: 'Category'),
             items: [
-              const DropdownMenuItem(value: 'all', child: Text('All categories')),
+              const DropdownMenuItem(value: 'all', child: FixMateText('All categories')),
               for (final item in _categories.entries)
                 DropdownMenuItem(
                   value: item.key.toString(),
-                  child: Text(item.value, overflow: TextOverflow.ellipsis),
+                  child: FixMateText(item.value, overflow: TextOverflow.ellipsis),
                 ),
             ],
             onChanged: (v) => setState(() => _categoryFilter = v ?? 'all'),
@@ -283,27 +283,27 @@ class _AdminOperationsPageState extends State<AdminOperationsPage> {
             isExpanded: true,
             decoration: const InputDecoration(labelText: 'Submitted'),
             items: const [
-              DropdownMenuItem(value: 'all', child: Text('Any date')),
-              DropdownMenuItem(value: 'last7', child: Text('Last 7 days')),
-              DropdownMenuItem(value: 'last30', child: Text('Last 30 days')),
+              DropdownMenuItem(value: 'all', child: FixMateText('Any date')),
+              DropdownMenuItem(value: 'last7', child: FixMateText('Last 7 days')),
+              DropdownMenuItem(value: 'last30', child: FixMateText('Last 30 days')),
             ],
             onChanged: (v) => setState(() => _dateFilter = v ?? 'all'),
           )),
           TextButton.icon(
             onPressed: _clearFilters,
             icon: const Icon(Icons.filter_alt_off_outlined),
-            label: const Text('Clear filters'),
+            label: const FixMateText('Clear filters'),
           ),
         ]),
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 12),
-          child: Text('${rows.length} matching reports',
+          child: FixMateText('${rows.length} matching reports',
             style: Theme.of(context).textTheme.bodySmall),
         ),
       ],
       if (rows.isEmpty)
         const Padding(padding: EdgeInsets.all(30),
-            child: Text('No reports found for this view.')),
+            child: FixMateText('No reports found for this view.')),
       for (final row in rows)
         Card(
           child: Padding(
@@ -311,25 +311,25 @@ class _AdminOperationsPageState extends State<AdminOperationsPage> {
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Wrap(spacing: 10, runSpacing: 6, crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
-                  Text('#${row['id']}  ${row['title']}',
+                  FixMateText('#${row['id']}  ${row['title']}',
                       style: Theme.of(context).textTheme.titleMedium),
-                  Chip(label: Text((row['status'] as String).replaceAll('_', ' '))),
+                  Chip(label: FixMateText((row['status'] as String).replaceAll('_', ' '))),
                 ]),
               const SizedBox(height: 7),
-              Text('${_categories[(row['category_id'] as num).toInt()] ?? 'Unknown category'}'
+              FixMateText('${_categories[(row['category_id'] as num).toInt()] ?? 'Unknown category'}'
                   ' · ${row['location'] ?? 'No location'}'),
-              Text('Resident: ${_person(row['resident_id'] as String?)}'),
-              Text('Assigned to: ${_person(row['assigned_to'] as String?)}'),
+              FixMateText('Resident: ${_person(row['resident_id'] as String?)}'),
+              FixMateText('Assigned to: ${_person(row['assigned_to'] as String?)}'),
               if ((row['description'] as String?)?.isNotEmpty == true) ...[
                 const SizedBox(height: 8),
-                Text(row['description'] as String),
+                FixMateText(row['description'] as String),
               ],
               if (row['status'] == 'new' && row['assigned_to'] == null) ...[
                 const SizedBox(height: 10),
                 FilledButton.icon(
                   onPressed: _busy ? null : () => _assign((row['id'] as num).toInt()),
                   icon: const Icon(Icons.assignment_ind_outlined),
-                  label: const Text('Assign to maintenance staff'),
+                  label: const FixMateText('Assign to maintenance staff'),
                 ),
               ],
             ]),
@@ -342,14 +342,14 @@ class _AdminOperationsPageState extends State<AdminOperationsPage> {
     for (final p in _profiles)
       Card(child: ListTile(
         leading: const Icon(Icons.person_outline),
-        title: Text((p['full_name'] as String?)?.isNotEmpty == true
+        title: FixMateText((p['full_name'] as String?)?.isNotEmpty == true
             ? p['full_name'] as String : 'Unnamed user'),
-        subtitle: Text('${p['role']} · ${p['building'] ?? 'No building'}'
+        subtitle: FixMateText('${p['role']} · ${p['building'] ?? 'No building'}'
             ' · ${p['room_number'] ?? 'No room'}'),
         trailing: const Icon(Icons.lock_outline),
       )),
     const Padding(padding: EdgeInsets.all(12),
-      child: Text('Roles are read-only here. Privileged role changes must '
+      child: FixMateText('Roles are read-only here. Privileged role changes must '
           'use trusted operator provisioning, never browser SQL keys.')),
   ]);
 
@@ -360,7 +360,7 @@ class _AdminOperationsPageState extends State<AdminOperationsPage> {
       0 => Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         _summary(),
         const SizedBox(height: 24),
-        Text('Recent activity',
+        FixMateText('Recent activity',
             style: Theme.of(context).textTheme.titleLarge),
         const SizedBox(height: 10),
         _listReports(assignmentsOnly: false),
@@ -376,9 +376,9 @@ class _AdminOperationsPageState extends State<AdminOperationsPage> {
         title: const Row(mainAxisSize: MainAxisSize.min, children: [
           Icon(Icons.home_repair_service_rounded, color: FixMateTheme.teal),
           SizedBox(width: 9),
-          Text('FixMate'),
+          FixMateText('FixMate'),
           SizedBox(width: 12),
-          Text('Operations', style: TextStyle(fontSize: 13,
+          FixMateText('Operations', style: TextStyle(fontSize: 13,
               fontWeight: FontWeight.w500, color: Color(0xFF65818B))),
         ]),
         actions: [
@@ -414,15 +414,15 @@ class _AdminOperationsPageState extends State<AdminOperationsPage> {
             onDestinationSelected: (value) => setState(() => _tab = value),
             destinations: const [
               NavigationRailDestination(icon: Icon(Icons.dashboard_outlined),
-                  label: Text('Overview')),
+                  label: FixMateText('Overview')),
               NavigationRailDestination(icon: Icon(Icons.description_outlined),
-                  label: Text('All reports')),
+                  label: FixMateText('All reports')),
               NavigationRailDestination(icon: Icon(Icons.assignment_ind_outlined),
-                  label: Text('Assignments')),
+                  label: FixMateText('Assignments')),
               NavigationRailDestination(icon: Icon(Icons.people_alt_outlined),
-                  label: Text('People')),
+                  label: FixMateText('People')),
               NavigationRailDestination(icon: Icon(Icons.category_outlined),
-                  label: Text('Categories')),
+                  label: FixMateText('Categories')),
             ],
           ),
         Expanded(child: SingleChildScrollView(
@@ -436,7 +436,7 @@ class _AdminOperationsPageState extends State<AdminOperationsPage> {
                   child: Row(children: [
                     for (var i = 0; i < labels.length; i++)
                       Padding(padding: const EdgeInsets.only(right: 8),
-                        child: ChoiceChip(label: Text(labels[i]),
+                        child: ChoiceChip(label: FixMateText(labels[i]),
                             selected: _tab == i,
                             onSelected: (_) => setState(() => _tab = i))),
                   ])),
@@ -445,10 +445,10 @@ class _AdminOperationsPageState extends State<AdminOperationsPage> {
               const SizedBox(height: 12),
               if (_loading) const LinearProgressIndicator(),
               if (_error != null)
-                Text(_error!, style: TextStyle(
+                FixMateText(_error!, style: TextStyle(
                     color: Theme.of(context).colorScheme.error)),
               if (_notice != null)
-                Text(_notice!, style: TextStyle(
+                FixMateText(_notice!, style: TextStyle(
                     color: Theme.of(context).colorScheme.primary)),
               const SizedBox(height: 16),
               content,
@@ -484,15 +484,15 @@ class _WelcomePanel extends StatelessWidget {
         alignment: WrapAlignment.spaceBetween,
         children: [
           Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            const Text('OPERATIONS OVERVIEW',
+            const FixMateText('OPERATIONS OVERVIEW',
               style: TextStyle(color: Color(0xFFB9EAE2),
                 letterSpacing: 1.5, fontSize: 11, fontWeight: FontWeight.w700)),
             const SizedBox(height: 9),
-            Text('Welcome back, $displayName',
+            FixMateText('Welcome back, $displayName',
               style: const TextStyle(color: Colors.white,
                 fontSize: 23, fontWeight: FontWeight.w800)),
             const SizedBox(height: 7),
-            const Text('Manage requests, teams and maintenance progress.',
+            const FixMateText('Manage requests, teams and maintenance progress.',
               style: TextStyle(color: Color(0xFFE3F6F3), fontSize: 13)),
           ]),
           Container(
@@ -503,7 +503,7 @@ class _WelcomePanel extends StatelessWidget {
             child: Row(mainAxisSize: MainAxisSize.min, children: [
               const Icon(Icons.analytics_outlined, color: Colors.white),
               const SizedBox(width: 10),
-              Text('$reportCount total requests',
+              FixMateText('$reportCount total requests',
                 style: const TextStyle(color: Colors.white,
                   fontWeight: FontWeight.w700)),
             ]),
@@ -538,11 +538,11 @@ class _Metric extends StatelessWidget {
               child: Icon(icon, size: 22, color: accent),
             ),
             const SizedBox(height: 15),
-            Text('$count', style: const TextStyle(
+            FixMateText('$count', style: const TextStyle(
               fontSize: 30, color: FixMateTheme.ink,
               fontWeight: FontWeight.w800)),
             const SizedBox(height: 3),
-            Text(label, style: const TextStyle(
+            FixMateText(label, style: const TextStyle(
               fontSize: 13, color: Color(0xFF617C86),
               fontWeight: FontWeight.w600)),
           ],
