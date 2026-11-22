@@ -204,3 +204,45 @@ class _AboutRole extends StatelessWidget {
     ),
   );
 }
+
+class FixMateSupportMenu extends StatelessWidget {
+  const FixMateSupportMenu({super.key});
+
+  @override
+  Widget build(BuildContext context) => PopupMenuButton<SupportSection>(
+    key: const Key('app_support_menu'),
+    tooltip: fmTr(context, 'Support center'),
+    icon: const Icon(Icons.help_outline),
+    onSelected: (section) => Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => FixMateSupportPage(initialSection: section),
+      ),
+    ),
+    itemBuilder: (_) => const [
+      PopupMenuItem(
+        value: SupportSection.contacts,
+        child: Row(children: [
+          Icon(Icons.contact_phone_outlined),
+          SizedBox(width: 12),
+          FixMateText('Contacts'),
+        ]),
+      ),
+      PopupMenuItem(
+        value: SupportSection.help,
+        child: Row(children: [
+          Icon(Icons.help_outline),
+          SizedBox(width: 12),
+          FixMateText('Help'),
+        ]),
+      ),
+      PopupMenuItem(
+        value: SupportSection.about,
+        child: Row(children: [
+          Icon(Icons.info_outline),
+          SizedBox(width: 12),
+          FixMateText('About'),
+        ]),
+      ),
+    ],
+  );
+}
