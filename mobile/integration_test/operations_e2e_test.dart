@@ -392,10 +392,21 @@ void main() {
     await waitFor(tester, find.text('Kauno kolegijos apgyvendinimo paslaugos'));
     expect(find.text('apgyvendinimas@kaunokolegija.lt'), findsOneWidget);
 
-    await tester.tap(find.text('Pagalba').first);
-    await waitFor(tester, find.text('Kaip pranešti apie gedimą?'));
-    await tester.tap(find.text('Apie programėlę').first);
-    await waitFor(tester, find.text('Išmani bendrabučio priežiūra'));
+    // Select the actual segmented controls by stable keys. Labels can
+    // also appear in the app bar/tooltips and are localized at runtime.
+    final helpTab = find.byKey(const Key('support_tab_help'));
+    await tester.ensureVisible(helpTab);
+    await tester.tap(helpTab);
+    await tester.pumpAndSettle();
+    await waitFor(tester, find.text('Kaip pranešti apie gedimą?'),
+        reason: 'Help tab did not open after tapping the segmented button');
+
+    final aboutTab = find.byKey(const Key('support_tab_about'));
+    await tester.ensureVisible(aboutTab);
+    await tester.tap(aboutTab);
+    await tester.pumpAndSettle();
+    await waitFor(tester, find.text('Išmani bendrabučio priežiūra'),
+        reason: 'About tab did not open after tapping the segmented button');
 
     // Real Web navigation may not expose a Material BackButton widget.
     // Pop the active support route through its navigator instead.
