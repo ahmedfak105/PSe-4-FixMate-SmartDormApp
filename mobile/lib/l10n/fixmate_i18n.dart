@@ -244,6 +244,17 @@ const Map<String, String> _lithuanian = {
   "Could not load admin dashboard.": "Nepavyko įkelti administratoriaus skydelio.",
   "Report saved to Supabase": "Pranešimas išsaugotas.",
   "No reports found": "Pranešimų nerasta.",
+  "Plumbing": "Santechnika",
+  "Electrical": "Elektra",
+  "Heating": "Šildymas",
+  "Doors & Windows": "Durys ir langai",
+  "Furniture": "Baldai",
+  "Internet & Wi-Fi": "Internetas ir belaidis ryšys",
+  "Cleaning": "Valymas",
+  "Other": "Kita",
+  "Submit report": "Pateikti pranešimą",
+  "Add photo": "Pridėti nuotrauką",
+  "Select category": "Pasirinkti kategoriją",
 };
 
 const Map<String, String> _dynamicPrefixes = {
