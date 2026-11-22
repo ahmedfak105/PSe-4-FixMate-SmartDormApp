@@ -8,23 +8,30 @@
 
 1. Open [Integrated Release Candidate Actions runs](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/workflows/integrated-release.yml) and select the **latest successful run** for the integration branch.
 2. Open **Artifacts** and download `fixmate-integrated-connected-android-apk`. This is a ZIP. Extract its `app-debug.apk` and install it on an Android phone. GitHub artifact downloads may require a signed-in account; debug APKs are for testing, not Play Store distribution.
-3. Open FixMate, sign in with an **existing authorized Resident or Maintenance Staff account** or use Resident sign-up if enabled in the project. Only accounts registered in the hosted Supabase Auth project can sign in.
-4. Test Resident submit / My Reports / details / photos or Staff queue / claim / status / notes. Only test using authorized sample data. The private report photos remain protected by Supabase Storage policies.
+3. Open FixMate, sign in with an **existing authorized account** or use Resident sign-up if enabled in the project. Profiles route Residents and Maintenance Staff to their appropriate workspaces; Moderator and Admin workflows require corresponding authorized roles and deployed backend functions. Only accounts registered in the hosted Supabase Auth project can sign in.
+4. Test Resident submit / My Reports / details / photos or Staff queue / claim / status / notes. Use your own authorized maintenance report data, not preloaded or pretend sample reports. The private report photos remain protected by Supabase Storage policies.
 5. If the APK cannot sign in, check Auth email confirmation/provider configuration and user role. This connected APK uses the active project's **public publishable key only**, never `service_role` / `sb_secret`.
 
 **Only the connected Android APK is published.** Builds without valid public Supabase settings show an error/connection-required screen; there is no local report database or offline APK.
 
-## B. Flutter Web operations — GitHub Pages
+## B. Published Flutter Web — all four roles
 
-The repository contains [the Pages deployment workflow](../.github/workflows/deploy-flutter-web-pages.yml). It builds a real Flutter Web operations UI with the repository subpath `/PSe-4-FixMate-SmartDormApp/`, with the hosted project's **public publishable key** compiled into the browser bundle (no secret or privileged keys). It **may not be live yet** until the repository owner enables Pages and a successful deployment is verified.
+The integrated Flutter Web site was **successfully deployed on GitHub Pages**
+from `7f035cd1` on **22 November 2026**. GitHub Actions confirmed both
+the build and the deployment in [run #45037533703](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/45037533703).
 
-1. Repository administrator: open [Settings → Pages](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/settings/pages) and set **Build and deployment → Source: GitHub Actions**.
-2. In [Actions → FixMate Operations Web — GitHub Pages](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/workflows/deploy-flutter-web-pages.yml), run the workflow on the integration branch (or inspect an automatically triggered run). Confirm both `build` and `deploy` succeed.
-3. **Only if the deployment succeeds**, open the Pages URL reported by that run (usually `https://ahmedfak105.github.io/PSe-4-FixMate-SmartDormApp/`; never assume it exists before success).
-4. The Pages build is already configured to use `https://epsvagztisdovixlqehi.supabase.co` with a **public-only** API key. You should see the login page directly, without entering server configuration. Never enter `sb_secret`, service-role keys or database passwords.
-5. Log in with an existing `maintenance_staff` or `system_admin` profile. The Moderator page **cannot save reviews** on the six-table hosted database; this requires the separate approved staging/release gate. A Resident is deliberately denied access to the operations website.
+**Open the published site:** https://ahmedfak105.github.io/PSe-4-FixMate-SmartDormApp/
 
-If Pages deployment is unavailable due to repository permissions, use the web ZIP from [Integrated Release Candidate](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/workflows/integrated-release.yml) and publish its contents on an HTTPS static host, preserving the base-path configuration (the generic web artifact in that workflow targets root `/`, so it should not be mounted under a subpath without rebuilding).
+The published build is configured with the project's **public-only Supabase
+publishable key**. Sign in through Supabase Auth as Resident, Maintenance Staff,
+Moderator or System Admin; routing is based on the current account's profile
+role. Never enter private database, Firebase service-account or `sb_secret_`
+values into the browser.
+
+A successful deploy does **not** prove every hosted backend feature works.
+The existing six-table server still has no Moderator review RPC or photo-avatar
+Storage. Only currently installed and authorized backend actions can succeed.
+See the current [hosted release audit](HOSTED_RELEASE_AUDIT_2026-11-22.md).
 
 ## C. Four-role connected application
 
