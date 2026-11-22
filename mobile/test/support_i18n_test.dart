@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:fixmate_mobile/l10n/gen/app_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fixmate_mobile/features/support/fixmate_support_page.dart';
 import 'package:fixmate_mobile/l10n/fixmate_i18n.dart';
@@ -9,6 +11,12 @@ void main() {
     await tester.pumpWidget(const MaterialApp(
       locale: Locale('lt'),
       supportedLocales: [Locale('en'), Locale('lt')],
+      localizationsDelegates: [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
       home: Scaffold(body: FixMateText('Contacts')),
     ));
     expect(find.text('Kontaktai'), findsOneWidget);
@@ -19,6 +27,12 @@ void main() {
     await tester.pumpWidget(const MaterialApp(
       locale: Locale('lt'),
       supportedLocales: [Locale('en'), Locale('lt')],
+      localizationsDelegates: [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
       home: FixMateSupportPage(initialSection: SupportSection.contacts),
     ));
     expect(find.text('Kontaktai'), findsWidgets);
@@ -37,6 +51,12 @@ void main() {
     await tester.pumpWidget(const MaterialApp(
       locale: Locale('en'),
       supportedLocales: [Locale('en'), Locale('lt')],
+      localizationsDelegates: [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
       home: FixMateSupportPage(initialSection: SupportSection.help),
     ));
     expect(find.text('How do I report a problem?'), findsOneWidget);
