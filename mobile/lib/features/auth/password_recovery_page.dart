@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../l10n/fixmate_i18n.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'password_recovery_links.dart';
@@ -72,7 +73,7 @@ class _PasswordRecoveryRequestPageState
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text('Reset password')),
+    appBar: AppBar(title: const FixMateText('Reset password')),
     body: Center(child: ConstrainedBox(
       constraints: const BoxConstraints(maxWidth: 450),
       child: SingleChildScrollView(padding: const EdgeInsets.all(24),
@@ -81,27 +82,27 @@ class _PasswordRecoveryRequestPageState
               const Icon(Icons.mark_email_read_outlined,
                   color: Color(0xFF127F76), size: 56),
               const SizedBox(height: 16),
-              Text('Check your email',
+              FixMateText('Check your email',
                 style: Theme.of(context).textTheme.headlineSmall,
                 textAlign: TextAlign.center),
               const SizedBox(height: 12),
-              const Text('If an account matches that email address, '
+              const FixMateText('If an account matches that email address, '
                   'you will receive a password reset link. Check your inbox '
                   'and spam folder. The link may expire.',
                   textAlign: TextAlign.center),
               const SizedBox(height: 22),
               OutlinedButton(onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Back to sign in')),
+                child: const FixMateText('Back to sign in')),
             ])
           : Form(key: _key, child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch, children: [
                 const Icon(Icons.lock_reset_outlined, size: 56,
                     color: Color(0xFF127F76)),
                 const SizedBox(height: 14),
-                Text('Forgot your password?',
+                FixMateText('Forgot your password?',
                   style: Theme.of(context).textTheme.headlineSmall),
                 const SizedBox(height: 8),
-                const Text('Enter your account email to request a secure reset link.'),
+                const FixMateText('Enter your account email to request a secure reset link.'),
                 const SizedBox(height: 22),
                 TextFormField(
                   key: const Key('recovery_email'),
@@ -125,18 +126,18 @@ class _PasswordRecoveryRequestPageState
                 ),
                 if (_error != null) ...[
                   const SizedBox(height: 12),
-                  Text(_error!, style: TextStyle(
+                  FixMateText(_error!, style: TextStyle(
                     color: Theme.of(context).colorScheme.error)),
                 ],
                 const SizedBox(height: 24),
                 FilledButton(
                   key: const Key('recovery_submit'),
                   onPressed: _busy ? null : _send,
-                  child: Text(_busy ? 'Sending…' : 'Send reset link')),
+                  child: FixMateText(_busy ? 'Sending…' : 'Send reset link')),
                 const SizedBox(height: 12),
                 TextButton(
                   onPressed: _busy ? null : () => Navigator.of(context).pop(),
-                  child: const Text('Back to sign in')),
+                  child: const FixMateText('Back to sign in')),
               ],
             )),
       ),
@@ -216,7 +217,7 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text('Create new password')),
+    appBar: AppBar(title: const FixMateText('Create new password')),
     body: Center(child: ConstrainedBox(
       constraints: const BoxConstraints(maxWidth: 460),
       child: SingleChildScrollView(padding: const EdgeInsets.all(24),
@@ -224,22 +225,22 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
           ? Column(children: [
               const Icon(Icons.link_off_outlined, size: 52),
               const SizedBox(height: 15),
-              const Text('This password reset link is invalid or expired. '
+              const FixMateText('This password reset link is invalid or expired. '
                   'Return to sign in and request a new link.',
                   textAlign: TextAlign.center),
               const SizedBox(height: 20),
               TextButton(onPressed: widget.onCompleted,
-                child: const Text('Back to sign in')),
+                child: const FixMateText('Back to sign in')),
             ])
           : Form(key: _key, child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch, children: [
                 const Icon(Icons.security_outlined, size: 56,
                   color: Color(0xFF127F76)),
                 const SizedBox(height: 16),
-                Text('Choose a new password',
+                FixMateText('Choose a new password',
                   style: Theme.of(context).textTheme.headlineSmall),
                 const SizedBox(height: 8),
-                const Text('Use at least 8 characters. You will sign in again '
+                const FixMateText('Use at least 8 characters. You will sign in again '
                     'after your password changes.'),
                 const SizedBox(height: 20),
                 TextFormField(
@@ -262,14 +263,14 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
                       ? 'Passwords do not match' : null),
                 if (_error != null) ...[
                   const SizedBox(height: 12),
-                  Text(_error!, style: TextStyle(
+                  FixMateText(_error!, style: TextStyle(
                     color: Theme.of(context).colorScheme.error)),
                 ],
                 const SizedBox(height: 22),
                 FilledButton(
                   key: const Key('recovery_update_password'),
                   onPressed: _busy ? null : _update,
-                  child: Text(_busy ? 'Saving…' : 'Update password')),
+                  child: FixMateText(_busy ? 'Saving…' : 'Update password')),
               ],
             )),
       ),
