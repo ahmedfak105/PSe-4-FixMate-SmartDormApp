@@ -8,7 +8,7 @@ import '../../l10n/fixmate_i18n.dart';
 enum SupportSection { contacts, help, about }
 
 /// Role-independent support hub: all content is available without privileged
-/// Supabase queries, so it is safe on a public sign-in screen and offline.
+/// Supabase queries, so it is safe on a public sign-in screen.
 class FixMateSupportPage extends StatefulWidget {
   const FixMateSupportPage({
     super.key,
