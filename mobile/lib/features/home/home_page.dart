@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../../l10n/fixmate_i18n.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../data/models/maintenance_report.dart';
-import '../../data/repositories/report_repository.dart';
 import '../../fixmate_theme.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../../navigation/app_tab.dart';
@@ -17,13 +16,11 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final tabs = context.read<BottomTabsCubit>();
-    final isDemo = context.read<ReportsCubit>().repository is InMemoryReportRepository;
     return Scaffold(
       appBar: AppBar(
         title: FixMateText(l10n.appTitle),
         actions: [
-          if (!isDemo)
-            IconButton(
+          IconButton(
               key: const Key('open_resident_notifications'),
               tooltip: fmTr(context, 'Notifications'),
               icon: const Icon(Icons.notifications_none_outlined),
@@ -113,11 +110,6 @@ class HomePage extends StatelessWidget {
                 onTap: () => tabs.selectTab(AppTab.myReports),
               ),
             ),
-            if (isDemo) ...[
-              const SizedBox(height: 22),
-              FixMateText(l10n.demoNotice,
-                style: Theme.of(context).textTheme.bodySmall),
-            ],
           ],
         );
       }),

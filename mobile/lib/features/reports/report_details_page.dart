@@ -7,7 +7,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../data/models/photo_data.dart';
-import '../../data/repositories/report_repository.dart';
 import '../../data/repositories/supabase_attachment_repository.dart';
 import '../../data/repositories/supabase_report_repository.dart';
 import '../../l10n/gen/app_localizations.dart';
@@ -31,7 +30,7 @@ class _ReportDetailsPageState extends State<ReportDetailsPage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Offline widget tests don't require a configured Supabase client.
+    // Test fixture repositories do not initialize Supabase; connected accounts do.
     if (_attachments == null &&
         context.read<ReportsCubit>().repository is SupabaseReportRepository) {
       _attachments = SupabaseAttachmentRepository(Supabase.instance.client);
@@ -149,7 +148,6 @@ class _ReportDetailsPageState extends State<ReportDetailsPage> {
         );
       }
       final report = matches.first;
-      final isDemo = context.read<ReportsCubit>().repository is InMemoryReportRepository;
       return Scaffold(
         appBar: AppBar(title: FixMateText(l10n.reportDetails)),
         body: ListView(padding: const EdgeInsets.all(20), children: [
@@ -165,10 +163,7 @@ class _ReportDetailsPageState extends State<ReportDetailsPage> {
           ListTile(title: FixMateText(l10n.category), subtitle: FixMateText(report.category)),
           ListTile(title: FixMateText(l10n.location), subtitle: FixMateText(report.location)),
           ListTile(title: FixMateText(l10n.description), subtitle: FixMateText(report.description)),
-          if (isDemo) ...[
-            const SizedBox(height: 16),
-            FixMateText(l10n.demoNotice),
-          ] else if (_attachments != null) _photoSection(),
+          if (_attachments != null) _photoSection(),
         ]),
       );
     });

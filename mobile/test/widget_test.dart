@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fixmate_mobile/app.dart';
+import 'support/test_report_repository.dart';
 
 void main() {
   Future<void> start(WidgetTester tester) async {
@@ -11,7 +12,10 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 
-    await tester.pumpWidget(const FixMateApp());
+    await tester.pumpWidget(FixMateApp(
+      requireLogin: false,
+      repository: TestReportRepository(),
+    ));
     await tester.pumpAndSettle();
   }
 

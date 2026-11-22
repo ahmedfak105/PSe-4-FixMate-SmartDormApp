@@ -19,11 +19,11 @@ import 'features/settings/locale_cubit.dart';
 import 'l10n/gen/app_localizations.dart';
 import 'navigation/route_generator.dart';
 
-/// Offline tests use InMemoryReportRepository; authenticated app uses DB.
+/// The installed app requires Supabase. Explicit repository injection is for widget tests only.
 class FixMateApp extends StatelessWidget {
-  const FixMateApp({super.key, this.repository, this.requireLogin = false,
+  const FixMateApp({super.key, this.repository, this.requireLogin = true,
       this.operationsOnly = false, this.initialRecoveryLink = false,
-      this.allowResidentWeb = false});
+      this.allowResidentWeb = false}) : assert(requireLogin || repository != null);
 
   final ReportRepository? repository;
   final bool requireLogin;
@@ -38,7 +38,7 @@ class FixMateApp extends StatelessWidget {
       BlocProvider(create: (_) => LocaleCubit()),
       if (!requireLogin)
         BlocProvider<ReportsCubit>(
-          create: (_) => ReportsCubit(repository ?? InMemoryReportRepository())..load(),
+          create: (_) => ReportsCubit(repository!)..load(),
         ),
     ],
     child: BlocBuilder<LocaleCubit, Locale?>(
@@ -100,14 +100,6 @@ class FixMateApp extends StatelessWidget {
         // the restricted operations-only variant remains available for QA.
         onGenerateRoute: operationsOnly && !allowResidentWeb
             ? null : const RouteGenerator().getRoute,
-        builder: (context, child) => requireLogin
-            ? child!
-            : Banner(
-                message: 'DEMO DATA',
-                location: BannerLocation.topEnd,
-                color: Colors.deepOrange,
-                child: child!,
-              ),
       ),
     ),
   );

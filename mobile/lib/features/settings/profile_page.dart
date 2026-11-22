@@ -14,7 +14,7 @@ import '../../l10n/fixmate_i18n.dart';
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key, this.profile});
 
-  /// Null only while running offline demo mode.
+  /// Null is allowed only in isolated widget tests; authenticated users have a profile.
   final ResidentProfile? profile;
 
   @override
@@ -148,7 +148,7 @@ class _ProfilePageState extends State<ProfilePage> {
         const SizedBox(height: 12),
         Center(
           child: FixMateText(
-            profile?.fullName ?? l10n.demoResident,
+            profile?.fullName ?? 'FixMate User',
             style: Theme.of(context).textTheme.titleLarge,
           ),
         ),
@@ -157,7 +157,7 @@ class _ProfilePageState extends State<ProfilePage> {
           ListTile(
             leading: const Icon(Icons.lock_outline),
             title: FixMateText(l10n.authNotConnected),
-            subtitle: FixMateText(l10n.demoNotice),
+            subtitle: const FixMateText('Sign in to view your personal information.'),
           ),
         ] else ...[
           FilledButton.icon(

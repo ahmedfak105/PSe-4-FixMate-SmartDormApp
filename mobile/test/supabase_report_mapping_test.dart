@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fixmate_mobile/data/models/maintenance_report.dart';
-import 'package:fixmate_mobile/data/repositories/report_repository.dart';
+import 'support/test_report_repository.dart';
 
 void main() {
   test('Converts Supabase row using bigint ID and category name', () {
@@ -27,8 +27,8 @@ void main() {
         MaintenanceStatus.unknown);
   });
 
-  test('Offline repository still provides demo categories', () async {
-    final repository = InMemoryReportRepository();
+  test('Isolated test fixture returns category options', () async {
+    final repository = TestReportRepository();
     final categories = await repository.getCategories();
     expect(categories, contains('Electrical'));
     expect((await repository.getMyReports()).length, 2);

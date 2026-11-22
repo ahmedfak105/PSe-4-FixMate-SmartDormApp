@@ -8,7 +8,7 @@ import '../../l10n/fixmate_i18n.dart';
 enum SupportSection { contacts, help, about }
 
 /// Role-independent support hub: all content is available without privileged
-/// Supabase queries, so it is safe on a public sign-in screen and offline.
+/// Supabase queries, so it is safe on a public sign-in screen.
 class FixMateSupportPage extends StatefulWidget {
   const FixMateSupportPage({
     super.key,
@@ -52,15 +52,15 @@ class _FixMateSupportPageState extends State<FixMateSupportPage> {
             ButtonSegment(
               value: SupportSection.contacts,
               icon: Icon(Icons.contact_mail_outlined),
-              label: FixMateText('Contacts')),
+              label: FixMateText('Contacts', key: Key('support_tab_contacts'))),
             ButtonSegment(
               value: SupportSection.help,
               icon: Icon(Icons.help_outline),
-              label: FixMateText('Help')),
+              label: FixMateText('Help', key: Key('support_tab_help'))),
             ButtonSegment(
               value: SupportSection.about,
               icon: Icon(Icons.info_outline),
-              label: FixMateText('About')),
+              label: FixMateText('About', key: Key('support_tab_about'))),
           ],
           selected: {_section},
           onSelectionChanged: (value) =>
