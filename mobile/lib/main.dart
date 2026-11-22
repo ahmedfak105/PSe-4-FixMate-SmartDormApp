@@ -5,9 +5,14 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'app.dart';
 import 'features/operations/operations_connection_page.dart';
+import 'features/auth/password_recovery_links.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Capture the dedicated recovery marker before Supabase initializes and
+  // consumes the query parameters from an emailed auth callback.
+  final initialRecoveryLink = kIsWeb && isFixMateRecoveryLanding(Uri.base);
 
   const supabaseUrl = String.fromEnvironment('SUPABASE_URL');
   const supabaseKey = String.fromEnvironment('SUPABASE_PUBLISHABLE_KEY');
@@ -47,15 +52,17 @@ Future<void> main() async {
   if (operationsOnly && !isConfigured) {
     // Runtime public configuration lets the same compiled web bundle be
     // deployed to staging without hardcoding or leaking server credentials.
-    runApp(const _OperationsConnectApp());
+    runApp(_OperationsConnectApp(initialRecoveryLink: initialRecoveryLink));
     return;
   }
   runApp(FixMateApp(requireLogin: isConfigured,
-      operationsOnly: operationsOnly));
+      operationsOnly: operationsOnly,
+      initialRecoveryLink: initialRecoveryLink));
 }
 
 class _OperationsConnectApp extends StatefulWidget {
-  const _OperationsConnectApp();
+  const _OperationsConnectApp({required this.initialRecoveryLink});
+  final bool initialRecoveryLink;
 
   @override
   State<_OperationsConnectApp> createState() => _OperationsConnectAppState();
@@ -67,7 +74,8 @@ class _OperationsConnectAppState extends State<_OperationsConnectApp> {
   @override
   Widget build(BuildContext context) {
     if (_connected) {
-      return const FixMateApp(requireLogin: true, operationsOnly: true);
+      return FixMateApp(requireLogin: true, operationsOnly: true,
+          initialRecoveryLink: widget.initialRecoveryLink);
     }
     return MaterialApp(
       debugShowCheckedModeBanner: false,
