@@ -1,4 +1,4 @@
-# FixMate — enable real Android Firebase notifications
+> **CURRENT VERIFIED RESULT — 22 Nov 2026:** F05.2 Push Delivery is **Completed**. The owner configured secrets privately; one Android Resident device registered; test notification #3 for report #11 generated outbox job #2, which was **sent** in one attempt after an HTTP 200 Edge response. The owner confirmed the alert arrived **while the Android screen was locked**. The two-Resident negative isolation check passed. See [actual Android acceptance](FCM_DEVICE_ACCEPTANCE_2026-11-22.md) and [closed F05.2 #24](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/24). **The credential creation/setup steps below are preserved as historical operator instructions, not pending actions for the current owner; do not rotate or regenerate secrets unnecessarily.** Release Gate #47 remains OPEN for lecturer/team signoff.\n\n# FixMate — enable real Android Firebase notifications
 
 \n**Security hardening:** `pg_net` was moved into the `extensions` extension-registration namespace via a guarded transactional reinstall (remote version `20261122171136`). Latest Security Advisor no longer reports `extension_in_public`. See [applied hardening SQL](sql/FCM_PGNET_NAMESPACE_HARDENING_APPLIED.sql).\n\n**Verified hosted status on 22 November 2026**
 
@@ -123,10 +123,7 @@ notifications, reviewed FCM server code, ACTIVE Edge v1, private Vault
 dispatch trigger and cron with no-secret fail-closed behavior, rollback-only
 database smoke tests.
 
-**Still open:** three Edge secret values configured by an authorized owner,
-the matching named Vault secret, actual Resident FCM registration and real
-background Android delivery, and lecturer/team final sign-off. No paid
-resources were purchased or project plan changed.
+**Completed:** private Edge/Vault secret setup (owner-confirmed), authenticated Resident device registration, controlled real FCM send and user-confirmed Android screen-locked receipt. **Still open:** final lecturer/team sign-off of the integrated application in [Release Gate #47](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/47). No newly paid resources or plan change.
 
 **References:** [Supabase Edge secrets](https://supabase.com/docs/guides/functions/secrets),
 [Vault](https://supabase.com/docs/guides/database/vault),
