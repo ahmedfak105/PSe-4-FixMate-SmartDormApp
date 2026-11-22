@@ -7,6 +7,8 @@ import '../../l10n/gen/app_localizations.dart';
 import 'locale_cubit.dart';
 import 'edit_profile_page.dart';
 import 'my_profile_avatar.dart';
+import '../support/fixmate_support_page.dart';
+import '../../l10n/fixmate_i18n.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key, this.profile});
@@ -60,7 +62,8 @@ class _ProfilePageState extends State<ProfilePage> {
         : Supabase.instance.client.auth.currentUser?.email;
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.tabProfile)),
+      appBar: AppBar(title: Text(l10n.tabProfile),
+        actions: const [FixMateLanguageButton(), FixMateSupportMenu()]),
       body: ListView(padding: const EdgeInsets.all(20), children: [
         profile == null
             ? const CircleAvatar(radius: 36, child: Icon(Icons.person_outline, size: 36))
