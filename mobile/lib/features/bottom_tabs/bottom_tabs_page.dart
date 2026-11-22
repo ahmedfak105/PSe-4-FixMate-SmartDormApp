@@ -16,7 +16,7 @@ import 'widgets/tab_navigator.dart';
 /// Based on Tadas's independent Navigator per tab / IndexedStack skeleton.
 class BottomTabsPage extends StatefulWidget {
   const BottomTabsPage({super.key, this.profile});
-  /// Null only in offline demo/test mode.
+  /// Null only for isolated widget tests; real accounts always have profiles.
   final ResidentProfile? profile;
   static const tabletBreakpoint = 600.0;
   @override
