@@ -1,11 +1,14 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../data/models/resident_profile.dart';
 import '../../data/repositories/resident_profile_repository.dart';
 import 'login_page.dart';
+import 'password_recovery_page.dart';
+import 'password_recovery_links.dart';
 import '../operations/operations_role.dart';
 
 /// Checks the Supabase session and loads the user's real profile before
@@ -28,6 +31,8 @@ class _AuthGateState extends State<AuthGate> {
   String? _userId;
   Future<ResidentProfile>? _profileFuture;
   String? _authError;
+  bool _recoveryMode = false;
+  bool _resetCompleted = false;
 
   @override
   void initState() {
@@ -35,13 +40,39 @@ class _AuthGateState extends State<AuthGate> {
     _client = Supabase.instance.client;
     _repository = ResidentProfileRepository(_client);
     _userId = _client.auth.currentUser?.id;
+    // The SDK may exchange the recovery token during initialize(), before
+    // this widget subscribes. The dedicated web landing marker is a fallback.
+    _recoveryMode = kIsWeb && isFixMateRecoveryLanding(Uri.base) &&
+        _client.auth.currentSession != null;
     if (_userId != null) _profileFuture = _repository.getCurrent();
     _subscription = _client.auth.onAuthStateChange.listen(
       (event) {
         if (!mounted) return;
         final nextId = event.session?.user.id;
-        if (_userId == nextId) return;
+        if (event.event == AuthChangeEvent.passwordRecovery) {
+          setState(() {
+            _recoveryMode = nextId != null;
+            _resetCompleted = false;
+            _userId = nextId;
+            _authError = null;
+            _profileFuture = nextId == null ? null : _repository.getCurrent();
+          });
+          return;
+        }
+        if (event.event == AuthChangeEvent.signedOut) {
+          setState(() {
+            _recoveryMode = false;
+            _userId = null;
+            _profileFuture = null;
+            _authError = null;
+          });
+          return;
+        }
+        final isWebRecovery = kIsWeb &&
+            isFixMateRecoveryLanding(Uri.base) && nextId != null;
+        if (_userId == nextId && (!isWebRecovery || _recoveryMode)) return;
         setState(() {
+          if (isWebRecovery) _recoveryMode = true;
           _userId = nextId;
           _authError = null;
           _profileFuture = nextId == null ? null : _repository.getCurrent();
@@ -112,11 +143,26 @@ class _AuthGateState extends State<AuthGate> {
     );
   }
 
+  void _finishPasswordReset() {
+    if (!mounted) return;
+    setState(() {
+      _recoveryMode = false;
+      _resetCompleted = true;
+      _userId = null;
+      _profileFuture = null;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (_recoveryMode) {
+      return PasswordResetPage(onCompleted: _finishPasswordReset);
+    }
     if (_userId == null) return LoginPage(
       connectionError: _authError,
       allowResidentSignup: !widget.operationsOnly,
+      successMessage: _resetCompleted
+          ? 'Password updated. Sign in with your new password.' : null,
     );
 
     return FutureBuilder<ResidentProfile>(
