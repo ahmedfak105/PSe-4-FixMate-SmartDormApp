@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../l10n/fixmate_i18n.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../fixmate_theme.dart';
@@ -165,19 +166,19 @@ class _AdminCategoriesPageState extends State<AdminCategoriesPage> {
       final approved = await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text('Deactivate category?'),
-          content: Text(
+          title: const FixMateText('Deactivate category?'),
+          content: FixMateText(
             '“${category.name}” will no longer be available for new reports. '
             'Existing reports will retain their category.',
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text('Cancel'),
+              child: const FixMateText('Cancel'),
             ),
             FilledButton(
               onPressed: () => Navigator.pop(context, true),
-              child: const Text('Deactivate'),
+              child: const FixMateText('Deactivate'),
             ),
           ],
         ),
@@ -199,17 +200,17 @@ class _AdminCategoriesPageState extends State<AdminCategoriesPage> {
         runSpacing: 12,
         children: [
           Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text('Maintenance categories',
+            FixMateText('Maintenance categories',
               style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 5),
-            const Text('Choose which issues residents can report.'),
+            const FixMateText('Choose which issues residents can report.'),
           ]),
           FilledButton.icon(
             key: const Key('add_category'),
             onPressed: _managementEnabled && !_busy && !_loading
                 ? () => _manage() : null,
             icon: const Icon(Icons.add),
-            label: const Text('Add category'),
+            label: const FixMateText('Add category'),
           ),
         ],
       ),
@@ -224,7 +225,7 @@ class _AdminCategoriesPageState extends State<AdminCategoriesPage> {
           child: Row(children: [
             Icon(Icons.lock_outline, color: FixMateTheme.teal),
             SizedBox(width: 12),
-            Expanded(child: Text(
+            Expanded(child: FixMateText(
               'Category editing is not enabled on this server yet. '
               'You can view active categories, but changes are disabled.',
             )),
@@ -233,18 +234,18 @@ class _AdminCategoriesPageState extends State<AdminCategoriesPage> {
       ],
       if (_error != null) Padding(
         padding: const EdgeInsets.only(top: 12),
-        child: Text(_error!, style: TextStyle(
+        child: FixMateText(_error!, style: TextStyle(
           color: Theme.of(context).colorScheme.error)),
       ),
       if (_notice != null) Padding(
         padding: const EdgeInsets.only(top: 12),
-        child: Text(_notice!, style: const TextStyle(
+        child: FixMateText(_notice!, style: const TextStyle(
           color: FixMateTheme.teal)),
       ),
       if (!_loading && _categories.isEmpty)
         const Padding(
           padding: EdgeInsets.symmetric(vertical: 25),
-          child: Text('No categories found.'),
+          child: FixMateText('No categories found.'),
         ),
       const SizedBox(height: 14),
       for (final category in _categories)
@@ -260,9 +261,9 @@ class _AdminCategoriesPageState extends State<AdminCategoriesPage> {
             Expanded(child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(category.name, style:
+                FixMateText(category.name, style:
                   Theme.of(context).textTheme.titleMedium),
-                Text(category.active ? 'Active' : 'Inactive',
+                FixMateText(category.active ? 'Active' : 'Inactive',
                   style: TextStyle(
                     fontSize: 12,
                     color: category.active
@@ -319,7 +320,7 @@ class _CategoryEditorDialogState extends State<_CategoryEditorDialog> {
 
   @override
   Widget build(BuildContext context) => AlertDialog(
-    title: Text(widget.existing == null ? 'Add category' : 'Edit category'),
+    title: FixMateText(widget.existing == null ? 'Add category' : 'Edit category'),
     content: SizedBox(
       width: 420,
       child: Form(
@@ -340,12 +341,12 @@ class _CategoryEditorDialogState extends State<_CategoryEditorDialog> {
             SwitchListTile(
               key: const Key('category_active'),
               contentPadding: EdgeInsets.zero,
-              title: const Text('Available for new reports'),
+              title: const FixMateText('Available for new reports'),
               value: _active,
               onChanged: (value) => setState(() => _active = value),
             ),
             if (widget.existing != null)
-              const Text(
+              const FixMateText(
                 'Renaming creates a new category. Existing reports '
                 'retain their original category.',
                 style: TextStyle(fontSize: 12, color: Color(0xFF6B7F8D)),
@@ -357,7 +358,7 @@ class _CategoryEditorDialogState extends State<_CategoryEditorDialog> {
     actions: [
       TextButton(
         onPressed: () => Navigator.pop(context),
-        child: const Text('Cancel'),
+        child: const FixMateText('Cancel'),
       ),
       FilledButton(
         key: const Key('save_category'),
@@ -368,7 +369,7 @@ class _CategoryEditorDialogState extends State<_CategoryEditorDialog> {
             active: _active,
           ));
         },
-        child: const Text('Save'),
+        child: const FixMateText('Save'),
       ),
     ],
   );
