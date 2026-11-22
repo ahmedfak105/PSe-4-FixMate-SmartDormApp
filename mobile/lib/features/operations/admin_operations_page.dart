@@ -145,7 +145,7 @@ class _AdminOperationsPageState extends State<AdminOperationsPage> {
             child: DropdownButtonFormField<String>(
               initialValue: selected,
               isExpanded: true,
-              decoration: const InputDecoration(labelText: 'Maintenance employee'),
+              decoration: InputDecoration(labelText: fmTr(context, 'Maintenance employee')),
               items: [
                 for (final person in candidates)
                   DropdownMenuItem(
@@ -240,10 +240,10 @@ class _AdminOperationsPageState extends State<AdminOperationsPage> {
           child: TextField(
             key: const Key('admin_filter_query'),
             controller: _searchController,
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
               prefixIcon: Icon(Icons.search),
-              labelText: 'Search reports',
-              hintText: 'Title, description, location, category or ID',
+              labelText: fmTr(context, 'Search reports'),
+              hintText: fmTr(context, 'Title, description, location, category or ID'),
             ),
             onChanged: (value) => setState(() => _query = value),
           ),
@@ -253,7 +253,7 @@ class _AdminOperationsPageState extends State<AdminOperationsPage> {
             key: const Key('admin_filter_status'),
             initialValue: _statusFilter,
             isExpanded: true,
-            decoration: const InputDecoration(labelText: 'Status'),
+            decoration: InputDecoration(labelText: fmTr(context, 'Status')),
             items: const [
               DropdownMenuItem(value: 'all', child: FixMateText('All statuses')),
               DropdownMenuItem(value: 'new', child: FixMateText('New')),
@@ -266,7 +266,7 @@ class _AdminOperationsPageState extends State<AdminOperationsPage> {
             key: const Key('admin_filter_category'),
             initialValue: _categoryFilter,
             isExpanded: true,
-            decoration: const InputDecoration(labelText: 'Category'),
+            decoration: InputDecoration(labelText: fmTr(context, 'Category')),
             items: [
               const DropdownMenuItem(value: 'all', child: FixMateText('All categories')),
               for (final item in _categories.entries)
@@ -281,7 +281,7 @@ class _AdminOperationsPageState extends State<AdminOperationsPage> {
             key: const Key('admin_filter_date'),
             initialValue: _dateFilter,
             isExpanded: true,
-            decoration: const InputDecoration(labelText: 'Submitted'),
+            decoration: InputDecoration(labelText: fmTr(context, 'Submitted')),
             items: const [
               DropdownMenuItem(value: 'all', child: FixMateText('Any date')),
               DropdownMenuItem(value: 'last7', child: FixMateText('Last 7 days')),
@@ -400,9 +400,9 @@ class _AdminOperationsPageState extends State<AdminOperationsPage> {
               ),
             ),
           ),
-          IconButton(tooltip: 'Refresh', icon: const Icon(Icons.refresh),
+          IconButton(tooltip: fmTr(context, 'Refresh'), icon: const Icon(Icons.refresh),
               onPressed: _loading || _busy ? null : _load),
-          IconButton(tooltip: 'Sign out', icon: const Icon(Icons.logout),
+          IconButton(tooltip: fmTr(context, 'Sign out'), icon: const Icon(Icons.logout),
               onPressed: _logout),
         ],
       ),
