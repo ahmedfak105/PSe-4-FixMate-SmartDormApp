@@ -34,12 +34,18 @@ jobs:
         run: flutter pub get
       - name: Generate translations
         run: flutter gen-l10n
-      - name: Build Android debug APK (offline-demo configuration)
-        run: flutter build apk --debug --dart-define=FIXMATE_OFFLINE_DEMO=true
+      - name: Build Android APK with real Supabase connection
+        env:
+          FIXMATE_PUBLIC_URL: https://epsvagztisdovixlqehi.supabase.co
+          FIXMATE_PUBLIC_KEY: sb_publishable_eHEuMIdnI8vo1FAzXQmPow_zHrQTrXt
+        run: |
+          flutter build apk --debug \
+            --dart-define=SUPABASE_URL="$FIXMATE_PUBLIC_URL" \
+            --dart-define=SUPABASE_PUBLISHABLE_KEY="$FIXMATE_PUBLIC_KEY"
       - name: Upload built APK for review
         uses: actions/upload-artifact@v4
         with:
-          name: fixmate-flutter-android-debug-demo
+          name: fixmate-flutter-android-connected-debug
           path: mobile/build/app/outputs/flutter-apk/app-debug.apk
           if-no-files-found: error
           retention-days: 7
