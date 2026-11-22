@@ -62,7 +62,7 @@ class _ProfilePageState extends State<ProfilePage> {
         : Supabase.instance.client.auth.currentUser?.email;
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.tabProfile),
+      appBar: AppBar(title: FixMateText(l10n.tabProfile),
         actions: const [FixMateLanguageButton(), FixMateSupportMenu()]),
       body: ListView(padding: const EdgeInsets.all(20), children: [
         profile == null
@@ -72,7 +72,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 userId: profile.id, name: profile.fullName)),
         const SizedBox(height: 12),
         Center(
-          child: Text(
+          child: FixMateText(
             profile?.fullName ?? l10n.demoResident,
             style: Theme.of(context).textTheme.titleLarge,
           ),
@@ -81,49 +81,49 @@ class _ProfilePageState extends State<ProfilePage> {
         if (profile == null) ...[
           ListTile(
             leading: const Icon(Icons.lock_outline),
-            title: Text(l10n.authNotConnected),
-            subtitle: Text(l10n.demoNotice),
+            title: FixMateText(l10n.authNotConnected),
+            subtitle: FixMateText(l10n.demoNotice),
           ),
         ] else ...[
           FilledButton.icon(
             onPressed: _editProfile,
             icon: const Icon(Icons.edit_outlined),
-            label: const Text('Edit personal information'),
+            label: const FixMateText('Edit personal information'),
           ),
           const SizedBox(height: 12),
           ListTile(
             leading: const Icon(Icons.email_outlined),
-            title: const Text('Email'),
-            subtitle: Text(email ?? 'Not available'),
+            title: const FixMateText('Email'),
+            subtitle: FixMateText(email ?? 'Not available'),
           ),
           ListTile(
             leading: const Icon(Icons.badge_outlined),
-            title: const Text('Role'),
-            subtitle: Text(profile.role),
+            title: const FixMateText('Role'),
+            subtitle: FixMateText(profile.role),
           ),
           ListTile(
             leading: const Icon(Icons.apartment_outlined),
-            title: const Text('Building'),
-            subtitle: Text(profile.building?.trim().isNotEmpty == true
+            title: const FixMateText('Building'),
+            subtitle: FixMateText(profile.building?.trim().isNotEmpty == true
                 ? profile.building!
                 : 'Not set'),
           ),
           ListTile(
             leading: const Icon(Icons.meeting_room_outlined),
-            title: const Text('Room number'),
-            subtitle: Text(profile.roomNumber?.trim().isNotEmpty == true
+            title: const FixMateText('Room number'),
+            subtitle: FixMateText(profile.roomNumber?.trim().isNotEmpty == true
                 ? profile.roomNumber!
                 : 'Not set'),
           ),
         ],
         const Divider(),
-        Text(l10n.language, style: Theme.of(context).textTheme.titleMedium),
+        FixMateText(l10n.language, style: Theme.of(context).textTheme.titleMedium),
         ListTile(
-          title: const Text('English'),
+          title: const FixMateText('English'),
           onTap: () => localeCubit.setLocale(const Locale('en')),
         ),
         ListTile(
-          title: const Text('Lietuvių'),
+          title: const FixMateText('Lietuvių'),
           onTap: () => localeCubit.setLocale(const Locale('lt')),
         ),
         if (profile != null) ...[
@@ -132,11 +132,11 @@ class _ProfilePageState extends State<ProfilePage> {
           OutlinedButton.icon(
             onPressed: _signingOut ? null : _signOut,
             icon: const Icon(Icons.logout),
-            label: Text(_signingOut ? 'Signing out...' : 'Sign out'),
+            label: FixMateText(_signingOut ? 'Signing out...' : 'Sign out'),
           ),
           if (_error != null) ...[
             const SizedBox(height: 8),
-            Text(_error!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
+            FixMateText(_error!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
           ],
         ],
       ]),
