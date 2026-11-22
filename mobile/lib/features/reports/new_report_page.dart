@@ -251,11 +251,7 @@ class _NewReportPageState extends State<NewReportPage> {
                             key: const Key('submit_report'),
                             onPressed: _saving ? null : _submit,
                             icon: const Icon(Icons.send_outlined),
-                            label: FixMateText(_saving
-                                ? l10n.saving
-                                : (Localizations.localeOf(context).languageCode == 'lt'
-                                    ? 'Pateikti pranešimą'
-                                    : 'Submit report')),
+                            label: FixMateText(_saving ? l10n.saving : l10n.submitReport),
                           ),
                         ],
                       ),
