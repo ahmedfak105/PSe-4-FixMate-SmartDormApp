@@ -14,7 +14,7 @@ class PasswordRecoveryRequestPage extends StatefulWidget {
   });
 
   final String initialEmail;
-  /// Dependency-injection seam for free offline widget tests.
+  /// Dependency-injection seam for isolated widget tests.
   final Future<void> Function(String email, String redirectTo)? sendResetEmail;
 
   @override
