@@ -9,7 +9,7 @@ void main() {
     expect(validateCategoryName('a'), isNotNull);
     expect(validateCategoryName('  Internet  '), isNull);
     expect(validateCategoryName('Building maintenance'), isNull);
-    expect(validateCategoryName('x' * 80), isNull);
-    expect(validateCategoryName('x' * 81), isNotNull);
+    expect(validateCategoryName(List.filled(80, 'x').join()), isNull);
+    expect(validateCategoryName(List.filled(81, 'x').join()), isNotNull);
   });
 }
