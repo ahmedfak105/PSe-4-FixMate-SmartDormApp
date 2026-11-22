@@ -49,7 +49,9 @@ class FixMatePushService {
 
   Future<void> _registerToken(
       SupabaseClient client, String ownerId, String token) async {
-    if (client.auth.currentUser?.id != ownerId) return;
+    if (client.auth.currentUser?.id != ownerId) {
+      throw StateError('Session changed before push registration.');
+    }
     await client.from('push_device_tokens').upsert({
       'token': token,
       'user_id': ownerId,
