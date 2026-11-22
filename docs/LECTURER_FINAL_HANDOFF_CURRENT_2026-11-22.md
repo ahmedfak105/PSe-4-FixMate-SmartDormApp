@@ -169,3 +169,8 @@ as if the release gate were complete.
 - [Live Web](https://ahmedfak105.github.io/PSe-4-FixMate-SmartDormApp/)
 - [FCM remaining setup](FCM_SERVER_FINAL_ACTIVATION_2026-11-22.md)
 - [Release checklist #47](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/47)
+
+
+### Final FK index completion (22 November 2026)
+
+The server has all four additional indexes for notification, push and role-audit foreign keys. Hosted migration `20261122171743` succeeded and the Supabase `unindexed_foreign_keys` advisor is now clear. This is a backend performance verification, **not** proof of FCM device delivery. SQL: [post-rollout FK indexes](sql/FCM_POST_ROLLOUT_FK_INDEXES_APPLIED.sql).
