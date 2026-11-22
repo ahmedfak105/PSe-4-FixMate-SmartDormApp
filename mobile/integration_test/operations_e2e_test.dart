@@ -85,7 +85,7 @@ void main() {
     await loginAs(tester, 'resident.b.fixmate@example.com');
     await waitFor(tester,
         find.text('Account role not permitted in this workspace'));
-    expect(find.textContaining('Maintenance Staff, Moderators and System Admins'),
+    expect(find.textContaining('maintenance staff and authorized managers'),
         findsOneWidget);
   });
 
