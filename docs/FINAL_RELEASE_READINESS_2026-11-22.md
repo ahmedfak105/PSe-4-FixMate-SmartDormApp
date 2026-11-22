@@ -20,7 +20,7 @@ This is a **truthful release status**, not a declaration that all hosted accepta
 4. **F06.2 Admin user roles**: People tab can choose a target user and confirm a role; proposed audited, role-checked RPC, no browser secret keys, no self-change, stale-role protection. Tested only against disposable local backend until authorized hosted rollout.
 5. **F06.3 Categories**: Add/edit/deactivate/reactivate; rename versions category, preserving historical report names. Missing hosted RPC disables editing safely.
 6. **F05.1 Notifications**: proposed SQL trigger stores owner-only in-app status notifications; Resident has an inbox and read controls. Missing hosted table shows an honest unavailable state.
-7. **F05.2 Push**: **not complete**; free Firebase Cloud Messaging Spark plus secure Supabase Edge Function is selected, but Android Firebase app registration, token handling, sender secrets and real background-device acceptance remain outstanding. See `docs/F05_2_FREE_PUSH_REQUIREMENTS.md`.
+7. **F05.2 Push**: **not live**. Firebase project/Android app registration, non-secret Android client config, FlutterFire token opt-in, server-side OAuth/FCM sender source and local outbox queue are prepared. Secure sender guards were merged in PR #48. The Firebase project is currently **Blaze**; FCM sending is no-cost but other cloud services could bill. Hosted SQL/Edge deployment, server secrets and real background-device acceptance remain outstanding. See `docs/F05_2_FREE_PUSH_REQUIREMENTS.md`.
 
 ## Feature lifecycle and board
 
@@ -31,6 +31,13 @@ Existing **12 Tasks remain Done** in the GitHub board. Of the 22 Features, the m
 - **1 Todo**: #24 (true Android push).
 - Six Epics remain open until their child Features are accepted. **#47 Release Gate** remains open/In Progress.
 - If the GitHub Project V2 custom Status field is synchronized: 24 Done (Tasks + accepted Features), 10 In Progress (9 Features + gate), 7 Todo (6 Epics + push). GitHub Issue updates do **not** automatically imply the Project custom field was edited.
+
+## Verified connected-only deployment status — updated 22 November 2026
+
+- [PR #49](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/pull/49) removed all runtime Demo modes and local sample data and was merged as `7f035cd1`. The connected-only Android build and Web/real-Chrome E2E passed on that SHA.
+- [GitHub Pages deployment](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/45037533703) succeeded for `7f035cd1`; web URL: https://ahmedfak105.github.io/PSe-4-FixMate-SmartDormApp/ . Physical-device login on that published URL remains a separate acceptance item.
+- [PR #48](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/pull/48) added tested secure FCM send guards and current Supabase secret-key handling, merged into integration as `17a632d7`. No backend sender is deployed by that merge.
+- A fresh, privacy-preserving audit of live Auth role counts, privileges, Storage buckets, RLS and missing schema/RPCs is recorded in [HOSTED_RELEASE_AUDIT_2026-11-22.md](HOSTED_RELEASE_AUDIT_2026-11-22.md). The live server still has **six public RLS tables**, **six profiles**, **no Moderator profile**, and **no notification, avatar or role-management extensions**. Do not claim hosted completion from green local CI alone.
 
 ## Hosted Supabase preflight (read-only)
 
