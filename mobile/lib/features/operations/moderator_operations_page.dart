@@ -5,6 +5,23 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../data/models/resident_profile.dart';
 
+/// Keep historical decisions visible after Staff changes a reviewed report
+/// to in_progress or resolved. Only unassigned NEW reports can be reviewed.
+List<Map<String, dynamic>> visibleModeratorReports({
+  required List<Map<String, dynamic>> reports,
+  required Map<int, Map<String, dynamic>> decisions,
+  required bool reviewedOnly,
+}) {
+  return reports.where((report) {
+    final id = (report['id'] as num).toInt();
+    final reviewed = decisions.containsKey(id);
+    if (reviewedOnly) return reviewed;
+    return !reviewed &&
+        report['status'] == 'new' &&
+        report['assigned_to'] == null;
+  }).toList(growable: false);
+}
+
 /// Task #39: Flutter Web moderator review, restricted by DB RLS and RPC.
 ///
 /// IMPORTANT: Review table/RPC are proposed on local/staging Supabase only.
@@ -226,10 +243,11 @@ class _ModeratorOperationsPageState extends State<ModeratorOperationsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final visible = _reports.where((report) {
-      final reviewed = _decisions.containsKey((report['id'] as num).toInt());
-      return _reviewedOnly ? reviewed : _canReview(report);
-    }).toList();
+    final visible = visibleModeratorReports(
+      reports: _reports,
+      decisions: _decisions,
+      reviewedOnly: _reviewedOnly,
+    );
 
     return Scaffold(
       appBar: AppBar(
