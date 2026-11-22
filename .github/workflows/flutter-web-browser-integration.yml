@@ -47,7 +47,7 @@ jobs:
             sudo apt-get update -qq
             sudo apt-get install -y -qq postgresql-client
           fi
-      - name: Apply proposed validations and moderator review to LOCAL only
+      - name: Check versioned validation and moderation schema after local reset
         env:
           PGHOST: 127.0.0.1
           PGPORT: 54322
@@ -55,8 +55,8 @@ jobs:
           PGPASSWORD: postgres
           PGDATABASE: postgres
         run: |
-          psql -X -v ON_ERROR_STOP=1 -f docs/sql/PROPOSED_REPORT_INPUT_VALIDATION.sql
-          psql -X -v ON_ERROR_STOP=1 -f docs/sql/PROPOSED_MODERATOR_REVIEW_MIGRATION.sql
+          psql -X -v ON_ERROR_STOP=1 -c "SELECT count(*) FROM public.report_reviews;"
+          psql -X -v ON_ERROR_STOP=1 -c "SELECT count(*) FROM pg_proc WHERE proname = 'review_maintenance_report';"
           psql -X -v ON_ERROR_STOP=1 -c "NOTIFY pgrst, 'reload schema';"
       - name: Seed five synthetic accounts and validate their local roles
         env:

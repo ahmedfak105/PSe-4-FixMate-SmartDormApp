@@ -51,7 +51,7 @@ jobs:
         run: |
           supabase migration list --local
           supabase db reset
-      - name: Apply separately proposed validation and moderator SQL in local DB
+      - name: Verify versioned validation and Moderator SQL were applied by reset
         env:
           PGHOST: 127.0.0.1
           PGPORT: 54322
@@ -59,8 +59,7 @@ jobs:
           PGPASSWORD: postgres
           PGDATABASE: postgres
         run: |
-          psql -X -v ON_ERROR_STOP=1 -f docs/sql/PROPOSED_REPORT_INPUT_VALIDATION.sql
-          psql -X -v ON_ERROR_STOP=1 -f docs/sql/PROPOSED_MODERATOR_REVIEW_MIGRATION.sql
+          psql -X -v ON_ERROR_STOP=1 -c "SELECT count(*) FROM public.report_reviews;"
           psql -X -v ON_ERROR_STOP=1 -c "NOTIFY pgrst, 'reload schema';"
 
       - name: Test API with five freshly registered local accounts

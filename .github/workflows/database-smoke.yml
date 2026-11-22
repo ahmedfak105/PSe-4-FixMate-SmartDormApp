@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - 'docs/sql/**'
+      - 'supabase/migrations/**'
       - '.github/workflows/database-smoke.yml'
   pull_request:
     paths:
@@ -47,13 +48,15 @@ jobs:
       - name: Prepare disposable Supabase schema stubs
         run: psql -X -v ON_ERROR_STOP=1 -f docs/sql/test/prepare_postgres_smoke.sql
       - name: Recreate verified six-table baseline
-        run: psql -X -v ON_ERROR_STOP=1 -f docs/sql/VERIFIED_BASELINE_RECONSTRUCTION_DRAFT.sql
+        run: psql -X -v ON_ERROR_STOP=1 -f supabase/migrations/20261121222817_fixmate_baseline.sql
       - name: Seed only the eight public maintenance categories
-        run: psql -X -v ON_ERROR_STOP=1 -f docs/sql/VERIFIED_CATEGORY_SEED_DRAFT.sql
-      - name: Apply proposed report input validation (staging-only)
-        run: psql -X -v ON_ERROR_STOP=1 -f docs/sql/PROPOSED_REPORT_INPUT_VALIDATION.sql
-      - name: Apply proposed moderator review migration in disposable DB
-        run: psql -X -v ON_ERROR_STOP=1 -f docs/sql/PROPOSED_MODERATOR_REVIEW_MIGRATION.sql
+        run: psql -X -v ON_ERROR_STOP=1 -f supabase/migrations/20261121222818_fixmate_categories_seed.sql
+      - name: Create the nine foreign-key indexes from versioned migration
+        run: psql -X -v ON_ERROR_STOP=1 -f supabase/migrations/20261121223150_fixmate_fk_indexes.sql
+      - name: Apply versioned local report input validation
+        run: psql -X -v ON_ERROR_STOP=1 -f supabase/migrations/20261122000339_fixmate_report_validation.sql
+      - name: Apply versioned local moderator review migration
+        run: psql -X -v ON_ERROR_STOP=1 -f supabase/migrations/20261122000340_fixmate_moderator_review.sql
       - name: Assert authorization, signup trigger, claim/resolve and moderation
         run: psql -X -v ON_ERROR_STOP=1 -f docs/sql/test/assert_baseline_moderator_smoke.sql
       - name: Test invalid fields, ownership and archived-category blocking

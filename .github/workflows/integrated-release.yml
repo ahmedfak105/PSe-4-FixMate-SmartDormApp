@@ -37,6 +37,13 @@ jobs:
           test -f supabase/migrations/20261121222817_fixmate_baseline.sql
           test -f supabase/migrations/20261121222818_fixmate_categories_seed.sql
           test -f supabase/migrations/20261121223150_fixmate_fk_indexes.sql
+          test -f supabase/migrations/20261122000339_fixmate_report_validation.sql
+          test -f supabase/migrations/20261122000340_fixmate_moderator_review.sql
+          test -f scripts/prepare_local_lecturer_demo.sh
+          test -f docs/LOCAL_LECTURER_DEMO_RUNBOOK.md
+          bash -n scripts/prepare_local_lecturer_demo.sh
+          cmp docs/sql/PROPOSED_REPORT_INPUT_VALIDATION.sql supabase/migrations/20261122000339_fixmate_report_validation.sql
+          cmp docs/sql/PROPOSED_MODERATOR_REVIEW_MIGRATION.sql supabase/migrations/20261122000340_fixmate_moderator_review.sql
           test -f docs/sql/PROPOSED_MODERATOR_REVIEW_MIGRATION.sql
           test -f docs/sql/PROPOSED_REPORT_INPUT_VALIDATION.sql
 

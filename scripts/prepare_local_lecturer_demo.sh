@@ -44,11 +44,10 @@ export PGPASSWORD=postgres PGDATABASE=postgres
 export SUPABASE_URL="$url" SUPABASE_ANON_KEY="$key"
 psql -X -qAt -v ON_ERROR_STOP=1 -c 'SELECT current_database();' >/dev/null
 
-echo 'Restoring three committed migrations into disposable LOCAL Supabase...'
+echo 'Restoring all five versioned migrations into disposable LOCAL Supabase...'
 supabase db reset
-echo 'Applying TASK #36 + TASK #39 proposed SQL in LOCAL stack only...'
-psql -X -v ON_ERROR_STOP=1 -f docs/sql/PROPOSED_REPORT_INPUT_VALIDATION.sql >/dev/null
-psql -X -v ON_ERROR_STOP=1 -f docs/sql/PROPOSED_MODERATOR_REVIEW_MIGRATION.sql >/dev/null
+echo 'Verifying TASK #36 and TASK #39 schema was installed by the local reset...'
+psql -X -v ON_ERROR_STOP=1 -c "SELECT count(*) FROM public.report_reviews;" >/dev/null
 psql -X -v ON_ERROR_STOP=1 -c "NOTIFY pgrst, 'reload schema';" >/dev/null
 
 echo 'Provisioning test-only roles, dummy reports, and photo permissions...'
