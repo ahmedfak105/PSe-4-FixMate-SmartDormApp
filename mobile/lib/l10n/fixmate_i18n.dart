@@ -276,6 +276,8 @@ const Map<String, String> _lithuanian = {
   "Push notifications are not enabled on this server yet.": "Tiesioginiai pranešimai šiame serveryje dar neįjungti.",
   "Cannot enable notifications. Check your device permission and connection.": "Nepavyko įjungti pranešimų. Patikrinkite įrenginio leidimus ir ryšį.",
   "Could not change push notifications. Please retry.": "Nepavyko pakeisti tiesioginių pranešimų nustatymų. Bandykite dar kartą.",
+  "Device registered for push. Delivery requires the server sender to be enabled.": "Įrenginys užregistruotas tiesioginiams pranešimams. Pranešimų siuntimui būtina įjungti serverio siuntimo paslaugą.",
+  "Push registration removed from this device.": "Šio įrenginio tiesioginių pranešimų registracija pašalinta.",
 };
 
 const Map<String, String> _dynamicPrefixes = {
