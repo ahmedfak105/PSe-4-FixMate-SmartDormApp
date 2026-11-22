@@ -60,7 +60,7 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(title: const Text('FixMate'),
+        appBar: AppBar(title: const FixMateText('FixMate'),
           actions: const [FixMateLanguageButton(), FixMateSupportMenu()]),
         body: Center(
           child: ConstrainedBox(
@@ -93,17 +93,17 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    const Text('SMART DORM MAINTENANCE',
+                    const FixMateText('SMART DORM MAINTENANCE',
                       textAlign: TextAlign.center,
                       style: TextStyle(color: Color(0xFF127F76),
                         fontSize: 10, letterSpacing: 1.5,
                         fontWeight: FontWeight.w800)),
                     const SizedBox(height: 10),
-                    Text('Welcome to FixMate',
+                    FixMateText('Welcome to FixMate',
                         textAlign: TextAlign.center,
                         style: Theme.of(context).textTheme.headlineSmall),
                     const SizedBox(height: 8),
-                    Text(widget.allowResidentSignup
+                    FixMateText(widget.allowResidentSignup
                             ? 'Sign in or create a resident account.'
                             : 'Authorized maintenance staff, moderators and administrators only.',
                         textAlign: TextAlign.center),
@@ -152,13 +152,13 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     if (widget.successMessage != null) ...[
                       const SizedBox(height: 14),
-                      Text(widget.successMessage!,
+                      FixMateText(widget.successMessage!,
                         key: const Key('reset_password_success'),
                         style: const TextStyle(color: Color(0xFF127F76))),
                     ],
                     if (_error != null || widget.connectionError != null) ...[
                       const SizedBox(height: 16),
-                      Text(_error ?? widget.connectionError!,
+                      FixMateText(_error ?? widget.connectionError!,
                           style: TextStyle(
                               color: Theme.of(context).colorScheme.error)),
                     ],
@@ -174,7 +174,7 @@ class _LoginPageState extends State<LoginPage> {
                                 height: 20,
                                 child: CircularProgressIndicator(strokeWidth: 2),
                               )
-                            : const Text('Sign in'),
+                            : const FixMateText('Sign in'),
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -187,7 +187,7 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                         ),
                       ),
-                      child: const Text('Forgot password?'),
+                      child: const FixMateText('Forgot password?'),
                     ),
                     // Enabled after isolated local Supabase Auth + profile/RLS
                     // API tests passed. Set ENABLE_RESIDENT_SIGNUP=false
@@ -203,11 +203,11 @@ class _LoginPageState extends State<LoginPage> {
                             builder: (_) => const SignUpPage(),
                           ),
                         ),
-                        child: const Text('Create resident account'),
+                        child: const FixMateText('Create resident account'),
                       ),
                     ],
                     const SizedBox(height: 16),
-                    const Text(
+                    const FixMateText(
                       'Residents can view and submit maintenance reports after signing in.',
                       textAlign: TextAlign.center,
                       style: TextStyle(fontSize: 12),
