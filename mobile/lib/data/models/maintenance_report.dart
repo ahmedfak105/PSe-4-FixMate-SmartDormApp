@@ -1,7 +1,7 @@
 enum MaintenanceStatus { newReport, inProgress, resolved, unknown }
 
 /// A maintenance report visible to a Resident. The id displayed in the UI
-/// is the database bigint as text, or FM-xxx in offline demo mode.
+/// is the database bigint as text; test-only records are created in test/.
 class MaintenanceReport {
   const MaintenanceReport({
     required this.id,
