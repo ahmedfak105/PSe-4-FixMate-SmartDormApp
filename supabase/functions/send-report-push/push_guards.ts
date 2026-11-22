@@ -69,7 +69,10 @@ export function selectSupabaseServiceKey(
 }
 
 function isLegacyServiceRoleJwt(value: string): boolean {
-  return /^[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+$/.test(value);
+  const parts = value.split('.');
+  return parts.length === 3 &&
+    parts.every((p) => p.length > 0 && /^[a-zA-Z0-9_-]+$/.test(p));
+
 }
 
 /**
