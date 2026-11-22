@@ -35,7 +35,7 @@ jobs:
       - name: Generate translations
         run: flutter gen-l10n
       - name: Build Android debug APK (offline-demo configuration)
-        run: flutter build apk --debug
+        run: flutter build apk --debug --dart-define=FIXMATE_OFFLINE_DEMO=true
       - name: Upload built APK for review
         uses: actions/upload-artifact@v4
         with:
