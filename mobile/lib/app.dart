@@ -22,12 +22,14 @@ import 'navigation/route_generator.dart';
 /// Offline tests use InMemoryReportRepository; authenticated app uses DB.
 class FixMateApp extends StatelessWidget {
   const FixMateApp({super.key, this.repository, this.requireLogin = false,
-      this.operationsOnly = false, this.initialRecoveryLink = false});
+      this.operationsOnly = false, this.initialRecoveryLink = false,
+      this.allowResidentWeb = false});
 
   final ReportRepository? repository;
   final bool requireLogin;
   final bool operationsOnly;
   final bool initialRecoveryLink;
+  final bool allowResidentWeb;
 
   @override
   Widget build(BuildContext context) => MultiBlocProvider(
@@ -55,9 +57,11 @@ class FixMateApp extends StatelessWidget {
         home: requireLogin
             ? AuthGate(
                 operationsOnly: operationsOnly,
+                allowResidentWeb: allowResidentWeb,
                 initialRecoveryLink: initialRecoveryLink,
                 builder: (profile) => switch (workspaceForRole(profile.role,
-                    operationsOnly: operationsOnly)) {
+                    operationsOnly: operationsOnly,
+                    allowResidentWeb: allowResidentWeb)) {
                     FixMateWorkspace.systemAdmin =>
                       AdminOperationsPage(
                         key: ValueKey('admin-${profile.id}'),
@@ -92,9 +96,10 @@ class FixMateApp extends StatelessWidget {
               },
               )
             : const BottomTabsPage(),
-        // Operations build has no Resident navigation routes. Its only
-        // entry point is the authenticated, role-gated AuthGate.
-        onGenerateRoute: operationsOnly ? null : const RouteGenerator().getRoute,
+        // The unified hosted web app also enables Resident navigation;
+        // the restricted operations-only variant remains available for QA.
+        onGenerateRoute: operationsOnly && !allowResidentWeb
+            ? null : const RouteGenerator().getRoute,
         builder: (context, child) => requireLogin
             ? child!
             : Banner(
