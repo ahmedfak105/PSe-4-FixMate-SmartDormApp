@@ -1,6 +1,8 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import '../../l10n/fixmate_i18n.dart';
+import '../support/fixmate_support_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// Validate only the *public* connection details allowed in a browser build.
@@ -95,7 +97,8 @@ class _OperationsConnectionPageState extends State<OperationsConnectionPage> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text('FixMate · Operations')),
+    appBar: AppBar(title: const FixMateText('FixMate'),
+      actions: const [FixMateLanguageButton(), FixMateSupportMenu()]),
     body: Center(child: SingleChildScrollView(
       padding: const EdgeInsets.all(24),
       child: ConstrainedBox(
@@ -110,11 +113,11 @@ class _OperationsConnectionPageState extends State<OperationsConnectionPage> {
                 Icon(Icons.admin_panel_settings_outlined,
                     size: 56, color: Theme.of(context).colorScheme.primary),
                 const SizedBox(height: 12),
-                Text('Connect your operations workspace',
+                FixMateText('Connect your operations workspace',
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.headlineSmall),
                 const SizedBox(height: 8),
-                const Text(
+                const FixMateText(
                   'Sign in as maintenance staff, moderator or system admin. '
                   'You need the shared FixMate Supabase project URL and a '
                   'public browser API key.',
@@ -125,9 +128,9 @@ class _OperationsConnectionPageState extends State<OperationsConnectionPage> {
                   key: const Key('operations_supabase_url'),
                   controller: _url,
                   keyboardType: TextInputType.url,
-                  decoration: const InputDecoration(
-                    labelText: 'Supabase project URL',
-                    hintText: 'https://your-project.supabase.co',
+                  decoration: InputDecoration(
+                    labelText: fmTr(context, 'Supabase project URL'),
+                    hintText: fmTr(context, 'https://your-project.supabase.co'),
                     border: OutlineInputBorder(),
                   ),
                   validator: (v) =>
@@ -139,7 +142,7 @@ class _OperationsConnectionPageState extends State<OperationsConnectionPage> {
                   controller: _key,
                   obscureText: !_showPublicKey,
                   decoration: InputDecoration(
-                    labelText: 'Publishable / anon API key',
+                    labelText: fmTr(context, 'Publishable / anon API key'),
                     border: const OutlineInputBorder(),
                     suffixIcon: IconButton(
                       tooltip: _showPublicKey ? 'Hide public key' : 'Show public key',
@@ -153,11 +156,11 @@ class _OperationsConnectionPageState extends State<OperationsConnectionPage> {
                       ? 'Public API key is required' : null,
                 ),
                 const SizedBox(height: 10),
-                const Text('Never enter a service-role or secret key. '
+                const FixMateText('Never enter a service-role or secret key. '
                     'The public key does not bypass authentication or RLS.'),
                 if (_error != null) ...[
                   const SizedBox(height: 12),
-                  Text(_error!, style: TextStyle(
+                  FixMateText(_error!, style: TextStyle(
                       color: Theme.of(context).colorScheme.error)),
                 ],
                 const SizedBox(height: 22),
@@ -165,7 +168,7 @@ class _OperationsConnectionPageState extends State<OperationsConnectionPage> {
                   key: const Key('operations_connect'),
                   onPressed: _busy ? null : _connect,
                   icon: const Icon(Icons.login_outlined),
-                  label: Text(_busy ? 'Connecting...' : 'Connect'),
+                  label: FixMateText(_busy ? 'Connecting...' : 'Connect'),
                 ),
               ]),
           ),
