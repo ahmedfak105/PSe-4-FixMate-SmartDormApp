@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../l10n/fixmate_i18n.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -85,7 +86,7 @@ class _NewReportPageState extends State<NewReportPage> {
     } catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Could not select photo: $error'),
+        content: FixMateText('Could not select photo: $error'),
       ));
     }
   }
@@ -106,7 +107,7 @@ class _NewReportPageState extends State<NewReportPage> {
       setState(() => _saving = false);
       final details = cubit.state.error;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(details == null ? l10n.saveFailed : '${l10n.saveFailed}: $details'),
+        content: FixMateText(details == null ? l10n.saveFailed : '${l10n.saveFailed}: $details'),
       ));
       return;
     }
@@ -139,7 +140,7 @@ class _NewReportPageState extends State<NewReportPage> {
     });
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       duration: Duration(seconds: photoError == null ? 4 : 10),
-      content: Text(photoError != null
+      content: FixMateText(photoError != null
           ? 'Report #$createdId saved, but photo upload failed: $photoError. '
               'Open report details to add the photo again.'
           : (_isDemo
@@ -155,22 +156,22 @@ class _NewReportPageState extends State<NewReportPage> {
     String? requiredValue(String? value) =>
         (value == null || value.trim().isEmpty) ? l10n.requiredField : null;
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.tabNewReport)),
+      appBar: AppBar(title: FixMateText(l10n.tabNewReport)),
       body: _categoriesLoading
           ? const Center(child: CircularProgressIndicator())
           : _categoriesError != null
               ? Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
-                  const Text('Could not load categories from Supabase.'),
+                  const FixMateText('Could not load categories from Supabase.'),
                   Padding(
                     padding: const EdgeInsets.all(12),
                     child: SelectableText(_categoriesError!, textAlign: TextAlign.center),
                   ),
-                  TextButton(onPressed: _loadCategories, child: Text(l10n.retry)),
+                  TextButton(onPressed: _loadCategories, child: FixMateText(l10n.retry)),
                 ]))
               : _categories == null || _categories!.isEmpty
                   ? Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
-                      const Text('No active maintenance categories available.'),
-                      TextButton(onPressed: _loadCategories, child: Text(l10n.retry)),
+                      const FixMateText('No active maintenance categories available.'),
+                      TextButton(onPressed: _loadCategories, child: FixMateText(l10n.retry)),
                     ]))
                   : Form(
                       key: _key,
@@ -178,7 +179,7 @@ class _NewReportPageState extends State<NewReportPage> {
                         padding: const EdgeInsets.all(20),
                         children: [
                           if (_isDemo) ...[
-                            Text(l10n.demoNotice, style: Theme.of(context).textTheme.bodySmall),
+                            FixMateText(l10n.demoNotice, style: Theme.of(context).textTheme.bodySmall),
                             const SizedBox(height: 18),
                           ],
                           TextFormField(
@@ -199,7 +200,7 @@ class _NewReportPageState extends State<NewReportPage> {
                               border: const OutlineInputBorder(),
                             ),
                             items: _categories!
-                                .map((name) => DropdownMenuItem(value: name, child: Text(name)))
+                                .map((name) => DropdownMenuItem(value: name, child: FixMateText(name)))
                                 .toList(),
                             onChanged: (value) => setState(() => _category = value),
                           ),
@@ -229,15 +230,15 @@ class _NewReportPageState extends State<NewReportPage> {
                             OutlinedButton.icon(
                               onPressed: _saving ? null : _pickPhoto,
                               icon: const Icon(Icons.add_photo_alternate_outlined),
-                              label: Text(_selectedPhoto == null
+                              label: FixMateText(_selectedPhoto == null
                                   ? 'Add photo (optional, up to 5 MB)'
                                   : 'Change selected photo'),
                             ),
                             if (_selectedPhoto != null) ...[
                               ListTile(
                                 leading: const Icon(Icons.image_outlined),
-                                title: Text(_photoName ?? 'Selected photo'),
-                                subtitle: const Text('JPEG, PNG or WebP'),
+                                title: FixMateText(_photoName ?? 'Selected photo'),
+                                subtitle: const FixMateText('JPEG, PNG or WebP'),
                                 trailing: IconButton(
                                   tooltip: 'Remove selected photo',
                                   onPressed: _saving ? null : () => setState(() {
@@ -262,7 +263,7 @@ class _NewReportPageState extends State<NewReportPage> {
                             key: const Key('submit_report'),
                             onPressed: _saving ? null : _submit,
                             icon: const Icon(Icons.send_outlined),
-                            label: Text(_saving
+                            label: FixMateText(_saving
                                 ? l10n.saving
                                 : (_isDemo
                                     ? l10n.submitReport
