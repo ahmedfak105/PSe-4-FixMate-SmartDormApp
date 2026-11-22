@@ -58,11 +58,13 @@ void main() {
     ));
   }
 
-  Future<int> createTestReport(String title) async {
+  Future<int> createTestReport(String title, {
+    String residentEmail = 'resident.a.fixmate@example.com',
+  }) async {
     final client = Supabase.instance.client;
     await client.auth.signOut();
     await client.auth.signInWithPassword(
-      email: 'resident.a.fixmate@example.com',
+      email: residentEmail,
       password: _password,
     );
     final categories = await client.from('maintenance_categories')
@@ -87,6 +89,46 @@ void main() {
         find.text('Account role not permitted in this workspace'));
     expect(find.textContaining('maintenance staff and authorized managers'),
         findsOneWidget);
+  });
+
+  testWidgets('Resident signs in on unified FixMate Web and sees only own reports',
+      (tester) async {
+    const foreignTitle = 'FLUTTER_WEB_RESIDENT_A_PRIVATE';
+    const ownTitle = 'FLUTTER_WEB_RESIDENT_B_OWN';
+    final foreignId = (await tester.runAsync(
+        () => createTestReport(foreignTitle)))!;
+    final ownId = (await tester.runAsync(
+        () => createTestReport(ownTitle,
+            residentEmail: 'resident.b.fixmate@example.com')))!;
+    expect(foreignId, isNot(ownId));
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.runAsync(() async {
+      final auth = Supabase.instance.client.auth;
+      if (auth.currentSession != null) await auth.signOut();
+    });
+    await tester.pumpWidget(const FixMateApp(
+      requireLogin: true,
+      operationsOnly: true,
+      allowResidentWeb: true,
+    ));
+    await waitFor(tester, find.byKey(const Key('login_email')));
+    await tester.enterText(find.byKey(const Key('login_email')),
+        'resident.b.fixmate@example.com');
+    await tester.enterText(find.byKey(const Key('login_password')), _password);
+    await tester.tap(find.byKey(const Key('login_submit')));
+    await waitFor(tester, find.byKey(const Key('tab_myReports')),
+        reason: 'Resident sign-in did not reach Resident navigation');
+    expect(find.text('Account role not permitted in this workspace'),
+        findsNothing);
+    await tester.tap(find.byKey(const Key('tab_myReports')));
+    final ownReport = find.text(ownTitle);
+    await waitFor(tester, ownReport,
+        reason: 'Resident did not see their own Supabase report');
+    expect(find.text(foreignTitle), findsNothing,
+        reason: 'Resident must never see another account report');
+    expect(find.byKey(const Key('tab_newReport')), findsOneWidget);
+    expect(find.byKey(const Key('tab_profile')), findsOneWidget);
   });
 
   testWidgets('Admin loads the real Supabase operations dashboard',
