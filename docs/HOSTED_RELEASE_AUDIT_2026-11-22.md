@@ -29,6 +29,7 @@
 | `push_device_tokens`, `push_delivery_outbox`, push claim RPC | **Absent** |
 | Existing live `assign_maintenance_report`, `claim_maintenance_report`, `resolve_maintenance_report` functions | Present as invoker functions (not `SECURITY DEFINER`) |
 | Supabase migration history | **Empty**, despite populated manually created application tables |
+| Supabase organization subscription | **Free (`tier_free`)**, verified via Supabase organization settings; automatic daily project backups are not included |
 | Report-validation preflight | **0 invalid reports**, **0 missing/inactive-category references** |
 | Active categories | **8** (0 disabled) |
 | Existing Auth-to-profile signup trigger | **1** (`on_auth_user_created`); do **not** add a redundant trigger |
@@ -43,7 +44,7 @@
 ## Deployment gate: mandatory order (do not skip)
 
 1. **Approve scope and downtime:** obtain team/lecturer review of [release gate #47](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/47). Do not merge the broader [integration PR #46](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/pull/46) into `main` as a proxy for approving hosted SQL.
-2. **Take a verified recoverable backup** of the populated database **including Auth** and a separate copy of private Storage objects. Store both securely outside GitHub/chat. Conduct a restoration rehearsal in an isolated environment and record its success. Supabase [official backup guide](https://supabase.com/docs/guides/platform/backups) recommends periodic manual CLI dumps for Free projects; do **not** assume this project's plan provides an accessible daily backup.
+2. **Take a verified recoverable backup** of the populated database **including Auth** and a separate copy of private Storage objects. Store both securely outside GitHub/chat. Conduct a restoration rehearsal in an isolated environment and record its success. The project's Supabase organization is confirmed **Free**, and Supabase's [official backup guide](https://supabase.com/docs/guides/platform/backups) states automatic daily backups are provided only for Pro/Team/Enterprise. Take a manual Supabase CLI dump and verify a restore. Supabase database backups **do not include Storage file bytes**: export private report photos separately, keeping access controls and privacy intact. No paid plan upgrade is authorized.
 3. **Reconcile drift and history:** inventory the actual live schema and `supabase_migrations.schema_migrations` carefully. Do not run `supabase db reset`, import/replay `20261121222817_fixmate_baseline.sql`, or blindly run all versioned files against the populated original tables. Use a reviewed migration-history reconciliation plan.
 4. **Review & test only the additive changes** for the existing schema in a disposable staging clone/instance. The ordered source candidates (not deployment approval) are:
    - `20261121223150_fixmate_fk_indexes.sql` — missing FK indexes.
