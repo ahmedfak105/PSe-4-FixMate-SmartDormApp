@@ -1,3 +1,4 @@
+import 'fixmate_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -49,10 +50,7 @@ class FixMateApp extends StatelessWidget {
           GlobalWidgetsLocalizations.delegate,
           GlobalCupertinoLocalizations.delegate,
         ],
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF146B70)),
-          useMaterial3: true,
-        ),
+        theme: FixMateTheme.light,
         home: requireLogin
             ? AuthGate(
                 operationsOnly: operationsOnly,
