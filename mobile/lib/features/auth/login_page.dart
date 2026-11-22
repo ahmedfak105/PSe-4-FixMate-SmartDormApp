@@ -67,9 +67,32 @@ class _LoginPageState extends State<LoginPage> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.home_repair_service_outlined,
-                        size: 56, color: Color(0xFF146B70)),
-                    const SizedBox(height: 12),
+                    Center(
+                      child: Container(
+                        width: 78, height: 78,
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFF127F76), Color(0xFF23B4A5)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(23),
+                          boxShadow: [BoxShadow(
+                            color: const Color(0xFF127F76).withValues(alpha: 0.18),
+                            blurRadius: 24, offset: const Offset(0, 10),
+                          )],
+                        ),
+                        child: const Icon(Icons.home_repair_service_rounded,
+                          size: 42, color: Colors.white),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    const Text('SMART DORM MAINTENANCE',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Color(0xFF127F76),
+                        fontSize: 10, letterSpacing: 1.5,
+                        fontWeight: FontWeight.w800)),
+                    const SizedBox(height: 10),
                     Text('Welcome to FixMate',
                         textAlign: TextAlign.center,
                         style: Theme.of(context).textTheme.headlineSmall),
