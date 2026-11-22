@@ -207,7 +207,6 @@ const Map<String, String> _lithuanian = {
   "Save changes": "Išsaugoti pakeitimus",
   "Account role": "Paskyros vaidmuo",
   "Room": "Kambarys",
-  "Not available": "Nepasiekiama",
   "resident": "Gyventojas",
   "maintenance_staff": "Priežiūros darbuotojas",
   "moderator": "Moderatorius",
