@@ -8,6 +8,7 @@ import 'locale_cubit.dart';
 import 'edit_profile_page.dart';
 import 'my_profile_avatar.dart';
 import '../support/fixmate_support_page.dart';
+import '../notifications/fixmate_push_service.dart';
 import '../../l10n/fixmate_i18n.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -25,6 +26,70 @@ class _ProfilePageState extends State<ProfilePage> {
   String? _error;
   ResidentProfile? _currentProfile;
   int _avatarRevision = 0;
+  bool _pushEnabled = false;
+  bool _pushBusy = false;
+  String? _pushMessage;
+
+  bool get _supportsPush => widget.profile != null &&
+      widget.profile!.role == 'resident' &&
+      FixMatePushService.instance.supported;
+
+  @override
+  void initState() {
+    super.initState();
+    if (_supportsPush) _refreshPush();
+  }
+
+  Future<void> _refreshPush() async {
+    final profile = widget.profile;
+    if (profile == null || !_supportsPush) return;
+    final client = Supabase.instance.client;
+    try {
+      await FixMatePushService.instance.restoreIfEnabled(client, profile.id);
+      final optedIn = await FixMatePushService.instance.isOptedIn(profile.id);
+      if (mounted) setState(() => _pushEnabled = optedIn);
+    } catch (_) {
+      // A missing server extension leaves the opt-in controls available
+      // for a later approved deployment; never invent a success status.
+    }
+  }
+
+  Future<void> _togglePush(bool enabled) async {
+    final profile = widget.profile;
+    if (_pushBusy || profile == null || !_supportsPush) return;
+    setState(() {
+      _pushBusy = true;
+      _pushMessage = null;
+    });
+    try {
+      final service = FixMatePushService.instance;
+      final client = Supabase.instance.client;
+      if (enabled) {
+        await service.enableForResident(client);
+      } else {
+        await service.disable(client, profile.id);
+      }
+      if (!mounted) return;
+      setState(() {
+        _pushEnabled = enabled;
+        _pushMessage = enabled
+            ? 'Push notifications enabled on this Android device.'
+            : 'Push notifications disabled on this Android device.';
+      });
+    } on PostgrestException {
+      if (mounted) setState(() => _pushMessage =
+          'Push notifications are not enabled on this server yet.');
+    } on StateError {
+      if (mounted) setState(() => _pushMessage =
+          'Cannot enable notifications. Check your device permission and connection.');
+    } catch (_) {
+      if (mounted) setState(() => _pushMessage =
+          'Could not change push notifications. Please retry.');
+    } finally {
+      if (mounted) setState(() => _pushBusy = false);
+    }
+  }
+
 
   Future<void> _editProfile() async {
     final original = _currentProfile ?? widget.profile;
@@ -44,6 +109,12 @@ class _ProfilePageState extends State<ProfilePage> {
       _error = null;
     });
     try {
+      // Revoke the previous resident's FCM token before the Supabase
+      // session disappears. The service never blocks sign-out on FCM errors.
+      if (_supportsPush) {
+        await FixMatePushService.instance.disable(
+          Supabase.instance.client, widget.profile!.id);
+      }
       await Supabase.instance.client.auth.signOut();
     } catch (_) {
       if (mounted) setState(() => _error = 'Could not sign out. Please try again.');
@@ -115,6 +186,25 @@ class _ProfilePageState extends State<ProfilePage> {
                 ? profile.roomNumber!
                 : 'Not set'),
           ),
+        ],
+        if (_supportsPush) ...[
+          const Divider(),
+          SwitchListTile(
+            key: const Key('resident_push_opt_in'),
+            contentPadding: EdgeInsets.zero,
+            title: const FixMateText('Push notifications'),
+            subtitle: const FixMateText(
+              'Receive Android alerts when your maintenance report status changes.'),
+            value: _pushEnabled,
+            onChanged: _pushBusy || !FixMatePushService.instance.ready
+                ? null : _togglePush,
+          ),
+          if (!FixMatePushService.instance.ready)
+            const FixMateText('Firebase is not available on this device.'),
+          if (_pushBusy) const LinearProgressIndicator(),
+          if (_pushMessage != null)
+            FixMateText(_pushMessage!, style:
+              Theme.of(context).textTheme.bodySmall),
         ],
         const Divider(),
         FixMateText(l10n.language, style: Theme.of(context).textTheme.titleMedium),
