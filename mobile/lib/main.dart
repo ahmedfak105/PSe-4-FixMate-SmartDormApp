@@ -8,6 +8,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'app.dart';
 import 'features/operations/operations_connection_page.dart';
 import 'features/auth/password_recovery_links.dart';
+import 'features/notifications/fixmate_push_service.dart';
 import 'features/settings/locale_cubit.dart';
 import 'l10n/gen/app_localizations.dart';
 
@@ -45,6 +46,9 @@ Future<void> main() async {
       publishableKey: supabaseKey,
     );
     debugPrint('FixMate: Supabase initialized');
+    // Firebase is a separate, Android-only channel. Browser users and offline
+    // demonstrations do not initialize FCM or register device tokens.
+    await FixMatePushService.instance.initialize();
   } else {
     debugPrint('FixMate: Running offline demo (Supabase not configured)');
   }
