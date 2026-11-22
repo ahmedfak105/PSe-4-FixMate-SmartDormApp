@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../data/models/resident_profile.dart';
 import '../settings/edit_profile_page.dart';
+import '../settings/my_profile_avatar.dart';
 import '../../data/models/staff_report.dart';
 import '../../data/repositories/staff_reports_repository.dart';
 import '../../data/repositories/staff_notes_repository.dart';
@@ -29,13 +30,14 @@ class _StaffDashboardPageState extends State<StaffDashboardPage> {
   List<StaffReport> _reports = const [];
   bool _loading = true;
   ResidentProfile? _editedProfile;
+  int _avatarRevision = 0;
 
   Future<void> _editOwnProfile() async {
     final updated = await Navigator.of(context).push<ResidentProfile>(
       MaterialPageRoute(builder: (_) => EditProfilePage(
         profile: _editedProfile ?? widget.profile)),
     );
-    if (updated != null && mounted) setState(() => _editedProfile = updated);
+    if (updated != null && mounted) setState(() { _editedProfile = updated; _avatarRevision++; });
   }
 
   bool _showMyJobs = false;
@@ -151,8 +153,22 @@ class _StaffDashboardPageState extends State<StaffDashboardPage> {
       appBar: AppBar(
         title: const Text('FixMate · Maintenance Workspace'),
         actions: [
-          IconButton(tooltip: 'My profile', icon: const Icon(Icons.account_circle_outlined),
-            onPressed: _editOwnProfile),
+          Tooltip(
+            message: 'My profile',
+            child: InkWell(
+              onTap: _editOwnProfile,
+              borderRadius: BorderRadius.circular(30),
+              child: Padding(
+                padding: const EdgeInsets.all(5),
+                child: MyProfileAvatar(
+                  key: ValueKey('my-avatar-${widget.profile.id}-$_avatarRevision'),
+                  userId: widget.profile.id,
+                  name: (_editedProfile ?? widget.profile).fullName,
+                  radius: 17,
+                ),
+              ),
+            ),
+          ),
           IconButton(
             tooltip: 'Refresh reports',
             icon: const Icon(Icons.refresh),
