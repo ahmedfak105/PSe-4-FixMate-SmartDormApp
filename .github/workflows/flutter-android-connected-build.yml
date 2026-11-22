@@ -22,6 +22,8 @@ jobs:
         working-directory: mobile
     steps:
       - uses: actions/checkout@v4
+      - name: Block Demo code before connected Android build
+        run: bash scripts/check_connected_only_release.sh
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
