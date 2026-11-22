@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../data/models/resident_profile.dart';
 import '../../l10n/gen/app_localizations.dart';
 import 'locale_cubit.dart';
+import 'edit_profile_page.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key, this.profile});
@@ -19,6 +20,16 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   bool _signingOut = false;
   String? _error;
+  ResidentProfile? _currentProfile;
+
+  Future<void> _editProfile() async {
+    final original = _currentProfile ?? widget.profile;
+    if (original == null) return;
+    final changed = await Navigator.of(context).push<ResidentProfile>(
+      MaterialPageRoute(builder: (_) => EditProfilePage(profile: original)),
+    );
+    if (changed != null && mounted) setState(() => _currentProfile = changed);
+  }
 
   Future<void> _signOut() async {
     if (_signingOut) return;
@@ -39,7 +50,7 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final localeCubit = context.read<LocaleCubit>();
-    final profile = widget.profile;
+    final profile = _currentProfile ?? widget.profile;
     final email = profile == null
         ? null
         : Supabase.instance.client.auth.currentUser?.email;
@@ -63,6 +74,12 @@ class _ProfilePageState extends State<ProfilePage> {
             subtitle: Text(l10n.demoNotice),
           ),
         ] else ...[
+          FilledButton.icon(
+            onPressed: _editProfile,
+            icon: const Icon(Icons.edit_outlined),
+            label: const Text('Edit personal information'),
+          ),
+          const SizedBox(height: 15),
           ListTile(
             leading: const Icon(Icons.email_outlined),
             title: const Text('Email'),
