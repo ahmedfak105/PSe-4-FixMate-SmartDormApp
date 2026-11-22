@@ -138,7 +138,7 @@ class _ModeratorOperationsPageState extends State<ModeratorOperationsPage> {
     await showDialog<void>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Private report photo'),
+        title: const FixMateText('Private report photo'),
         content: SizedBox(
           width: 540,
           height: 350,
@@ -146,7 +146,7 @@ class _ModeratorOperationsPageState extends State<ModeratorOperationsPage> {
             future: download,
             builder: (context, snapshot) {
               if (snapshot.hasError) {
-                return Center(child: Text('Photo unavailable: ${snapshot.error}'));
+                return Center(child: FixMateText('Photo unavailable: ${snapshot.error}'));
               }
               if (!snapshot.hasData) {
                 return const Center(child: CircularProgressIndicator());
@@ -157,7 +157,7 @@ class _ModeratorOperationsPageState extends State<ModeratorOperationsPage> {
         ),
         actions: [
           TextButton(onPressed: () => Navigator.pop(dialogContext),
-              child: const Text('Close')),
+              child: const FixMateText('Close')),
         ],
       ),
     );
@@ -172,7 +172,7 @@ class _ModeratorOperationsPageState extends State<ModeratorOperationsPage> {
         context: context,
         builder: (dialogContext) => StatefulBuilder(
           builder: (dialogContext, update) => AlertDialog(
-            title: Text('Review report #${report['id']}'),
+            title: FixMateText('Review report #${report['id']}'),
             content: SizedBox(
               width: 460,
               child: Column(mainAxisSize: MainAxisSize.min, children: [
@@ -180,9 +180,9 @@ class _ModeratorOperationsPageState extends State<ModeratorOperationsPage> {
                   initialValue: outcome,
                   decoration: const InputDecoration(labelText: 'Review outcome'),
                   items: const [
-                    DropdownMenuItem(value: 'valid', child: Text('Valid')),
-                    DropdownMenuItem(value: 'duplicate', child: Text('Duplicate')),
-                    DropdownMenuItem(value: 'inappropriate', child: Text('Inappropriate')),
+                    DropdownMenuItem(value: 'valid', child: FixMateText('Valid')),
+                    DropdownMenuItem(value: 'duplicate', child: FixMateText('Duplicate')),
+                    DropdownMenuItem(value: 'inappropriate', child: FixMateText('Inappropriate')),
                   ],
                   onChanged: (value) {
                     if (value != null) update(() => outcome = value);
@@ -203,19 +203,19 @@ class _ModeratorOperationsPageState extends State<ModeratorOperationsPage> {
             ),
             actions: [
               TextButton(onPressed: () => Navigator.pop(dialogContext),
-                  child: const Text('Cancel')),
+                  child: const FixMateText('Cancel')),
               FilledButton(
                 onPressed: () {
                   final trimmed = reason.text.trim();
                   if (outcome != 'valid' && trimmed.isEmpty) {
                     ScaffoldMessenger.of(dialogContext).showSnackBar(
-                      const SnackBar(content: Text('A rejection reason is required.')),
+                      const SnackBar(content: FixMateText('A rejection reason is required.')),
                     );
                     return;
                   }
                   Navigator.pop(dialogContext, (outcome, trimmed));
                 },
-                child: const Text('Save decision'),
+                child: const FixMateText('Save decision'),
               ),
             ],
           ),
@@ -268,7 +268,7 @@ class _ModeratorOperationsPageState extends State<ModeratorOperationsPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('FixMate · Review Center'),
+        title: const FixMateText('FixMate · Review Center'),
         actions: [
           const FixMateLanguageButton(),
           const FixMateSupportMenu(),
@@ -302,17 +302,17 @@ class _ModeratorOperationsPageState extends State<ModeratorOperationsPage> {
             child: ListView(
               padding: const EdgeInsets.all(20),
               children: [
-                Text('Report review',
+                FixMateText('Report review',
                     style: Theme.of(context).textTheme.headlineSmall),
                 const SizedBox(height: 8),
-                Text('Signed in as ${(_editedProfile ?? widget.profile).fullName} '
+                FixMateText('Signed in as ${(_editedProfile ?? widget.profile).fullName} '
                     '(${widget.profile.role}). Review only new, unassigned reports.'),
                 const SizedBox(height: 14),
                 SegmentedButton<bool>(
                   segments: const [
-                    ButtonSegment(value: false, label: Text('Awaiting review'),
+                    ButtonSegment(value: false, label: FixMateText('Awaiting review'),
                         icon: Icon(Icons.pending_actions_outlined)),
-                    ButtonSegment(value: true, label: Text('Reviewed'),
+                    ButtonSegment(value: true, label: FixMateText('Reviewed'),
                         icon: Icon(Icons.fact_check_outlined)),
                   ],
                   selected: {_reviewedOnly},
@@ -325,34 +325,34 @@ class _ModeratorOperationsPageState extends State<ModeratorOperationsPage> {
                 ],
                 if (_error != null) ...[
                   const SizedBox(height: 12),
-                  Text(_error!, style: TextStyle(
+                  FixMateText(_error!, style: TextStyle(
                       color: Theme.of(context).colorScheme.error)),
-                  TextButton(onPressed: _refresh, child: const Text('Retry')),
+                  TextButton(onPressed: _refresh, child: const FixMateText('Retry')),
                 ],
                 if (_notice != null) ...[
                   const SizedBox(height: 10),
-                  Text(_notice!, style: TextStyle(
+                  FixMateText(_notice!, style: TextStyle(
                       color: Theme.of(context).colorScheme.primary)),
                 ],
                 if (!_loading && _error == null && visible.isEmpty)
                   const Padding(padding: EdgeInsets.all(30),
-                      child: Text('No reports in this review category.')),
+                      child: FixMateText('No reports in this review category.')),
                 for (final report in visible) ...[
                   const SizedBox(height: 9),
                   Card(child: Padding(
                     padding: const EdgeInsets.all(16),
                     child: Column(crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('#${report['id']}  ${report['title']}',
+                        FixMateText('#${report['id']}  ${report['title']}',
                             style: Theme.of(context).textTheme.titleLarge),
                         const SizedBox(height: 6),
-                        Text('${_categories[(report['category_id'] as num).toInt()] ?? 'Other'}'
+                        FixMateText('${_categories[(report['category_id'] as num).toInt()] ?? 'Other'}'
                             ' · ${report['location'] ?? 'No location'}'),
                         const SizedBox(height: 8),
-                        Text(report['description'] as String? ?? ''),
+                        FixMateText(report['description'] as String? ?? ''),
                         if (_decisions.containsKey((report['id'] as num).toInt())) ...[
                           const SizedBox(height: 8),
-                          Text('Decision: ${_decisions[(report['id'] as num).toInt()]?['outcome']}'
+                          FixMateText('Decision: ${_decisions[(report['id'] as num).toInt()]?['outcome']}'
                               ' · ${_decisions[(report['id'] as num).toInt()]?['reason']}'),
                         ],
                         const SizedBox(height: 12),
@@ -361,13 +361,13 @@ class _ModeratorOperationsPageState extends State<ModeratorOperationsPage> {
                             FilledButton.icon(
                               onPressed: _busy ? null : () => _review(report),
                               icon: const Icon(Icons.fact_check_outlined),
-                              label: const Text('Review report'),
+                              label: const FixMateText('Review report'),
                             ),
                           for (final photo in _photos[(report['id'] as num).toInt()] ?? [])
                             OutlinedButton.icon(
                               onPressed: () => _showPhoto(photo['storage_path'] as String),
                               icon: const Icon(Icons.photo_outlined),
-                              label: const Text('View private photo'),
+                              label: const FixMateText('View private photo'),
                             ),
                         ]),
                       ]),
