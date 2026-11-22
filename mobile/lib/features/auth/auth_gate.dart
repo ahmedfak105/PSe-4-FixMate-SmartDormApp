@@ -132,8 +132,7 @@ class _AuthGateState extends State<AuthGate> {
           return _message(
             heading: 'Profile not available',
             description: 'The account signed in, but FixMate could not read '
-                'its profile from Supabase. Check the profiles row, Data API '
-                'access, and RLS permissions.',
+                'your account details. Please retry or contact support.',
             allowRetry: true,
           );
         }
@@ -143,11 +142,8 @@ class _AuthGateState extends State<AuthGate> {
           return _message(
             heading: 'Account role not permitted in this workspace',
             description: widget.operationsOnly
-                ? 'This Flutter Web operations workspace is for Maintenance Staff, '
-                    'Moderators and System Admins only. The signed-in role is ${profile.role}.'
-                : 'This Flutter mobile application supports Resident and Maintenance Staff '
-                    'accounts. The signed-in role is ${profile.role}. '
-                    'Use the Operations Web application for Moderator and Admin access.',
+                ? 'This workspace is available to maintenance staff and authorized managers.'
+                : 'Please open the appropriate FixMate workspace for your account.',
           );
         }
         return widget.builder(profile);
