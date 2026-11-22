@@ -22,11 +22,12 @@ import 'navigation/route_generator.dart';
 /// Offline tests use InMemoryReportRepository; authenticated app uses DB.
 class FixMateApp extends StatelessWidget {
   const FixMateApp({super.key, this.repository, this.requireLogin = false,
-      this.operationsOnly = false});
+      this.operationsOnly = false, this.initialRecoveryLink = false});
 
   final ReportRepository? repository;
   final bool requireLogin;
   final bool operationsOnly;
+  final bool initialRecoveryLink;
 
   @override
   Widget build(BuildContext context) => MultiBlocProvider(
@@ -54,6 +55,7 @@ class FixMateApp extends StatelessWidget {
         home: requireLogin
             ? AuthGate(
                 operationsOnly: operationsOnly,
+                initialRecoveryLink: initialRecoveryLink,
                 builder: (profile) => switch (workspaceForRole(profile.role,
                     operationsOnly: operationsOnly)) {
                     FixMateWorkspace.systemAdmin =>
