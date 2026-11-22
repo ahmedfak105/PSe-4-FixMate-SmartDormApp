@@ -8,6 +8,7 @@ import '../../data/models/staff_report.dart';
 import '../../data/repositories/staff_reports_repository.dart';
 import '../../data/repositories/staff_notes_repository.dart';
 import 'staff_notes_dialog.dart';
+import 'staff_report_filters.dart';
 
 /// Staff-only Flutter Web dashboard. The user's role is checked by AuthGate;
 /// PostgreSQL RLS and role-aware RPC functions remain the source of truth.
@@ -38,6 +39,28 @@ class _StaffDashboardPageState extends State<StaffDashboardPage> {
         profile: _editedProfile ?? widget.profile)),
     );
     if (updated != null && mounted) setState(() { _editedProfile = updated; _avatarRevision++; });
+  }
+
+  final _filterSearchController = TextEditingController();
+  String _filterQuery = '';
+  String _filterStatus = 'all';
+  String _filterCategory = 'all';
+  String _filterDate = 'all';
+
+  void _clearReportFilters() {
+    _filterSearchController.clear();
+    setState(() {
+      _filterQuery = '';
+      _filterStatus = 'all';
+      _filterCategory = 'all';
+      _filterDate = 'all';
+    });
+  }
+
+  @override
+  void dispose() {
+    _filterSearchController.dispose();
+    super.dispose();
   }
 
   bool _showMyJobs = false;
@@ -144,7 +167,15 @@ class _StaffDashboardPageState extends State<StaffDashboardPage> {
     final staffId = widget.profile.id;
     final available = _reports.where((r) => r.canClaim(staffId)).toList();
     final mine = _reports.where((r) => r.isAssignedTo(staffId)).toList();
-    final displayed = _showMyJobs ? mine : available;
+    final displayed = filterStaffVisibleReports(
+      _showMyJobs ? mine : available,
+      query: _filterQuery,
+      status: _filterStatus,
+      category: _filterCategory,
+      dateRange: _filterDate,
+    );
+    final categoryIds = _reports.map((r) => r.categoryId).toSet().toList()
+      ..sort();
     final name = (_editedProfile ?? widget.profile).fullName.trim().isNotEmpty
         ? (_editedProfile ?? widget.profile).fullName.trim()
         : 'Maintenance Staff';
@@ -223,6 +254,70 @@ class _StaffDashboardPageState extends State<StaffDashboardPage> {
                     onSelected: (_) => setState(() => _showMyJobs = true),
                   ),
                 ]),
+                const SizedBox(height: 16),
+                TextField(
+                  key: const Key('staff_filter_search'),
+                  controller: _filterSearchController,
+                  decoration: const InputDecoration(
+                    prefixIcon: Icon(Icons.search),
+                    labelText: 'Search reports',
+                    hintText: 'Title, location, description or report ID',
+                  ),
+                  onChanged: (v) => setState(() => _filterQuery = v),
+                ),
+                const SizedBox(height: 10),
+                Wrap(spacing: 8, runSpacing: 8, children: [
+                  SizedBox(width: 190, child: DropdownButtonFormField<String>(
+                    key: const Key('staff_filter_status'),
+                    initialValue: _filterStatus,
+                    isExpanded: true,
+                    decoration: const InputDecoration(labelText: 'Status'),
+                    items: const [
+                      DropdownMenuItem(value: 'all', child: Text('All statuses')),
+                      DropdownMenuItem(value: 'new', child: Text('New')),
+                      DropdownMenuItem(value: 'in_progress', child: Text('In progress')),
+                      DropdownMenuItem(value: 'resolved', child: Text('Resolved')),
+                    ],
+                    onChanged: (v) =>
+                        setState(() => _filterStatus = v ?? 'all'),
+                  )),
+                  SizedBox(width: 190, child: DropdownButtonFormField<String>(
+                    key: const Key('staff_filter_category'),
+                    initialValue: _filterCategory,
+                    isExpanded: true,
+                    decoration: const InputDecoration(labelText: 'Category'),
+                    items: [
+                      const DropdownMenuItem(value: 'all',
+                        child: Text('All categories')),
+                      for (final id in categoryIds)
+                        DropdownMenuItem(value: '$id',
+                          child: Text('Category #$id')),
+                    ],
+                    onChanged: (v) =>
+                        setState(() => _filterCategory = v ?? 'all'),
+                  )),
+                  SizedBox(width: 190, child: DropdownButtonFormField<String>(
+                    key: const Key('staff_filter_date'),
+                    initialValue: _filterDate,
+                    isExpanded: true,
+                    decoration: const InputDecoration(labelText: 'Submitted'),
+                    items: const [
+                      DropdownMenuItem(value: 'all', child: Text('Any date')),
+                      DropdownMenuItem(value: 'last7', child: Text('Last 7 days')),
+                      DropdownMenuItem(value: 'last30', child: Text('Last 30 days')),
+                    ],
+                    onChanged: (v) =>
+                        setState(() => _filterDate = v ?? 'all'),
+                  )),
+                  TextButton.icon(
+                    onPressed: _clearReportFilters,
+                    icon: const Icon(Icons.filter_alt_off_outlined),
+                    label: const Text('Clear filters'),
+                  ),
+                ]),
+                const SizedBox(height: 8),
+                Text('${displayed.length} matching reports',
+                    style: Theme.of(context).textTheme.bodySmall),
                 if (_loading) ...[
                   const SizedBox(height: 18),
                   const LinearProgressIndicator(),
