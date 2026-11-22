@@ -17,7 +17,7 @@ This **integration branch** combines the code and documentation for lecturer rev
 | Proposed validation and review SQL (not deployed live) | [docs/sql/PROPOSED_REPORT_INPUT_VALIDATION.sql](docs/sql/PROPOSED_REPORT_INPUT_VALIDATION.sql), [docs/sql/PROPOSED_MODERATOR_REVIEW_MIGRATION.sql](docs/sql/PROPOSED_MODERATOR_REVIEW_MIGRATION.sql) |
 | Presentation & delivery checklist | [docs/LECTURER_PRESENTATION_SCRIPT.md](docs/LECTURER_PRESENTATION_SCRIPT.md), [docs/INTEGRATION_AND_DELIVERY_HANDOFF_2026-11-22.md](docs/INTEGRATION_AND_DELIVERY_HANDOFF_2026-11-22.md) |
 
-**Start here for the lecturer:** [Lecturer Review Index](docs/LECTURER_REVIEW_START_HERE.md) and [Flutter Web demo guide](mobile/FLUTTER_WEB_LECTURER_DEMO.md).
+**Start here for the lecturer:** [Lecturer Review Index](docs/LECTURER_REVIEW_START_HERE.md) and [Flutter Web operations guide](mobile/OPERATIONS_WEB_README.md).
 
 ## Build the applications
 
@@ -33,7 +33,7 @@ flutter run -d chrome --dart-define=FIXMATE_OPERATIONS_WEB=true
 
 The last command launches Flutter Web Operations. Supply the **public** Supabase project URL and publishable/anon key in the connection form; the actual Moderator review workflow requires a *test database with the proposed review migration applied*. Do not enter `service_role` or `sb_secret_` keys in browser/client code.
 
-For Resident/Staff mobile workflows, use Flutter without `FIXMATE_OPERATIONS_WEB=true`, configured with a valid public Supabase URL/key. Without Supabase, the original mobile build has a local demo fallback and does not represent connected data.
+For Resident/Staff mobile workflows, use Flutter without `FIXMATE_OPERATIONS_WEB=true`, configured with a valid public Supabase URL/key. Without a valid public Supabase URL/key, the app displays a connection-required screen and never shows synthetic reports.
 
 ## Build/test proof
 
@@ -41,19 +41,23 @@ GitHub Actions workflows under `.github/workflows/` validate the integrated Flut
 
 ## Deployment / review status
 
-**This is a review candidate, not a production release.** The five versioned local migrations include report validation and Moderator review as additions to the original three baseline migrations. Read [the local demonstration runbook](docs/LOCAL_LECTURER_DEMO_RUNBOOK.md) to reproduce the full workflow. The active remote Supabase project contains six public application tables; its manually created schema must not be overwritten with the fresh database baseline migrations. The proposed new report validation and Moderator review SQL have passed isolated local tests but are **not deployed on the active project**. Do not claim that live Moderator review works until a separately approved staged rollout passes.
+**This is a review candidate, not a production release.** The five versioned local migrations include report validation and Moderator review as additions to the original three baseline migrations. Use [the isolated integration-test runbook](docs/LOCAL_LECTURER_DEMO_RUNBOOK.md) only for developer QA; the installed app has no offline fixture mode. The active remote Supabase project contains six public application tables; its manually created schema must not be overwritten with the fresh database baseline migrations. The proposed new report validation and Moderator review SQL have passed isolated local tests but are **not deployed on the active project**. Do not claim that live Moderator review works until a separately approved staged rollout passes.
 
 - All **12/12 original implementation TASKs** are closed at local code/CI acceptance level, including [#36](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/36) and [#39](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/39). **Hosted migration is NOT done**: [RELEASE GATE #47](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/47) tracks approved remote staging/backup/reconciliation.
 - Previous source PRs: #42 (documentation/database), #43 (Flutter mobile), #45 (Flutter Web), with #44 an optional older HTML/JavaScript prototype. These remain subject to review.
-- No private API keys, production credentials, actual resident data or passwords should be committed or included in demo screenshots.
+- No private API keys, production credentials, actual resident data or passwords should be committed or included in screenshots.
 
 **Do not merge this branch to `main` until the latest combined tests have passed and the team has reviewed the scope.**
 
-## One-command local lecturer demonstration
+## Isolated developer quality assurance (not part of the app)
 
-For a complete **four-role** demonstration without touching the hosted Supabase project, use the [local demo runbook](docs/LOCAL_LECTURER_DEMO_RUNBOOK.md) and the tested [Supabase CLI bootstrap script](scripts/prepare_local_lecturer_demo.sh). It reconstructs the local database, adds the two proposed backend changes **locally only**, provisions fictional Resident/Staff/Moderator/Admin users and verifies the report/photo workflows. This requires Docker and Flutter on a laptop; the APK artifact alone does not include a persistent local backend.
-
+Synthetic accounts and test records are restricted to local Supabase CLI tests
+and `mobile/test/`. They are **never** loaded by the installed Android app
+or Flutter Web. The [isolated API-test runbook](docs/LOCAL_LECTURER_DEMO_RUNBOOK.md)
+explains how automated QA protects actual hosted data. The production UI
+requires Supabase authentication for all four roles; unfinished hosted
+capabilities remain blocked until approved under Release Gate #47.
 
 ## Final lecturer handoff index
 
-[Current technical release status and sign-off gates](docs/FINAL_LECTURER_HANDOFF_STATUS.md) lists the **12 locally completed TASKs**, successful live-browser and API evidence, Android/Web build locations, the reproducible lecturer-demo script, the remaining separate hosted deployment gate, and what the lecturer should review in PR #46.
+[Current technical release status and sign-off gates](docs/FINAL_LECTURER_HANDOFF_STATUS.md) lists the **12 locally completed TASKs**, successful live-browser and API evidence, Android/Web build locations, the reproducible local test script, the remaining separate hosted deployment gate, and what the lecturer should review in PR #46.
