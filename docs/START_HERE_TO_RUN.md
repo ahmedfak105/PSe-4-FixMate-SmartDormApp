@@ -12,7 +12,7 @@
 4. Test Resident submit / My Reports / details / photos or Staff queue / claim / status / notes. Only test using authorized sample data. The private report photos remain protected by Supabase Storage policies.
 5. If the APK cannot sign in, check Auth email confirmation/provider configuration and user role. This connected APK uses the active project's **public publishable key only**, never `service_role` / `sb_secret`.
 
-The same run still includes `fixmate-integrated-android-debug-apk`, an **offline** demo version. Its `DEMO DATA` banner means it is not using hosted data. Do not confuse the two.
+The same run still includes `fixmate-integrated-android-debug-apk`, an **explicitly opt-in offline** demonstration with a `DEMO DATA` banner. Only `fixmate-integrated-connected-android-apk` has the hosted public URL and publishable key. An APK built with neither connected credentials nor the offline-demo flag now shows a clear connection-required screen instead of silently displaying fake reports.
 
 ## B. Flutter Web operations — GitHub Pages
 
