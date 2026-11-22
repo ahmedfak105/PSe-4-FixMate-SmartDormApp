@@ -18,6 +18,10 @@ Future<void> main() async {
   const supabaseKey = String.fromEnvironment('SUPABASE_PUBLISHABLE_KEY');
   final isConfigured = supabaseUrl.isNotEmpty && supabaseKey.isNotEmpty;
   const operationsOnly = bool.fromEnvironment('FIXMATE_OPERATIONS_WEB', defaultValue: false);
+  // Public GitHub Pages hosts all four roles; restricted operations mode
+  // remains the default unless this explicit web-only flag is enabled.
+  const residentWebFlag = bool.fromEnvironment('FIXMATE_RESIDENT_WEB', defaultValue: false);
+  final allowResidentWeb = kIsWeb && operationsOnly && residentWebFlag;
 
   // Validate build-time public credentials as carefully as the runtime
   // connection screen. Legacy service_role JWTs must never reach a Web client.
@@ -52,17 +56,21 @@ Future<void> main() async {
   if (operationsOnly && !isConfigured) {
     // Runtime public configuration lets the same compiled web bundle be
     // deployed to staging without hardcoding or leaking server credentials.
-    runApp(_OperationsConnectApp(initialRecoveryLink: initialRecoveryLink));
+    runApp(_OperationsConnectApp(initialRecoveryLink: initialRecoveryLink,
+        allowResidentWeb: allowResidentWeb));
     return;
   }
   runApp(FixMateApp(requireLogin: isConfigured,
       operationsOnly: operationsOnly,
-      initialRecoveryLink: initialRecoveryLink));
+      initialRecoveryLink: initialRecoveryLink,
+      allowResidentWeb: allowResidentWeb));
 }
 
 class _OperationsConnectApp extends StatefulWidget {
-  const _OperationsConnectApp({required this.initialRecoveryLink});
+  const _OperationsConnectApp({required this.initialRecoveryLink,
+      required this.allowResidentWeb});
   final bool initialRecoveryLink;
+  final bool allowResidentWeb;
 
   @override
   State<_OperationsConnectApp> createState() => _OperationsConnectAppState();
@@ -75,7 +83,8 @@ class _OperationsConnectAppState extends State<_OperationsConnectApp> {
   Widget build(BuildContext context) {
     if (_connected) {
       return FixMateApp(requireLogin: true, operationsOnly: true,
-          initialRecoveryLink: widget.initialRecoveryLink);
+          initialRecoveryLink: widget.initialRecoveryLink,
+          allowResidentWeb: widget.allowResidentWeb);
     }
     return MaterialApp(
       debugShowCheckedModeBanner: false,
