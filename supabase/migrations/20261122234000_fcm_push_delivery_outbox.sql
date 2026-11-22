@@ -110,8 +110,8 @@ begin
           q.claimed_at < now() - interval '10 minutes')
     )
     order by q.id
-    for update skip locked
     limit least(greatest(coalesce(p_batch_size, 10), 1), 20)
+    for update skip locked
   ), claimed as (
     update public.push_delivery_outbox q
     set state = 'processing',
