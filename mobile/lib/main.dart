@@ -1,3 +1,4 @@
+import 'fixmate_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -70,10 +71,7 @@ class _OperationsConnectAppState extends State<_OperationsConnectApp> {
     }
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF146B70)),
-        useMaterial3: true,
-      ),
+      theme: FixMateTheme.light,
       home: OperationsConnectionPage(
         onConnected: () {
           if (mounted) setState(() => _connected = true);
