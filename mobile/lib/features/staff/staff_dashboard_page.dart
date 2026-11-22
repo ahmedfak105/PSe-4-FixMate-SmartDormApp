@@ -145,7 +145,7 @@ class _StaffDashboardPageState extends State<StaffDashboardPage> {
           final messenger = ScaffoldMessenger.maybeOf(context);
           messenger?.hideCurrentSnackBar();
           messenger?.showSnackBar(
-            SnackBar(content: Text(feedback), duration: const Duration(seconds: 6)),
+            SnackBar(content: FixMateText(feedback), duration: const Duration(seconds: 6)),
           );
         }
       }
@@ -184,7 +184,7 @@ class _StaffDashboardPageState extends State<StaffDashboardPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('FixMate · Maintenance Workspace'),
+        title: const FixMateText('FixMate · Maintenance Workspace'),
         actions: [
           const FixMateLanguageButton(),
           const FixMateSupportMenu(),
@@ -212,7 +212,7 @@ class _StaffDashboardPageState extends State<StaffDashboardPage> {
           TextButton.icon(
             onPressed: _signingOut ? null : _signOut,
             icon: const Icon(Icons.logout),
-            label: Text(_signingOut ? 'Signing out...' : 'Sign out'),
+            label: FixMateText(_signingOut ? 'Signing out...' : 'Sign out'),
           ),
           const SizedBox(width: 10),
         ],
@@ -225,10 +225,10 @@ class _StaffDashboardPageState extends State<StaffDashboardPage> {
             child: ListView(
               padding: const EdgeInsets.all(20),
               children: [
-                Text('Welcome, $name',
+                FixMateText('Welcome, $name',
                     style: Theme.of(context).textTheme.headlineSmall),
                 const SizedBox(height: 6),
-                const Text('Available reports can be claimed. Only reports '
+                const FixMateText('Available reports can be claimed. Only reports '
                     'assigned to you can be marked resolved.'),
                 const SizedBox(height: 20),
                 Wrap(spacing: 12, runSpacing: 12, children: [
@@ -248,12 +248,12 @@ class _StaffDashboardPageState extends State<StaffDashboardPage> {
                 const SizedBox(height: 20),
                 Wrap(spacing: 8, children: [
                   ChoiceChip(
-                    label: Text('Available (${available.length})'),
+                    label: FixMateText('Available (${available.length})'),
                     selected: !_showMyJobs,
                     onSelected: (_) => setState(() => _showMyJobs = false),
                   ),
                   ChoiceChip(
-                    label: Text('My jobs (${mine.length})'),
+                    label: FixMateText('My jobs (${mine.length})'),
                     selected: _showMyJobs,
                     onSelected: (_) => setState(() => _showMyJobs = true),
                   ),
@@ -277,10 +277,10 @@ class _StaffDashboardPageState extends State<StaffDashboardPage> {
                     isExpanded: true,
                     decoration: const InputDecoration(labelText: 'Status'),
                     items: const [
-                      DropdownMenuItem(value: 'all', child: Text('All statuses')),
-                      DropdownMenuItem(value: 'new', child: Text('New')),
-                      DropdownMenuItem(value: 'in_progress', child: Text('In progress')),
-                      DropdownMenuItem(value: 'resolved', child: Text('Resolved')),
+                      DropdownMenuItem(value: 'all', child: FixMateText('All statuses')),
+                      DropdownMenuItem(value: 'new', child: FixMateText('New')),
+                      DropdownMenuItem(value: 'in_progress', child: FixMateText('In progress')),
+                      DropdownMenuItem(value: 'resolved', child: FixMateText('Resolved')),
                     ],
                     onChanged: (v) =>
                         setState(() => _filterStatus = v ?? 'all'),
@@ -292,10 +292,10 @@ class _StaffDashboardPageState extends State<StaffDashboardPage> {
                     decoration: const InputDecoration(labelText: 'Category'),
                     items: [
                       const DropdownMenuItem(value: 'all',
-                        child: Text('All categories')),
+                        child: FixMateText('All categories')),
                       for (final id in categoryIds)
                         DropdownMenuItem(value: '$id',
-                          child: Text('Category #$id')),
+                          child: FixMateText('Category #$id')),
                     ],
                     onChanged: (v) =>
                         setState(() => _filterCategory = v ?? 'all'),
@@ -306,9 +306,9 @@ class _StaffDashboardPageState extends State<StaffDashboardPage> {
                     isExpanded: true,
                     decoration: const InputDecoration(labelText: 'Submitted'),
                     items: const [
-                      DropdownMenuItem(value: 'all', child: Text('Any date')),
-                      DropdownMenuItem(value: 'last7', child: Text('Last 7 days')),
-                      DropdownMenuItem(value: 'last30', child: Text('Last 30 days')),
+                      DropdownMenuItem(value: 'all', child: FixMateText('Any date')),
+                      DropdownMenuItem(value: 'last7', child: FixMateText('Last 7 days')),
+                      DropdownMenuItem(value: 'last30', child: FixMateText('Last 30 days')),
                     ],
                     onChanged: (v) =>
                         setState(() => _filterDate = v ?? 'all'),
@@ -316,11 +316,11 @@ class _StaffDashboardPageState extends State<StaffDashboardPage> {
                   TextButton.icon(
                     onPressed: _clearReportFilters,
                     icon: const Icon(Icons.filter_alt_off_outlined),
-                    label: const Text('Clear filters'),
+                    label: const FixMateText('Clear filters'),
                   ),
                 ]),
                 const SizedBox(height: 8),
-                Text('${displayed.length} matching reports',
+                FixMateText('${displayed.length} matching reports',
                     style: Theme.of(context).textTheme.bodySmall),
                 if (_loading) ...[
                   const SizedBox(height: 18),
@@ -328,14 +328,14 @@ class _StaffDashboardPageState extends State<StaffDashboardPage> {
                 ],
                 if (_error != null) ...[
                   const SizedBox(height: 12),
-                  Text(_error!,
+                  FixMateText(_error!,
                       style: TextStyle(color: Theme.of(context).colorScheme.error)),
-                  TextButton(onPressed: _refresh, child: const Text('Retry')),
+                  TextButton(onPressed: _refresh, child: const FixMateText('Retry')),
                 ],
                 if (!_loading && _error == null && displayed.isEmpty) ...[
                   const SizedBox(height: 40),
                   Center(
-                      child: Text(_showMyJobs
+                      child: FixMateText(_showMyJobs
                           ? 'No jobs assigned to you yet.'
                           : 'No available reports right now.')),
                 ],
@@ -352,21 +352,21 @@ class _StaffDashboardPageState extends State<StaffDashboardPage> {
                             spacing: 10,
                             runSpacing: 8,
                             children: [
-                              Text('#${report.id}  ${report.title}',
+                              FixMateText('#${report.id}  ${report.title}',
                                   style: Theme.of(context).textTheme.titleMedium),
-                              Chip(label: Text(report.status.replaceAll('_', ' '))),
+                              Chip(label: FixMateText(report.status.replaceAll('_', ' '))),
                             ],
                           ),
                           const SizedBox(height: 8),
-                          Text('Location: ${report.location.isEmpty ? 'Not set' : report.location}'),
-                          Text('Submitted: ${report.createdAt.toLocal().toString().substring(0, 16)}'),
-                          Text('Last status update: ${report.lastStatusUpdatedAt == null
+                          FixMateText('Location: ${report.location.isEmpty ? 'Not set' : report.location}'),
+                          FixMateText('Submitted: ${report.createdAt.toLocal().toString().substring(0, 16)}'),
+                          FixMateText('Last status update: ${report.lastStatusUpdatedAt == null
                               ? 'Not recorded or not available'
                               : report.lastStatusUpdatedAt!.toLocal().toString().substring(0, 16)}'),
-                          Text('Category ID: ${report.categoryId}'),
+                          FixMateText('Category ID: ${report.categoryId}'),
                           if (report.description.isNotEmpty) ...[
                             const SizedBox(height: 8),
-                            Text(report.description),
+                            FixMateText(report.description),
                           ],
                           const SizedBox(height: 12),
                           if (report.canClaim(staffId))
@@ -375,7 +375,7 @@ class _StaffDashboardPageState extends State<StaffDashboardPage> {
                                   ? null
                                   : () => _handleAction(report, resolve: false),
                               icon: const Icon(Icons.assignment_turned_in_outlined),
-                              label: Text(_busyReportId == report.id
+                              label: FixMateText(_busyReportId == report.id
                                   ? 'Claiming...' : 'Claim report'),
                             )
                           else if (report.canResolve(staffId))
@@ -384,16 +384,16 @@ class _StaffDashboardPageState extends State<StaffDashboardPage> {
                                   ? null
                                   : () => _handleAction(report, resolve: true),
                               icon: const Icon(Icons.check_circle_outline),
-                              label: Text(_busyReportId == report.id
+                              label: FixMateText(_busyReportId == report.id
                                   ? 'Resolving...' : 'Mark resolved'),
                             )
                           else
-                            const Text('No status action available for this report.'),
+                            const FixMateText('No status action available for this report.'),
                           if (report.isAssignedTo(staffId)) ...[
                             const SizedBox(height: 10),
                             OutlinedButton.icon(
                               icon: const Icon(Icons.note_alt_outlined),
-                              label: const Text('Internal notes'),
+                              label: const FixMateText('Internal notes'),
                               onPressed: () => showDialog<void>(
                                 context: context,
                                 builder: (_) => StaffNotesDialog(
@@ -438,8 +438,8 @@ class _SummaryCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text('$count', style: Theme.of(context).textTheme.headlineSmall),
-                    Text(label, softWrap: true),
+                    FixMateText('$count', style: Theme.of(context).textTheme.headlineSmall),
+                    FixMateText(label, softWrap: true),
                   ],
                 ),
               ),
