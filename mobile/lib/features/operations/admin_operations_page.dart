@@ -181,16 +181,20 @@ class _AdminOperationsPageState extends State<AdminOperationsPage> {
       for (final status in ['new', 'in_progress', 'resolved'])
         status: _reports.where((r) => r['status'] == status).length,
     };
-    return Wrap(spacing: 12, runSpacing: 12, children: [
-      _Metric(label: 'All reports', count: _reports.length,
-          icon: Icons.library_books_outlined),
-      _Metric(label: 'New', count: byStatus['new']!,
-          icon: Icons.fiber_new_outlined),
-      _Metric(label: 'In progress', count: byStatus['in_progress']!,
-          icon: Icons.handyman_outlined),
-      _Metric(label: 'Resolved', count: byStatus['resolved']!,
-          icon: Icons.check_circle_outline),
-    ]);
+    return LayoutBuilder(builder: (context, bounds) {
+      final count = bounds.maxWidth >= 920 ? 4 : bounds.maxWidth >= 300 ? 2 : 1;
+      final cardWidth = (bounds.maxWidth - (count - 1) * 12) / count;
+      return Wrap(spacing: 12, runSpacing: 12, children: [
+        SizedBox(width: cardWidth, child: _Metric(label: 'All reports',
+            count: _reports.length, icon: Icons.library_books_outlined)),
+        SizedBox(width: cardWidth, child: _Metric(label: 'New',
+            count: byStatus['new']!, icon: Icons.fiber_new_outlined)),
+        SizedBox(width: cardWidth, child: _Metric(label: 'In progress',
+            count: byStatus['in_progress']!, icon: Icons.handyman_outlined)),
+        SizedBox(width: cardWidth, child: _Metric(label: 'Resolved',
+            count: byStatus['resolved']!, icon: Icons.check_circle_outline)),
+      ]);
+    });
   }
 
   Widget _listReports({required bool assignmentsOnly}) {
@@ -418,9 +422,7 @@ class _Metric extends StatelessWidget {
         : label == 'New' ? const Color(0xFFB87512)
         : label == 'In progress' ? const Color(0xFF3979B4)
         : FixMateTheme.teal;
-    return SizedBox(
-      width: 235,
-      child: Card(child: Padding(
+    return Card(child: Padding(
         padding: const EdgeInsets.all(19),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -441,7 +443,6 @@ class _Metric extends StatelessWidget {
               fontWeight: FontWeight.w600)),
           ],
         ),
-      )),
-    );
+      ));
   }
 }
