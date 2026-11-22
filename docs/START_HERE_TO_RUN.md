@@ -1,18 +1,18 @@
 # FixMate — Run the Application (Android + Flutter Web)
 
 **Build branch:** `integration/lecturer-review-2026-11-22`  
-**Scope:** executable demonstration builds, not final production release approval.  
+**Scope:** connected application builds; final production acceptance still requires the release gate.  
 **Backend:** existing hosted Supabase project `epsvagztisdovixlqehi` has the original six public application tables. It has **not** received the proposed Moderator review table/RPC or report-validation migration.
 
 ## A. Android phone — use the connected APK
 
 1. Open [Integrated Release Candidate Actions runs](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/workflows/integrated-release.yml) and select the **latest successful run** for the integration branch.
 2. Open **Artifacts** and download `fixmate-integrated-connected-android-apk`. This is a ZIP. Extract its `app-debug.apk` and install it on an Android phone. GitHub artifact downloads may require a signed-in account; debug APKs are for testing, not Play Store distribution.
-3. Open FixMate, sign in with an **existing authorized Resident or Maintenance Staff account** or use Resident sign-up if enabled in the project. Do **not** use local-only fixture accounts from the Docker demo; those do not exist on the hosted server.
+3. Open FixMate, sign in with an **existing authorized Resident or Maintenance Staff account** or use Resident sign-up if enabled in the project. Only accounts registered in the hosted Supabase Auth project can sign in.
 4. Test Resident submit / My Reports / details / photos or Staff queue / claim / status / notes. Only test using authorized sample data. The private report photos remain protected by Supabase Storage policies.
 5. If the APK cannot sign in, check Auth email confirmation/provider configuration and user role. This connected APK uses the active project's **public publishable key only**, never `service_role` / `sb_secret`.
 
-The same run still includes `fixmate-integrated-android-debug-apk`, an **explicitly opt-in offline** demonstration with a `DEMO DATA` banner. Only `fixmate-integrated-connected-android-apk` has the hosted public URL and publishable key. An APK built with neither connected credentials nor the offline-demo flag now shows a clear connection-required screen instead of silently displaying fake reports.
+**Only the connected Android APK is published.** Builds without valid public Supabase settings show an error/connection-required screen; there is no local report database or offline APK.
 
 ## B. Flutter Web operations — GitHub Pages
 
@@ -26,9 +26,15 @@ The repository contains [the Pages deployment workflow](../.github/workflows/dep
 
 If Pages deployment is unavailable due to repository permissions, use the web ZIP from [Integrated Release Candidate](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/workflows/integrated-release.yml) and publish its contents on an HTTPS static host, preserving the base-path configuration (the generic web artifact in that workflow targets root `/`, so it should not be mounted under a subpath without rebuilding).
 
-## C. Full four-role demonstration (including Moderator)
+## C. Four-role connected application
 
-Use the separate [local Supabase five-migration reproducible demo](LOCAL_LECTURER_DEMO_RUNBOOK.md) on a computer with Docker and Flutter. The synthetic Moderator review table/RPC and secure test fixture accounts exist in that **local stack only**. The existing hosted database must **not** receive the entire five-migration baseline.
+Resident, Maintenance Staff, Moderator and System Admin all use Supabase
+authentication. Their access and visibility depend on hosted role/RLS rules.
+Moderator reviews, avatar uploads and certain admin/notification actions
+remain unavailable until reviewed additive-only changes are deployed
+safely under Release Gate #47. Never present unfinished hosted workflows
+as already operational. Automated synthetic test fixtures under `test/`
+and the disposable local Supabase CLI remain **developer-only tests**.
 
 ## D. Final acceptance
 
@@ -36,4 +42,4 @@ Use the separate [local Supabase five-migration reproducible demo](LOCAL_LECTURE
 - Confirm Pages deployment URL by a successful GitHub Actions deploy and actual browser login.
 - Confirm no privileged client keys, and perform cross-account denied-access tests using synthetic accounts.
 - For hosted Moderator review and input validation, [Release Gate #47](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/47) requires approved staging, verified backup and restore, reconciliation of existing empty migration history, and review of only additive SQL.
-- The Draft [integrated PR #46](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/pull/46) is **not merged** merely because build artifacts exist.
+- The [integrated PR #46](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/pull/46) is **not merged** merely because build artifacts exist.
