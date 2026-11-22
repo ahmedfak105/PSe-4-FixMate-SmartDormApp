@@ -4,6 +4,15 @@
 
 **Important:** These steps must run on a trusted operator computer with sufficient encrypted local storage and Docker/Postgres tooling. They have **not** been performed or verified by ChatGPT against the real project, because no private database connection or recoverable backup was available. Never paste passwords, full connection URLs, backup files, Auth users, hashed passwords, service-role keys, or Firebase service-account JSON into GitHub issues, chats, screenshots, or CI logs.
 
+## Windows quick start
+
+For a **Windows PC**, use the reviewed read-only
+[PowerShell backup helper and two-photo Storage checklist](WINDOWS_BACKUP_CHECKLIST.md).
+The script performs the official database export steps and writes checksums,
+but **cannot verify a restore or export private Storage files by itself**.
+You must run it on your own trusted computer with a private database password.
+The Bash commands below remain a Unix/macOS alternative.
+
 ## 1. Review and prepare
 
 - Confirm this is the correct project and its current data. An existing [read-only release audit](sql/FIXMATE_HOSTED_RELEASE_AUDIT_READ_ONLY.sql) checks table presence, RLS and grants without retrieving names/emails/reports.
