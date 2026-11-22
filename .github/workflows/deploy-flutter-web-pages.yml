@@ -28,6 +28,8 @@ jobs:
         working-directory: mobile
     steps:
       - uses: actions/checkout@v4
+      - name: Block Demo code before publishing public Web
+        run: bash ../scripts/check_connected_only_release.sh
       - uses: subosito/flutter-action@v2
         with:
           channel: stable

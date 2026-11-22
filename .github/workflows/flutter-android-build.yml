@@ -20,6 +20,8 @@ jobs:
     steps:
       - name: Check out branch
         uses: actions/checkout@v4
+      - name: Block Demo code before Android artifact build
+        run: bash ../scripts/check_connected_only_release.sh
       - name: Setup Java 17 for Android Gradle
         uses: actions/setup-java@v4
         with:
