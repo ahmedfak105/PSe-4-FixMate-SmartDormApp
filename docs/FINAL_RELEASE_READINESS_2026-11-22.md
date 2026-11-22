@@ -1,5 +1,8 @@
 # FixMate — release readiness and lecturer handover (2026-11-22)
 
+> **Update 22 Nov 2026:** The live hosted status changed **after** the draft readiness section below; do not interpret older 'staging only' statements as current. See the verified [hosted 9-migration rollout log](HOSTED_RUNTIME_ROLLOUT_2026-11-22.md). The existing trial data was allowed to be disposable by the project owner, and no backup was performed. The app's backend database extensions are now installed, but user-level role testing and real Firebase push delivery are not fully accepted.
+
+
 This is a **truthful release status**, not a declaration that all hosted acceptance work is complete.
 
 ## Approved scope
