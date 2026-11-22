@@ -156,6 +156,27 @@ elif [[ ! "$foreign_status" =~ ^4[0-9][0-9]$ ]]; then
   echo "Unexpected foreign profile PATCH status: $foreign_status" >&2; exit 1
 fi
 
+# Every role can edit its own contact information without changing privileges.
+for record in "$staff_id|$staff_token|maintenance_staff" \
+              "$moderator_id|$moderator_token|moderator" \
+              "$admin_id|$admin_token|system_admin"; do
+  IFS='|' read -r account_id account_token expected_role <<< "$record"
+  own_status="$(curl -sS --max-time 20 -o "$workdir/role_profile_edit" -w '%{http_code}' \
+    -X PATCH "$rest/profiles?id=eq.$account_id&select=id,full_name,role" \
+    -H "apikey: $SUPABASE_ANON_KEY" \
+    -H "Authorization: Bearer $account_token" \
+    -H 'Content-Type: application/json' -H 'Prefer: return=representation' \
+    --data '{"full_name":"Updated Account Name"}')"
+  if [[ "$own_status" != "200" ]]; then
+    echo "Cannot edit own profile for role $expected_role ($own_status)" >&2
+    cat "$workdir/role_profile_edit" >&2; exit 1
+  fi
+  jq -e --arg id "$account_id" --arg role "$expected_role" \
+    'length==1 and .[0].id==$id and .[0].role==$role and
+     .[0].full_name=="Updated Account Name"' \
+    "$workdir/role_profile_edit" >/dev/null
+done
+
 # Authenticated users never gain column privilege to modify role, including
 # when trying to mix it with an otherwise valid profile update.
 mixed_status="$(curl -sS --max-time 20 -o "$workdir/role_mixed" -w '%{http_code}' \
