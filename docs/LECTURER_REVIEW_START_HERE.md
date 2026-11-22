@@ -79,3 +79,8 @@ PRs #42 (docs/backend), #43 (Flutter Mobile), #45 (Flutter Web) and #46 (combine
 For lecturer Q&A about RLS, SECURITY DEFINER, staff claims, SQL JOINs, category constraints and the distinction between local tests and hosted deployment, use the [updated presentation script](LECTURER_PRESENTATION_SCRIPT.md).
 
 For safe release approval, use the [integration and delivery handoff](INTEGRATION_AND_DELIVERY_HANDOFF_2026-11-22.md) and the [controlled Supabase rollout checklist](CONTROLLED_SUPABASE_ROLLOUT_TASK36_TASK39.md). Do not push fresh-baseline migrations into the populated hosted project.
+
+## Local lecturer demo that does not touch production
+
+Use the [local four-role demonstration guide](LOCAL_LECTURER_DEMO_RUNBOOK.md) with the [bootstrap script](../scripts/prepare_local_lecturer_demo.sh). The script resets a **local-only** Supabase CLI database and creates five fictional accounts with sample reports/photos. This is the recommended way to show Moderator decisions without changing the hosted project's six-table database. It needs a computer running Docker; the GitHub Android/Web artifacts are build outputs, not standalone deployed backends.
+
