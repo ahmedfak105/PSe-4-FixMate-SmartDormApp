@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:vp_mobile/features/operations/moderator_operations_page.dart';
+import 'package:fixmate_mobile/features/operations/moderator_operations_page.dart';
 
 void main() {
   final reports = <Map<String, dynamic>>[
