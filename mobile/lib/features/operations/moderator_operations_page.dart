@@ -178,7 +178,7 @@ class _ModeratorOperationsPageState extends State<ModeratorOperationsPage> {
               child: Column(mainAxisSize: MainAxisSize.min, children: [
                 DropdownButtonFormField<String>(
                   initialValue: outcome,
-                  decoration: const InputDecoration(labelText: 'Review outcome'),
+                  decoration: InputDecoration(labelText: fmTr(context, 'Review outcome')),
                   items: const [
                     DropdownMenuItem(value: 'valid', child: FixMateText('Valid')),
                     DropdownMenuItem(value: 'duplicate', child: FixMateText('Duplicate')),
@@ -288,9 +288,9 @@ class _ModeratorOperationsPageState extends State<ModeratorOperationsPage> {
               ),
             ),
           ),
-          IconButton(tooltip: 'Refresh reviews', onPressed: _loading ? null : _refresh,
+          IconButton(tooltip: fmTr(context, 'Refresh reviews'), onPressed: _loading ? null : _refresh,
               icon: const Icon(Icons.refresh)),
-          IconButton(tooltip: 'Sign out', onPressed: _logout,
+          IconButton(tooltip: fmTr(context, 'Sign out'), onPressed: _logout,
               icon: const Icon(Icons.logout)),
         ],
       ),
