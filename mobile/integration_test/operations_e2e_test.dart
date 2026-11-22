@@ -141,6 +141,58 @@ void main() {
     expect(find.text('People'), findsWidgets);
   });
 
+  testWidgets('System Admin adds a category from real Chrome Flutter UI',
+      (tester) async {
+    await loginAs(tester, 'admin.fixmate@example.com');
+    await waitFor(tester, find.text('Categories'),
+        reason: 'Admin categories navigation not rendered');
+    await tester.ensureVisible(find.text('Categories'));
+    await tester.tap(find.text('Categories'));
+    await waitFor(tester, find.text('Maintenance categories'));
+
+    final add = find.byKey(const Key('add_category'));
+    await tester.ensureVisible(add);
+    await tester.tap(add);
+    await waitFor(tester, find.byKey(const Key('category_name')));
+    await tester.enterText(find.byKey(const Key('category_name')),
+        'Accessibility');
+    await tester.tap(find.byKey(const Key('save_category')));
+    await waitFor(tester, find.text('Category created.'),
+        reason: 'Admin category save did not reach Supabase RPC');
+
+    final categories = await tester.runAsync(() async {
+      return Supabase.instance.client.from('maintenance_categories')
+          .select('id,name,is_active').eq('name', 'Accessibility');
+    });
+    expect(categories, isNotNull);
+    expect(categories!.length, 1);
+    expect(categories.single['is_active'], true);
+
+    final id = categories.single['id'];
+    final edit = find.byKey(Key('edit_category_$id'));
+    await tester.ensureVisible(edit);
+    await tester.tap(edit);
+    await waitFor(tester, find.byKey(const Key('category_name')));
+    await tester.enterText(find.byKey(const Key('category_name')),
+        'Accessibility & Mobility');
+    await tester.tap(find.byKey(const Key('save_category')));
+    await waitFor(tester,
+        find.text('Category updated. Existing report history was preserved.'));
+
+    final versions = await tester.runAsync(() async {
+      return Supabase.instance.client.from('maintenance_categories')
+          .select('id,name,is_active')
+          .inFilter('name', ['Accessibility', 'Accessibility & Mobility']);
+    });
+    expect(versions, isNotNull);
+    expect(versions!.length, 2);
+    expect(versions.any((c) => c['id'] == id &&
+        c['name'] == 'Accessibility' && c['is_active'] == false), isTrue);
+    expect(versions.any((c) => c['id'] != id &&
+        c['name'] == 'Accessibility & Mobility' && c['is_active'] == true),
+        isTrue);
+  });
+
   testWidgets('Maintenance Staff claims and resolves a report in Flutter UI',
       (tester) async {
     const title = 'FLUTTER_WEB_E2E_STAFF';
