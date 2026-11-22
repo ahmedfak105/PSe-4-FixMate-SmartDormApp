@@ -42,6 +42,8 @@ jobs:
           test -f scripts/prepare_local_lecturer_demo.sh
           test -f docs/LOCAL_LECTURER_DEMO_RUNBOOK.md
           bash -n scripts/prepare_local_lecturer_demo.sh
+          bash -n scripts/check_connected_only_release.sh
+          bash scripts/check_connected_only_release.sh
           cmp docs/sql/PROPOSED_REPORT_INPUT_VALIDATION.sql supabase/migrations/20261122000339_fixmate_report_validation.sql
           cmp docs/sql/PROPOSED_MODERATOR_REVIEW_MIGRATION.sql supabase/migrations/20261122000340_fixmate_moderator_review.sql
           test -f docs/sql/PROPOSED_MODERATOR_REVIEW_MIGRATION.sql
