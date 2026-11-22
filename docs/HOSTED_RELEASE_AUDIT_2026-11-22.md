@@ -1,5 +1,8 @@
 # FixMate — verified hosted release audit (22 November 2026)
 
+> **Update 22 Nov 2026:** The file below is the **pre-rollout read-only snapshot**, not current hosted schema status. See the verified [hosted 9-migration rollout log](HOSTED_RUNTIME_ROLLOUT_2026-11-22.md). The existing trial data was allowed to be disposable by the project owner, and no backup was performed. The app's backend database extensions are now installed, but user-level role testing and real Firebase push delivery are not fully accepted.
+
+
 **Project:** `epsvagztisdovixlqehi` (existing hosted Supabase, not disposable CLI).
 **Method:** read-only Supabase table inventory, catalog/privilege SQL, Storage bucket inventory, migration history, security/performance advisors, and exact GitHub Actions statuses. **No hosted data, grants, secrets, files, Auth accounts, migrations or billing were changed.**
 
