@@ -6,6 +6,7 @@ import '../../data/models/resident_profile.dart';
 import '../../l10n/gen/app_localizations.dart';
 import 'locale_cubit.dart';
 import 'edit_profile_page.dart';
+import 'my_profile_avatar.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key, this.profile});
@@ -58,7 +59,11 @@ class _ProfilePageState extends State<ProfilePage> {
     return Scaffold(
       appBar: AppBar(title: Text(l10n.tabProfile)),
       body: ListView(padding: const EdgeInsets.all(20), children: [
-        const CircleAvatar(radius: 36, child: Icon(Icons.person_outline, size: 36)),
+        profile == null
+            ? const CircleAvatar(radius: 36, child: Icon(Icons.person_outline, size: 36))
+            : Center(child: MyProfileAvatar(
+                key: ValueKey('avatar-${profile.id}-${profile.fullName}'),
+                userId: profile.id, name: profile.fullName)),
         const SizedBox(height: 12),
         Center(
           child: Text(
