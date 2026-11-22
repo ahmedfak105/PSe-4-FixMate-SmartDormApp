@@ -28,14 +28,9 @@ Future<void> main() async {
   // remains the default unless this explicit web-only flag is enabled.
   const residentWebFlag = bool.fromEnvironment('FIXMATE_RESIDENT_WEB', defaultValue: false);
   final allowResidentWeb = kIsWeb && operationsOnly && residentWebFlag;
-  // Offline fixture data is opt-in for lecturer/testing builds only.
-  // A normal Android installation must never silently show sample reports.
-  const allowOfflineDemo = bool.fromEnvironment(
-    'FIXMATE_OFFLINE_DEMO', defaultValue: false);
   final startupMode = resolveFixMateStartupMode(
     hasPublicBackendConfig: isConfigured,
     operationsWeb: operationsOnly,
-    explicitlyAllowOfflineDemo: allowOfflineDemo,
   );
 
 
@@ -56,17 +51,14 @@ Future<void> main() async {
       publishableKey: supabaseKey,
     );
     debugPrint('FixMate: Supabase initialized');
-    // Firebase is a separate, Android-only channel. Browser users and offline
-    // demonstrations do not initialize FCM or register device tokens.
+    // Firebase messaging only initializes on supported connected Android devices.
     await FixMatePushService.instance.initialize();
-  } else if (allowOfflineDemo) {
-    debugPrint('FixMate: Running explicitly configured offline demonstration');
   } else {
     debugPrint('FixMate: No connected backend configured');
   }
 
-  // Operations web uses an authenticated connection page when not configured.
-  // Android and general Web never silently fall back to sample records.
+  // Operations Web can configure a public connection at runtime.
+  // Android and ordinary Web installations require a configured backend.
   if (operationsOnly && !kIsWeb) {
     runApp(const MaterialApp(home: Scaffold(body: Center(
       child: Text('Operations-only mode requires a Flutter Web browser.'),
@@ -112,7 +104,7 @@ Future<void> main() async {
     ));
     return;
   }
-  runApp(FixMateApp(requireLogin: isConfigured,
+  runApp(FixMateApp(requireLogin: true,
       operationsOnly: operationsOnly,
       initialRecoveryLink: initialRecoveryLink,
       allowResidentWeb: allowResidentWeb));
