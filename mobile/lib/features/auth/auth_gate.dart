@@ -15,10 +15,12 @@ import '../operations/operations_role.dart';
 /// allowing entry to Resident screens. The database must still enforce RLS.
 class AuthGate extends StatefulWidget {
   const AuthGate({super.key, required this.builder,
-      this.operationsOnly = false, this.initialRecoveryLink = false});
+      this.operationsOnly = false, this.initialRecoveryLink = false,
+      this.allowResidentWeb = false});
 
   final bool operationsOnly;
   final bool initialRecoveryLink;
+  final bool allowResidentWeb;
 
   final Widget Function(ResidentProfile profile) builder;
 
@@ -174,7 +176,7 @@ class _AuthGateState extends State<AuthGate> {
     }
     if (_userId == null) return LoginPage(
       connectionError: _authError,
-      allowResidentSignup: !widget.operationsOnly,
+      allowResidentSignup: !widget.operationsOnly || widget.allowResidentWeb,
       successMessage: _resetCompleted
           ? 'Password updated. Sign in with your new password.' : null,
     );
@@ -198,10 +200,11 @@ class _AuthGateState extends State<AuthGate> {
         }
         final profile = snapshot.data!;
         if (workspaceForRole(profile.role,
-                operationsOnly: widget.operationsOnly) == FixMateWorkspace.denied) {
+                operationsOnly: widget.operationsOnly,
+                allowResidentWeb: widget.allowResidentWeb) == FixMateWorkspace.denied) {
           return _message(
             heading: 'Account role not permitted in this workspace',
-            description: widget.operationsOnly
+            description: widget.operationsOnly && !widget.allowResidentWeb
                 ? 'This workspace is available to maintenance staff and authorized managers.'
                 : 'Please open the appropriate FixMate workspace for your account.',
           );
