@@ -6,6 +6,7 @@ import '../../data/models/resident_profile.dart';
 import '../../l10n/gen/app_localizations.dart';
 import 'locale_cubit.dart';
 import 'edit_profile_page.dart';
+import 'edit_profile_page.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key, this.profile});
@@ -20,6 +21,18 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   bool _signingOut = false;
   String? _error;
+  ResidentProfile? _editedProfile;
+
+  Future<void> _editProfile() async {
+    final current = _editedProfile ?? widget.profile;
+    if (current == null) return;
+    final updated = await Navigator.of(context).push<ResidentProfile>(
+      MaterialPageRoute(builder: (_) => EditProfilePage(profile: current)),
+    );
+    if (mounted && updated != null) {
+      setState(() => _editedProfile = updated);
+    }
+  }
   ResidentProfile? _currentProfile;
 
   Future<void> _editProfile() async {
@@ -80,6 +93,12 @@ class _ProfilePageState extends State<ProfilePage> {
             label: const Text('Edit personal information'),
           ),
           const SizedBox(height: 15),
+          FilledButton.icon(
+            onPressed: _editProfile,
+            icon: const Icon(Icons.edit_outlined),
+            label: const Text('Edit personal information'),
+          ),
+          const SizedBox(height: 12),
           ListTile(
             leading: const Icon(Icons.email_outlined),
             title: const Text('Email'),
