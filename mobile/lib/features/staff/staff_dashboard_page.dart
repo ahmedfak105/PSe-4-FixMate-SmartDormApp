@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../data/models/resident_profile.dart';
+import '../settings/edit_profile_page.dart';
 import '../../data/models/staff_report.dart';
 import '../../data/repositories/staff_reports_repository.dart';
 import '../../data/repositories/staff_notes_repository.dart';
@@ -27,6 +28,16 @@ class _StaffDashboardPageState extends State<StaffDashboardPage> {
   late final StaffNotesRepository _notesRepository;
   List<StaffReport> _reports = const [];
   bool _loading = true;
+  ResidentProfile? _editedProfile;
+
+  Future<void> _editOwnProfile() async {
+    final updated = await Navigator.of(context).push<ResidentProfile>(
+      MaterialPageRoute(builder: (_) => EditProfilePage(
+        profile: _editedProfile ?? widget.profile)),
+    );
+    if (updated != null && mounted) setState(() => _editedProfile = updated);
+  }
+
   bool _showMyJobs = false;
   int? _busyReportId;
   bool _signingOut = false;
@@ -132,14 +143,16 @@ class _StaffDashboardPageState extends State<StaffDashboardPage> {
     final available = _reports.where((r) => r.canClaim(staffId)).toList();
     final mine = _reports.where((r) => r.isAssignedTo(staffId)).toList();
     final displayed = _showMyJobs ? mine : available;
-    final name = widget.profile.fullName.trim().isNotEmpty
-        ? widget.profile.fullName.trim()
+    final name = (_editedProfile ?? widget.profile).fullName.trim().isNotEmpty
+        ? (_editedProfile ?? widget.profile).fullName.trim()
         : 'Maintenance Staff';
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('FixMate · Maintenance Workspace'),
         actions: [
+          IconButton(tooltip: 'My profile', icon: const Icon(Icons.account_circle_outlined),
+            onPressed: _editOwnProfile),
           IconButton(
             tooltip: 'Refresh reports',
             icon: const Icon(Icons.refresh),
