@@ -37,10 +37,10 @@ trail. The same connected Supabase backend serves Web and Android.
   `profile-avatars` bucket.
 - **Business logic:** ownership RLS, column-level grants and PostgreSQL
   RPCs for protected role/category changes, moderation and report workflow.
-- **Push boundary:** Android Firebase client, DB outbox and deployed
-  `send-report-push` Edge Function **v1 ACTIVE**. Actual background
-  delivery still needs private Firebase credentials, invocation and
-  real-phone confirmation.
+- **Push delivery:** Resident Android Firebase Messaging client, protected
+  hosted Supabase sender, Vault-gated private delivery outbox and active
+  five-minute retry scheduler. **Live locked-screen notification delivery
+  is verified and accepted by the owner** (job #2 sent; HTTP 200; [test evidence](FCM_DEVICE_ACCEPTANCE_2026-11-22.md)).
 
 See [current hosted 11-table ERD](FIXMATE_HOSTED_ERD.md).
 
@@ -69,7 +69,7 @@ before any future `supabase db push`; do not blindly replay migrations.
 | Hosted Supabase inspect | 11 application tables, all with RLS; moderator/admin RPCs; private avatars; queue/notifications | **Verified** |
 | Hosted transaction-only SQL tests | Non-admin permission denial; Admin role/category writes; Moderator duplicate rejection + block staff action; notification trigger | **Passed**, test changes rolled back |
 | Project-owner manual acceptance | User reports connected Web and Android functionality including roles, avatar and in-app notifications | **Reported successful**; not independently captured video |
-| Firebase FCM | Edge function uploaded, ACTIVE v1, secret-header guard source | **Deployed but not delivered**; private credentials, trigger/scheduler and real Android background notification still **pending** |
+| Firebase FCM | Android Resident opt-in, actual hosted sender HTTP 200, queue job #2 sent on first attempt, owner reported receipt while screen **locked**, two-Resident scoped negative test rolled back | **Accepted for F05.2**, [feature #24 closed](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/24) |
 
 These are different evidence levels. Do not call a successful CI build a real
 phone delivery test. The project is a working academic MVP, not a fully signed
@@ -85,17 +85,20 @@ off public production launch.
 
 ### Final hosted FCM bridge status (updated 22 Nov 2026)
 
-- The deployed `send-report-push` Edge sender **ACTIVE v1** now has a
+- The deployed `send-report-push` Edge sender **ACTIVE** now has a
   **Vault-gated** database trigger on outbox inserts plus an **active 5-minute
   retry cron**. The `pg_net` extension was reinstalled under the
   `extensions` namespace after a Security Advisor warning.
 - Actual hosted migrations `20261122170759`
   (`fixmate_push_vault_bridge_live`) and `20261122171136`
   (`fixmate_pgnet_extension_harden_live`) were applied and checked.
-- **No Firebase service-account secret or matching webhook secret is set
-  through these tools; the system fails closed and produces no FCM HTTP
-  sends.** Android locked-screen delivery remains unverified. Source of
-  truth: [activation guide](FCM_SERVER_FINAL_ACTIVATION_2026-11-22.md).
+- **Final status:** The owner configured the server-only Firebase secrets
+  privately and added the matching Vault secret. Read-only SQL confirmed
+  the named Vault secret exists without accessing its value. One real
+  Android Resident registered, report #11 generated notification #3,
+  outbox job #2 was `sent` with 1 attempt and no error, and the owner
+  confirmed reception **with the screen locked**. An additional two-Resident
+  negative isolation check passed and was rolled back. [Acceptance log](FCM_DEVICE_ACCEPTANCE_2026-11-22.md).
 - Existing experimental report count can change as users test; the six
   reports mentioned in the nine-migration rollout were a point-in-time
   count, not a permanent production number.
@@ -111,8 +114,9 @@ off public production launch.
 4. **Admin:** Show dashboard counts, People role management and Categories
    management. Explain why a resident cannot elevate their own role.
 5. **Resident:** Return to My Reports and show the new status plus the
-   stored in-app notification. If Firebase server secrets are not yet
-   configured, explicitly state that OS background push is still pending.
+   stored in-app notification. Explain that **FCM Android background
+   delivery was verified** on a real locked phone; demonstrate a new
+   alert only if a registered Android test device is available.
 
 Never show test users' passwords, private Storage URLs, Supabase secret API
 keys or Firebase service-account contents.
@@ -149,17 +153,16 @@ from public.report_notifications;
 
 ## 7. Critical pending acceptance
 
-The deployed FCM Edge sender is deliberately protected by an independent
-strong `x-fixmate-push-secret` header and should fail closed without
-configuration. See the [private operator activation checklist](FCM_SERVER_FINAL_ACTIVATION_2026-11-22.md).
-An authorized operator needs to supply private Firebase service-account
-credentials **directly in Supabase secrets**, configure the DB webhook and
-trusted retry schedule, then confirm actual locked-screen Android delivery
-and cross-account isolation. The teacher/team must sign off the final scope.
-Until then, [F05.2 #24](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/24)
-and [Release Gate #47](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/47)
-remain open; do not merge [PR #46](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/pull/46)
-as if the release gate were complete.
+The secured FCM delivery flow is **operational and accepted for Feature
+[F05.2 #24](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/24)**:
+secret-backed webhook, Vault-gated trigger, cron retry, owner-only device
+registration and real locked-screen Android receipt all checked. [Full
+acceptance evidence](FCM_DEVICE_ACCEPTANCE_2026-11-22.md). The **remaining
+project-wide gate** is lecturer/team review of the integration candidate
+and other separately pending feature acceptance, particularly password-reset
+email/redirect behavior where not yet verified. [Release Gate #47](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/47)
+and [PR #46](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/pull/46)
+remain **OPEN**; do not merge to main before approval.
 
 ## 8. Lecturer resources
 
@@ -167,10 +170,10 @@ as if the release gate were complete.
 - [Current hosted SQL rollout](HOSTED_RUNTIME_ROLLOUT_2026-11-22.md)
 - [Current database ERD](erd/FIXMATE_HOSTED_11_TABLES.mmd)
 - [Live Web](https://ahmedfak105.github.io/PSe-4-FixMate-SmartDormApp/)
-- [FCM remaining setup](FCM_SERVER_FINAL_ACTIVATION_2026-11-22.md)
+- [FCM real-device acceptance](FCM_DEVICE_ACCEPTANCE_2026-11-22.md)
 - [Release checklist #47](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/47)
 
 
 ### Final FK index completion (22 November 2026)
 
-The server has all four additional indexes for notification, push and role-audit foreign keys. Hosted migration `20261122171743` succeeded and the Supabase `unindexed_foreign_keys` advisor is now clear. This is a backend performance verification, **not** proof of FCM device delivery. SQL: [post-rollout FK indexes](sql/FCM_POST_ROLLOUT_FK_INDEXES_APPLIED.sql).
+The server has all four additional indexes for notification, push and role-audit foreign keys. Hosted migration `20261122171743` succeeded and the Supabase `unindexed_foreign_keys` advisor is now clear. This is a backend performance check; separate actual FCM locked-screen receipt was confirmed and recorded above. SQL: [post-rollout FK indexes](sql/FCM_POST_ROLLOUT_FK_INDEXES_APPLIED.sql).
