@@ -198,7 +198,7 @@ if [[ ! "$avatar_foreign" =~ ^4[0-9][0-9]$ ]]; then
   echo "Foreign account read another user's private avatar" >&2; exit 1
 fi
 avatar_foreign_upload="$(curl -sS --max-time 20 -o "$workdir/avatar_foreign_upload" -w '%{http_code}' \
-  -X POST "$storage/object/profile-avatars/$avatar_path" \
+  -X POST "$storage/object/profile-avatars/$a/unauthorized-foreign-upload.png" \
   -H "apikey: $SUPABASE_ANON_KEY" -H "Authorization: Bearer $b_token" \
   -H 'Content-Type: image/png' --data-binary "@$workdir/avatar.png")"
 if [[ ! "$avatar_foreign_upload" =~ ^4[0-9][0-9]$ ]]; then
