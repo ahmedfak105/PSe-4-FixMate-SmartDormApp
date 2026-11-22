@@ -65,3 +65,7 @@
 - A live board snapshot still needs to be read from the user's GitHub CLI login before committing status changes; the final counts are the **expected target**, not a claimed live result.
 
 Related: [Lecturer review index](LECTURER_REVIEW_START_HERE.md), [Architecture](DATABASE_ARCHITECTURE.md), [Security QA](SECURITY_QA_VERIFICATION.md).
+
+## Later implementation-task closure snapshot — 22 November 2026
+
+All **12 original implementation TASK issues (#30 through #41)** in the student GitHub repository are now **Closed / Done at code + local Supabase/Flutter acceptance level**. The original Feature and Epic cards in this report retain their own criteria and should **not** be automatically marked Done on this basis. Hosted roll-out of new report validation/Moderator SQL remains [RELEASE GATE #47](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/47), and GitHub Project V2 Status-field synchronization remains a separate board operation. This supersedes earlier implementation-task counts while preserving the Feature/Epic assessment.

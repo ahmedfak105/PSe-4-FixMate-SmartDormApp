@@ -53,3 +53,7 @@ GitHub Actions workflows under `.github/workflows/` validate the integrated Flut
 
 For a complete **four-role** demonstration without touching the hosted Supabase project, use the [local demo runbook](docs/LOCAL_LECTURER_DEMO_RUNBOOK.md) and the tested [Supabase CLI bootstrap script](scripts/prepare_local_lecturer_demo.sh). It reconstructs the local database, adds the two proposed backend changes **locally only**, provisions fictional Resident/Staff/Moderator/Admin users and verifies the report/photo workflows. This requires Docker and Flutter on a laptop; the APK artifact alone does not include a persistent local backend.
 
+
+## Final lecturer handoff index
+
+[Current technical release status and sign-off gates](docs/FINAL_LECTURER_HANDOFF_STATUS.md) lists the **12 locally completed TASKs**, successful live-browser and API evidence, Android/Web build locations, the reproducible lecturer-demo script, the remaining separate hosted deployment gate, and what the lecturer should review in PR #46.

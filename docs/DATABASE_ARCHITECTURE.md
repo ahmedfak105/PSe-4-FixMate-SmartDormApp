@@ -9,11 +9,11 @@
 
 ## 1. System layout
 
-The **Flutter application** implements resident and maintenance-staff experiences. A separate **HTML/CSS/JavaScript admin web dashboard** provides administrator views. Both connect to the same Supabase backend using its public client configuration and user authentication. The database enforces relevant authorization through grants, RLS policies and checks inside privileged functions.
+The integrated application uses **Flutter Mobile** for Resident and Maintenance Staff and an actual **Flutter Web operations workspace** for Maintenance Staff, Moderator and System Admin. The earlier standalone HTML/CSS/JavaScript dashboard remains only as an optional historical prototype in PR #44. Both Flutter experiences use the same Supabase backend with public client configuration and authenticated user roles. The database enforces relevant authorization through grants, RLS policies and checks inside privileged functions.
 
 ```text
                     FixMate Frontend Applications
-       Flutter Resident & Staff       Admin Web Dashboard
+       Flutter Mobile Resident+Staff     Flutter Web Staff/Moderator/Admin
                        \                   /
                         \                 /
                          Supabase Authentication
@@ -164,3 +164,7 @@ Three `storage.objects` policies were supplied:
 7. End with tested results, constraints and explicit remaining work.
 
 **Version note:** This document is an evidence-based structural snapshot of the demonstrated backend, not a claim that every backlog feature or deployment migration is finished.
+
+## Implementation update — 22 Nov 2026
+
+The original six-table model in this document is intentionally **the hosted baseline snapshot**. The integrated local development build now replays **five** Supabase CLI-named migration files, including the additional report-input CHECK/RLS constraints and proposed `report_reviews` table, restricted review RPC and blocked-rejected-work trigger. [Real local Supabase API E2E](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/44964866869), [Flutter Web Chromium E2E](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/44964869271), and [reproducible local demo](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/44964866875) passed against the local schema. They do **not** change the hosted schema; approved remote rollout remains [Release Gate #47](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/47).

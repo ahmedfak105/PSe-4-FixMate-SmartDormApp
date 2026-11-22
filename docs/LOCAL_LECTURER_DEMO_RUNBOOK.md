@@ -6,7 +6,7 @@
 
 ## What this demo does
 
-It uses **Supabase CLI and Docker on your laptop**, not a cloud staging project. A fresh local PostgreSQL/Supabase instance is reconstructed from the three committed `supabase/migrations/` files and then enhanced with proposed report input validation and Moderator review SQL. Five fictional Auth users, private photo fixtures and sample reports are created by the same local-only API smoke tests used in GitHub Actions. This is a real local database and Auth API — not a UI-only fake.
+It uses **Supabase CLI and Docker on your laptop**, not a cloud staging project. A fresh local PostgreSQL/Supabase instance is reconstructed from the **five committed `supabase/migrations/` files**, including report input validation and Moderator review SQL. Five fictional Auth users, private photo fixtures and sample reports are created by the same local-only API smoke tests used in GitHub Actions. This is a real local database and Auth API — not a UI-only fake.
 
 **Important:** The script runs `supabase db reset` and destroys **only the local CLI database**. It refuses pre-existing external PostgreSQL host settings or a nonlocal Supabase API. Never run the script in an environment where your actual data lives in the local Supabase instance. Back up any existing local development records first.
 
@@ -24,7 +24,7 @@ bash -n scripts/prepare_local_lecturer_demo.sh
 bash scripts/prepare_local_lecturer_demo.sh
 ```
 
-The bootstrap will download/start local Supabase images as needed, reset the local database, apply **only to that local instance** [the validation proposal](sql/PROPOSED_REPORT_INPUT_VALIDATION.sql) and [Moderator review proposal](sql/PROPOSED_MODERATOR_REVIEW_MIGRATION.sql), seed five local accounts and exercise Auth/RLS/REST/Storage permissions.
+The bootstrap will download/start local Supabase images as needed, reset the local database, install the five versioned migrations **only to that local instance**, including [the validation proposal](sql/PROPOSED_REPORT_INPUT_VALIDATION.sql) and [Moderator review proposal](sql/PROPOSED_MODERATOR_REVIEW_MIGRATION.sql), seed five local accounts and exercise Auth/RLS/REST/Storage permissions.
 
 If any step errors, **stop** rather than bypassing the local URL checks or granting broader permissions. Review the command output and Docker status.
 
@@ -93,3 +93,7 @@ Next time you re-run the bootstrap it recreates these same synthetic users and d
 ## When this is not enough
 
 This local demonstration proves the tested app flows and SQL on Supabase CLI, but **not** a deployed, shareable public website, a production Auth-email configuration, or a live Moderator user in the existing hosted project. Closing Tasks [#36](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/36) and [#39](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/39) requires the reviewed staging/target-project acceptance defined in [the controlled rollout guide](CONTROLLED_SUPABASE_ROLLOUT_TASK36_TASK39.md). There is no separate staging Supabase project/branch connected to this account at the last inspection.
+
+## Verified reproduction evidence
+
+The [bootstrap workflow passed](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/44964866875), including synthetic Auth users, local SQL/permissions, report reviews and Role flows. This is a tested way for a teammate with Docker to reproduce the lecturer demonstration. It does not create a cloud staging service or change any hosted project.
