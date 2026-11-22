@@ -1,11 +1,15 @@
 import 'fixmate_theme.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'app.dart';
 import 'features/operations/operations_connection_page.dart';
 import 'features/auth/password_recovery_links.dart';
+import 'features/settings/locale_cubit.dart';
+import 'l10n/gen/app_localizations.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -86,13 +90,26 @@ class _OperationsConnectAppState extends State<_OperationsConnectApp> {
           initialRecoveryLink: widget.initialRecoveryLink,
           allowResidentWeb: widget.allowResidentWeb);
     }
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: FixMateTheme.light,
-      home: OperationsConnectionPage(
-        onConnected: () {
-          if (mounted) setState(() => _connected = true);
-        },
+    return BlocProvider(
+      create: (_) => LocaleCubit(),
+      child: BlocBuilder<LocaleCubit, Locale?>(
+        builder: (context, locale) => MaterialApp(
+          debugShowCheckedModeBanner: false,
+          theme: FixMateTheme.light,
+          locale: locale,
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          home: OperationsConnectionPage(
+            onConnected: () {
+              if (mounted) setState(() => _connected = true);
+            },
+          ),
+        ),
       ),
     );
   }
