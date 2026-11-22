@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../l10n/fixmate_i18n.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// TASK #30: resident registration only. No role chooser is present or sent.
@@ -72,7 +73,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(title: const Text('Create resident account')),
+        appBar: AppBar(title: const FixMateText('Create resident account')),
         body: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 460),
@@ -83,10 +84,10 @@ class _SignUpPageState extends State<SignUpPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Text('Register for FixMate',
+                    FixMateText('Register for FixMate',
                         style: Theme.of(context).textTheme.headlineSmall),
                     const SizedBox(height: 8),
-                    const Text('New accounts always start with the Resident role. Staff and administrator accounts are created by authorized personnel.'),
+                    const FixMateText('New accounts always start with the Resident role. Staff and administrator accounts are created by authorized personnel.'),
                     const SizedBox(height: 20),
                     TextFormField(
                       key: const Key('signup_full_name'),
@@ -154,13 +155,13 @@ class _SignUpPageState extends State<SignUpPage> {
                     ),
                     if (_error != null) ...[
                       const SizedBox(height: 16),
-                      Text(_error!, style: TextStyle(
+                      FixMateText(_error!, style: TextStyle(
                         color: Theme.of(context).colorScheme.error,
                       )),
                     ],
                     if (_success != null) ...[
                       const SizedBox(height: 16),
-                      Text(_success!, style: TextStyle(
+                      FixMateText(_success!, style: TextStyle(
                         color: Theme.of(context).colorScheme.primary,
                       )),
                     ],
@@ -170,12 +171,12 @@ class _SignUpPageState extends State<SignUpPage> {
                       onPressed: _busy ? null : _register,
                       child: Padding(
                         padding: const EdgeInsets.all(12),
-                        child: Text(_busy ? 'Creating account…' : 'Create resident account'),
+                        child: FixMateText(_busy ? 'Creating account…' : 'Create resident account'),
                       ),
                     ),
                     TextButton(
                       onPressed: _busy ? null : () => Navigator.of(context).pop(),
-                      child: const Text('Back to sign in'),
+                      child: const FixMateText('Back to sign in'),
                     ),
                   ],
                 ),
