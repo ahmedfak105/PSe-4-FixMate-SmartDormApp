@@ -27,7 +27,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
   bool _photoBusy = false;
   String? _error;
   Uint8List? _avatar;
-  String? _avatarPath;
 
   @override
   void initState() {
@@ -62,7 +61,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
       if (path == null || path.isEmpty) return;
       final bytes = await _client.storage.from('profile-avatars').download(path);
       if (mounted && _mySession) {
-        setState(() { _avatarPath = path; _avatar = bytes; });
+        setState(() => _avatar = bytes);
       }
     } on PostgrestException {
       // Existing six-table production database has no avatar_path until its
@@ -105,7 +104,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
       await _client.from('profiles').update({'avatar_path': uploadedPath})
           .eq('id', widget.profile.id).select('id').single();
       if (!mounted || !_mySession) return;
-      setState(() { _avatar = bytes; _avatarPath = uploadedPath; });
+      setState(() => _avatar = bytes);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Profile photo updated.')),
       );
