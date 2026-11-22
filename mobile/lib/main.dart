@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'app.dart';
+import 'startup_mode.dart';
 import 'features/operations/operations_connection_page.dart';
 import 'features/auth/password_recovery_links.dart';
 import 'features/notifications/fixmate_push_service.dart';
@@ -31,6 +32,11 @@ Future<void> main() async {
   // A normal Android installation must never silently show sample reports.
   const allowOfflineDemo = bool.fromEnvironment(
     'FIXMATE_OFFLINE_DEMO', defaultValue: false);
+  final startupMode = resolveFixMateStartupMode(
+    hasPublicBackendConfig: isConfigured,
+    operationsWeb: operationsOnly,
+    explicitlyAllowOfflineDemo: allowOfflineDemo,
+  );
 
 
   // No connected Flutter build (Android or Web) may embed privileged keys.
@@ -67,14 +73,14 @@ Future<void> main() async {
     ))));
     return;
   }
-  if (operationsOnly && !isConfigured) {
+  if (startupMode == FixMateStartupMode.operationsConnection) {
     // Runtime public configuration lets the same compiled web bundle be
     // deployed to staging without hardcoding or leaking server credentials.
     runApp(_OperationsConnectApp(initialRecoveryLink: initialRecoveryLink,
         allowResidentWeb: allowResidentWeb));
     return;
   }
-  if (!isConfigured && !allowOfflineDemo) {
+  if (startupMode == FixMateStartupMode.connectionRequired) {
     runApp(MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: FixMateTheme.light,
