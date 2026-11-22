@@ -83,6 +83,23 @@ off public production launch.
 - [GitHub Pages Web deploy](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/45040526030) — **SUCCESS**.
 - Hosted SQL/RLS/role/notification status is supported by fresh live checks described in [rollout log](HOSTED_RUNTIME_ROLLOUT_2026-11-22.md) and [release gate #47](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/47). GitHub CI does **not** prove FCM OS delivery.
 
+### Final hosted FCM bridge status (updated 22 Nov 2026)
+
+- The deployed `send-report-push` Edge sender **ACTIVE v1** now has a
+  **Vault-gated** database trigger on outbox inserts plus an **active 5-minute
+  retry cron**. The `pg_net` extension was reinstalled under the
+  `extensions` namespace after a Security Advisor warning.
+- Actual hosted migrations `20261122170759`
+  (`fixmate_push_vault_bridge_live`) and `20261122171136`
+  (`fixmate_pgnet_extension_harden_live`) were applied and checked.
+- **No Firebase service-account secret or matching webhook secret is set
+  through these tools; the system fails closed and produces no FCM HTTP
+  sends.** Android locked-screen delivery remains unverified. Source of
+  truth: [activation guide](FCM_SERVER_FINAL_ACTIVATION_2026-11-22.md).
+- Existing experimental report count can change as users test; the six
+  reports mentioned in the nine-migration rollout were a point-in-time
+  count, not a permanent production number.
+
 ## 5. Demonstration (5 minutes)
 
 1. **Resident:** Sign in with a dedicated test Resident, edit profile/avatar,
