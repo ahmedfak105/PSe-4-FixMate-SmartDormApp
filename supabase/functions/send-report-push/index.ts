@@ -1,4 +1,9 @@
-import { fcmTokenIsUnregistered, matchesPushWebhookSecret } from "./push_guards.ts";
+import {
+  fcmTokenIsUnregistered,
+  matchesPushWebhookSecret,
+  privilegedSupabaseRestHeaders,
+  selectSupabaseServiceKey,
+} from "./push_guards.ts";
 
 // FixMate F05.2: server-only FCM HTTP v1 sender.
 // Deploy only AFTER Release Gate #47, as verify_jwt=false with a strong
@@ -94,13 +99,6 @@ async function googleAccessToken(account: ServiceAccount): Promise<string> {
   return result.access_token;
 }
 
-function restHeaders(serviceKey: string): HeadersInit {
-  return {
-    apikey: serviceKey,
-    Authorization: `Bearer ${serviceKey}`,
-    "Content-Type": "application/json",
-  };
-}
 
 async function rest<T>(
   baseUrl: string, serviceKey: string, path: string,
@@ -109,7 +107,7 @@ async function rest<T>(
   const response = await fetch(`${baseUrl}/rest/v1/${path}`, {
     method,
     headers: {
-      ...restHeaders(serviceKey),
+      ...privilegedSupabaseRestHeaders(serviceKey),
       Prefer: "return=representation",
     },
     body: payload === undefined ? undefined : JSON.stringify(payload),
@@ -195,7 +193,10 @@ async function send(
 
 async function deliver(): Promise<Record<string, number>> {
   const baseUrl = requireConfig("SUPABASE_URL");
-  const serviceKey = requireConfig("SUPABASE_SERVICE_ROLE_KEY");
+  const serviceKey = selectSupabaseServiceKey(
+    Deno.env.get("SUPABASE_SECRET_KEYS") ?? null,
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? null,
+  );
   const account = JSON.parse(requireConfig("FIREBASE_SERVICE_ACCOUNT_JSON"))
     as ServiceAccount;
   const expectedProject = requireConfig("FIREBASE_PROJECT_ID");
