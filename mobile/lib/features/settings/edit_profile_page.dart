@@ -172,7 +172,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       child: Material(
                         color: FixMateTheme.teal, shape: const CircleBorder(),
                         child: IconButton(
-                          tooltip: 'Change profile photo',
+                          tooltip: fmTr(context, 'Change profile photo'),
                           onPressed: _photoBusy ? null : _pickPhoto,
                           icon: _photoBusy
                               ? const SizedBox(width: 16, height: 16,
@@ -197,8 +197,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     controller: _name,
                     textCapitalization: TextCapitalization.words,
                     maxLength: 100,
-                    decoration: const InputDecoration(
-                      labelText: 'Full name',
+                    decoration: InputDecoration(
+                      labelText: fmTr(context, 'Full name'),
                       prefixIcon: Icon(Icons.person_outline)),
                     validator: (v) => (v ?? '').trim().isEmpty
                         ? 'Enter your full name' : null,
