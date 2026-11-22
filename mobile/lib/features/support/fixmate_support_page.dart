@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../settings/locale_cubit.dart';
 
 import '../../l10n/fixmate_i18n.dart';
 
@@ -243,6 +245,58 @@ class FixMateSupportMenu extends StatelessWidget {
           FixMateText('About'),
         ]),
       ),
+    ],
+  );
+}
+
+enum _UtilityChoice { english, lithuanian, contacts, help, about }
+
+/// One compact app-bar menu keeps language and support available on phones
+/// without overflowing a narrow maintenance/admin toolbar.
+class FixMateUtilityMenu extends StatelessWidget {
+  const FixMateUtilityMenu({super.key});
+
+  @override
+  Widget build(BuildContext context) => PopupMenuButton<_UtilityChoice>(
+    key: const Key('app_utilities_menu'),
+    tooltip: fmTr(context, 'Support center'),
+    icon: const Icon(Icons.more_vert),
+    onSelected: (choice) {
+      if (choice == _UtilityChoice.english ||
+          choice == _UtilityChoice.lithuanian) {
+        context.read<LocaleCubit>().setLocale(
+            Locale(choice == _UtilityChoice.english ? 'en' : 'lt'));
+        return;
+      }
+      final section = switch (choice) {
+        _UtilityChoice.contacts => SupportSection.contacts,
+        _UtilityChoice.about => SupportSection.about,
+        _ => SupportSection.help,
+      };
+      Navigator.of(context).push(MaterialPageRoute<void>(
+        builder: (_) => FixMateSupportPage(initialSection: section),
+      ));
+    },
+    itemBuilder: (_) => const [
+      PopupMenuItem(value: _UtilityChoice.english,
+        child: Row(children: [
+          Icon(Icons.language), SizedBox(width: 12), Text('English')])),
+      PopupMenuItem(value: _UtilityChoice.lithuanian,
+        child: Row(children: [
+          Icon(Icons.language), SizedBox(width: 12), Text('Lietuvių')])),
+      PopupMenuDivider(),
+      PopupMenuItem(value: _UtilityChoice.contacts,
+        child: Row(children: [
+          Icon(Icons.contact_phone_outlined), SizedBox(width: 12),
+          FixMateText('Contacts')])),
+      PopupMenuItem(value: _UtilityChoice.help,
+        child: Row(children: [
+          Icon(Icons.help_outline), SizedBox(width: 12),
+          FixMateText('Help')])),
+      PopupMenuItem(value: _UtilityChoice.about,
+        child: Row(children: [
+          Icon(Icons.info_outline), SizedBox(width: 12),
+          FixMateText('About')])),
     ],
   );
 }
