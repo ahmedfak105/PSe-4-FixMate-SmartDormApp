@@ -109,8 +109,8 @@ class _PasswordRecoveryRequestPageState
                   controller: _email,
                   keyboardType: TextInputType.emailAddress,
                   autofillHints: const [AutofillHints.email],
-                  decoration: const InputDecoration(
-                    labelText: 'Email address',
+                  decoration: InputDecoration(
+                    labelText: fmTr(context, 'Email address'),
                     prefixIcon: Icon(Icons.email_outlined)),
                   validator: (value) {
                     final email = (value ?? '').trim();
@@ -247,8 +247,8 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
                   key: const Key('recovery_new_password'),
                   controller: _password, obscureText: true,
                   autofillHints: const [AutofillHints.newPassword],
-                  decoration: const InputDecoration(
-                    labelText: 'New password',
+                  decoration: InputDecoration(
+                    labelText: fmTr(context, 'New password'),
                     prefixIcon: Icon(Icons.lock_outline)),
                   validator: (v) => (v ?? '').length < 8
                       ? 'Use at least 8 characters' : null),
@@ -256,8 +256,8 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
                 TextFormField(
                   key: const Key('recovery_confirm_password'),
                   controller: _confirm, obscureText: true,
-                  decoration: const InputDecoration(
-                    labelText: 'Confirm new password',
+                  decoration: InputDecoration(
+                    labelText: fmTr(context, 'Confirm new password'),
                     prefixIcon: Icon(Icons.lock_reset_outlined)),
                   validator: (v) => v != _password.text
                       ? 'Passwords do not match' : null),
