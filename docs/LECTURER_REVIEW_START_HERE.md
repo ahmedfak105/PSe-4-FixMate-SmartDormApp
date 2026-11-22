@@ -14,6 +14,7 @@
 | What the lecturer wants to inspect | Exact location |
 |---|---|
 | **Whole integrated app and documentation** | [PR #46](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/pull/46) and [combined branch](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/tree/integration/lecturer-review-2026-11-22) |
+| **Run the real Android APK and Flutter Web** | [Start here to run: Android + GitHub Pages](START_HERE_TO_RUN.md) |
 | **Resident/Staff mobile source** | [mobile/lib/](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/tree/integration/lecturer-review-2026-11-22/mobile/lib) |
 | **Flutter Web Admin, Moderator and Staff** | [Operations setup](../mobile/OPERATIONS_WEB_README.md) and [operations screens](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/tree/integration/lecturer-review-2026-11-22/mobile/lib/features/operations) |
 | **Source-of-truth database ERD** | [Original six-table ERD](FIXMATE_ERD.md) |
