@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../l10n/fixmate_i18n.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../../navigation/route_generator.dart';
@@ -13,7 +14,7 @@ class MyReportsPage extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.tabMyReports),
+        title: FixMateText(l10n.tabMyReports),
         actions: [
           IconButton(
             tooltip: 'Refresh reports',
@@ -34,7 +35,7 @@ class MyReportsPage extends StatelessWidget {
             ),
             TextButton(
               onPressed: context.read<ReportsCubit>().load,
-              child: Text(l10n.retry),
+              child: FixMateText(l10n.retry),
             ),
           ]));
         }
@@ -45,7 +46,7 @@ class MyReportsPage extends StatelessWidget {
               physics: const AlwaysScrollableScrollPhysics(),
               children: [
                 const SizedBox(height: 170),
-                Center(child: Text(l10n.noReports)),
+                Center(child: FixMateText(l10n.noReports)),
               ],
             ),
           );
@@ -64,8 +65,8 @@ class MyReportsPage extends StatelessWidget {
                 child: ListTile(
                   key: Key('report_${report.id}'),
                   leading: const Icon(Icons.home_repair_service_outlined),
-                  title: Text(report.title),
-                  subtitle: Text(
+                  title: FixMateText(report.title),
+                  subtitle: FixMateText(
                     '${report.id} · ${report.category} · ${statusLabel(report.status, l10n)} · ${l10n.submittedOn}: $submittedDate',
                   ),
                   trailing: const Icon(Icons.chevron_right),
