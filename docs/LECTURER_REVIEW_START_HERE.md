@@ -23,6 +23,7 @@
 | **English 7–9-minute spoken demonstration** | [Lecturer Presentation Script](LECTURER_PRESENTATION_SCRIPT.md) |
 | **Remaining deployment tasks** | [Controlled rollout guide](CONTROLLED_SUPABASE_ROLLOUT_TASK36_TASK39.md) and [read-only preflight SQL](sql/REMOTE_ADDITIVE_PREDEPLOY_READ_ONLY.sql) |
 | **Staging acceptance and release sign-off** | [Evidence matrix and release decision record](STAGING_ACCEPTANCE_RELEASE_DECISION.md) |
+| **Latest live Supabase read-only audit (22 Nov)** | [Hosted inventory, migration/staging status and advisor findings](HOSTED_SUPABASE_READ_ONLY_AUDIT_2026-11-22.md) |
 
 The original, separately implemented HTML/CSS/JavaScript Admin dashboard is in [Draft PR #44](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/pull/44), but the **integrated deliverable uses Flutter Web**. Some older evidence snapshot documents still describe the earlier HTML version; those sections are historical, not the current UI architecture.
 
