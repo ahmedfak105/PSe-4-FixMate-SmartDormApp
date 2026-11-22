@@ -329,7 +329,7 @@ if [[ ! "$b_role_patch" =~ ^4[0-9][0-9]$ ]]; then
 fi
 
 post_json "$rest/rpc/manage_user_role" "$admin_token" \
-  "$role_payload" | jq -e '.role=="maintenance_staff"' >/dev/null
+  "$role_payload" | jq -e '(if type=="array" then .[0] else . end).role=="maintenance_staff"' >/dev/null
 get_json "$rest/profiles?select=role&id=eq.$b" "$b_token" |
   jq -e 'length==1 and .[0].role=="maintenance_staff"' >/dev/null
 stale_role="$(status_code POST "$rest/rpc/manage_user_role" "$admin_token" "$role_payload")"
@@ -348,7 +348,7 @@ fi
 revert_payload="$(jq -nc --arg id "$b" \
   '{p_user_id:$id,p_expected_role:"maintenance_staff",p_new_role:"resident"}')"
 post_json "$rest/rpc/manage_user_role" "$admin_token" \
-  "$revert_payload" | jq -e '.role=="resident"' >/dev/null
+  "$revert_payload" | jq -e '(if type=="array" then .[0] else . end).role=="resident"' >/dev/null
 get_json "$rest/user_role_audit?select=old_role,new_role&target_id=eq.$b" \
   "$admin_token" | jq -e 'length==2' >/dev/null
 get_json "$rest/user_role_audit?select=id" "$a_token" |
