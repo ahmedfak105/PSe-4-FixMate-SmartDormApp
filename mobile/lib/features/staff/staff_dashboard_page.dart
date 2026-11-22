@@ -184,10 +184,9 @@ class _StaffDashboardPageState extends State<StaffDashboardPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const FixMateText('FixMate · Maintenance Workspace'),
+        title: const FixMateText('FixMate'),
         actions: [
-          const FixMateLanguageButton(),
-          const FixMateSupportMenu(),
+          const FixMateUtilityMenu(),
           Tooltip(
             message: 'My profile',
             child: InkWell(
