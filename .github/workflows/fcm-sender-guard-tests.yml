@@ -29,3 +29,8 @@ jobs:
           node-version: '22'
       - name: Run pure webhook and FCM response tests (no credentials, no network)
         run: node --experimental-strip-types --test supabase/functions/send-report-push/push_guards_test.mjs
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Type-check the complete server-only Edge Function (no credentials)
+        run: deno check supabase/functions/send-report-push/index.ts
