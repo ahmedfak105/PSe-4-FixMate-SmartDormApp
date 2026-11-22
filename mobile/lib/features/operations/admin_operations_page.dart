@@ -1,3 +1,4 @@
+import '../../fixmate_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -254,7 +255,7 @@ class _AdminOperationsPageState extends State<AdminOperationsPage> {
       0 => Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         _summary(),
         const SizedBox(height: 24),
-        Text('Recent maintenance reports',
+        Text('Recent activity',
             style: Theme.of(context).textTheme.titleLarge),
         const SizedBox(height: 10),
         _listReports(assignmentsOnly: false),
@@ -266,7 +267,14 @@ class _AdminOperationsPageState extends State<AdminOperationsPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('FixMate · Flutter Web Admin'),
+        title: const Row(mainAxisSize: MainAxisSize.min, children: [
+          Icon(Icons.home_repair_service_rounded, color: FixMateTheme.teal),
+          SizedBox(width: 9),
+          Text('FixMate'),
+          SizedBox(width: 12),
+          Text('Operations', style: TextStyle(fontSize: 13,
+              fontWeight: FontWeight.w500, color: Color(0xFF65818B))),
+        ]),
         actions: [
           IconButton(tooltip: 'Refresh', icon: const Icon(Icons.refresh),
               onPressed: _loading || _busy ? null : _load),
@@ -292,9 +300,10 @@ class _AdminOperationsPageState extends State<AdminOperationsPage> {
             ],
           ),
         Expanded(child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
+          padding: EdgeInsets.symmetric(
+            horizontal: size.maxWidth > 760 ? 30 : 16, vertical: 24),
           child: Center(child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 1100),
+            constraints: const BoxConstraints(maxWidth: 1240),
             child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
               if (size.maxWidth <= 760)
                 SingleChildScrollView(scrollDirection: Axis.horizontal,
@@ -306,9 +315,8 @@ class _AdminOperationsPageState extends State<AdminOperationsPage> {
                             onSelected: (_) => setState(() => _tab = i))),
                   ])),
               const SizedBox(height: 12),
-              Text('Welcome, ${widget.profile.fullName}',
-                  style: Theme.of(context).textTheme.headlineSmall),
-              const SizedBox(height: 10),
+              _WelcomePanel(name: widget.profile.fullName, reportCount: _reports.length),
+              const SizedBox(height: 12),
               if (_loading) const LinearProgressIndicator(),
               if (_error != null)
                 Text(_error!, style: TextStyle(
@@ -326,6 +334,60 @@ class _AdminOperationsPageState extends State<AdminOperationsPage> {
   }
 }
 
+class _WelcomePanel extends StatelessWidget {
+  const _WelcomePanel({required this.name, required this.reportCount});
+  final String name;
+  final int reportCount;
+
+  @override
+  Widget build(BuildContext context) {
+    final displayName = name.trim().isEmpty ? 'Administrator' : name.trim();
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 25),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF07555C), Color(0xFF0B8586)],
+          begin: Alignment.topLeft, end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(22),
+      ),
+      child: Wrap(
+        spacing: 22, runSpacing: 15,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        alignment: WrapAlignment.spaceBetween,
+        children: [
+          Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            const Text('OPERATIONS OVERVIEW',
+              style: TextStyle(color: Color(0xFFB9EAE2),
+                letterSpacing: 1.5, fontSize: 11, fontWeight: FontWeight.w700)),
+            const SizedBox(height: 9),
+            Text('Welcome back, $displayName',
+              style: const TextStyle(color: Colors.white,
+                fontSize: 23, fontWeight: FontWeight.w800)),
+            const SizedBox(height: 7),
+            const Text('Manage requests, teams and maintenance progress.',
+              style: TextStyle(color: Color(0xFFE3F6F3), fontSize: 13)),
+          ]),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 17, vertical: 12),
+            decoration: BoxDecoration(
+              color: const Color(0x23FFFFFF),
+              borderRadius: BorderRadius.circular(14)),
+            child: Row(mainAxisSize: MainAxisSize.min, children: [
+              const Icon(Icons.analytics_outlined, color: Colors.white),
+              const SizedBox(width: 10),
+              Text('$reportCount total requests',
+                style: const TextStyle(color: Colors.white,
+                  fontWeight: FontWeight.w700)),
+            ]),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _Metric extends StatelessWidget {
   const _Metric({required this.label, required this.count, required this.icon});
   final String label;
@@ -333,18 +395,35 @@ class _Metric extends StatelessWidget {
   final IconData icon;
 
   @override
-  Widget build(BuildContext context) => SizedBox(
-    width: 235,
-    child: Card(child: Padding(
-      padding: const EdgeInsets.all(18),
-      child: Row(children: [
-        Icon(icon),
-        const SizedBox(width: 12),
-        Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text('$count', style: Theme.of(context).textTheme.headlineSmall),
-          Text(label),
-        ]),
-      ]),
-    )),
-  );
+  Widget build(BuildContext context) {
+    final accent = label == 'Resolved' ? const Color(0xFF16875A)
+        : label == 'New' ? const Color(0xFFB87512)
+        : label == 'In progress' ? const Color(0xFF3979B4)
+        : FixMateTheme.teal;
+    return SizedBox(
+      width: 235,
+      child: Card(child: Padding(
+        padding: const EdgeInsets.all(19),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: accent.withValues(alpha: 0.10),
+                borderRadius: BorderRadius.circular(12)),
+              child: Icon(icon, size: 22, color: accent),
+            ),
+            const SizedBox(height: 15),
+            Text('$count', style: const TextStyle(
+              fontSize: 30, color: FixMateTheme.ink,
+              fontWeight: FontWeight.w800)),
+            const SizedBox(height: 3),
+            Text(label, style: const TextStyle(
+              fontSize: 13, color: Color(0xFF617C86),
+              fontWeight: FontWeight.w600)),
+          ],
+        ),
+      )),
+    );
+  }
 }
