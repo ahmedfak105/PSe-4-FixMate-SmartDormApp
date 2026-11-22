@@ -251,7 +251,7 @@ class _ModeratorOperationsPageState extends State<ModeratorOperationsPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('FixMate · Flutter Web Moderator'),
+        title: const Text('FixMate · Review Center'),
         actions: [
           IconButton(tooltip: 'Refresh reviews', onPressed: _loading ? null : _refresh,
               icon: const Icon(Icons.refresh)),
