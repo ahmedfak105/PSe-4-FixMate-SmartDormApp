@@ -1,84 +1,64 @@
-# FixMate — free push-notification delivery plan (F05.2)
+# FixMate — F05.2 Android Push Delivery (Firebase FCM)
 
-**Status: not live / not accepted.** Do not label F05.2 Done merely because F05.1 in-app notifications are locally implemented.
+**Status: integration code prepared; remote delivery NOT activated or accepted.**
+Feature [#24](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/24)
+and [Release Gate #47](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/47)
+must remain open until verified on hosted Supabase and a real phone.
 
-## Firebase Android enrollment received — 2026-11-22
+## Existing confirmed Firebase setup
 
-The project owner supplied `google-services.json` for the existing Firebase project
-`pse-4-fixmate-smartdormapp` (Firebase project number `677525069947`).
-The configuration's Android package `lt.kaunokolegija.vp_mobile` and Firebase
-Android App ID match the app registered in the project and the existing Flutter
-Gradle `applicationId`.
+- Existing Firebase project: `pse-4-fixmate-smartdormapp` (number `677525069947`).
+- Android application ID: `lt.kaunokolegija.vp_mobile`, matches the Firebase project registration and `mobile/android/app/build.gradle.kts`.
+- The project owner provided the **Android client** config `google-services.json`; it is in `mobile/android/app/google-services.json` on the integration branch. Do not confuse this non-secret client config with a **service account JSON**, which must never be committed or pasted into chat.
+- Android Google services Gradle plugin, pinned FlutterFire Core/Messaging dependencies, and Android notification permission are prepared.
+- `mobile/lib/features/notifications/fixmate_push_service.dart` implements Android-only Resident opt-in, token refresh, owner-scoped registration and best-effort token deletion before logout.
+- `mobile/lib/features/settings/profile_page.dart` presents an English/Lithuanian push preference. This is a **registration preference**, not proof of remote delivery.
 
-- [x] User-supplied **client** configuration added to
-  `mobile/android/app/google-services.json`; the Firebase docs explicitly
-  describe these client identifiers as **non-secret**. Never commit an
-  administrative service-account private key.
-- [x] Google services Gradle plugin added for Android.
-- [x] Exact Flutter dependency versions added for `firebase_core` and
-  `firebase_messaging`; Android 13+ notification permission declared.
-- [x] Resident-only **opt-in** Firebase device token registration with
-  authenticated Supabase session, refresh handling, and opt-out/sign-out
-  revocation implemented in `mobile/lib/features/notifications/fixmate_push_service.dart`.
-- [x] `public.push_device_tokens` with owner-only RLS prepared in
-  `supabase/migrations/20261122210500_fcm_device_tokens.sql`; isolated API
-  permission tests added. **Not applied to the populated hosted database.**
-- [ ] Re-run CI and compile the integrated Android APK with Google Play
-  services. Test the opt-in on a physical phone.
-- [ ] Implement/approve the **server-side** FCM HTTP v1 sender and secure
-  secret deployment. Push delivery is *not* validated yet.
+## Server implementation staged locally
 
-### Billing plan warning
+- `supabase/migrations/20261122194500_report_notifications.sql` records in-app status-change notifications for the report owner.
+- `supabase/migrations/20261122210500_fcm_device_tokens.sql` creates an RLS-protected device-token registry with no access for non-owners.
+- `supabase/migrations/20261122234000_fcm_push_delivery_outbox.sql` queues notification deliveries transactionally for the report owner's registered Android devices, handles token revocation and offers atomic, service-role-only claims with retry leases. Client roles cannot SELECT the outbox or call the claim RPC.
+- `supabase/functions/send-report-push/index.ts` is a **server-only** FCM HTTP v1 dispatcher. It accepts POST requests carrying an independent high-entropy webhook secret, validates the Firebase project ID, signs a short-lived OAuth 2 assertion using WebCrypto, sends only queued report/status data to the stored owner token, and retries transient errors. It never returns tokens or privileged credentials to a browser.
+- `docs/sql/test/local_supabase_api_smoke.sh` checks owner-only token registration, denied role abuse, durable queue creation, denied client claims and cancellation on revoke **against disposable local Supabase**.
 
-The Firebase Console supplied by the owner shows **Blaze plan (pay as you go)**,
-not Spark. While FCM is free, Blaze can incur charges from unrelated services.
-Do not enable Cloud Functions, Cloud Run, hosting, storage, analytics export,
-or any billable integration to deliver this feature. The project is associated
-with `businessgo.kauko.lt` in Google Cloud, so confirm billing ownership and
-existing dependencies before downgrading, unlinking billing, or changing plans.
-Changing the plan was **not** authorized and **not** performed.
+**No server migration, service-account secret, webhook or sender has been deployed to populated hosted Supabase.** The outbox is at-least-once: rare duplicate delivery may occur after worker/network crashes. Do not promise exactly-once remote delivery.
 
-Reference: https://firebase.google.com/docs/projects/billing/firebase-pricing-plans
+## Controlled rollout — only after #47 release approval
 
-## Selected free option
+1. Review all additive-only migrations against the **actual hosted schema** (migration history may differ from existing database objects). Make and **verify** a recoverable backup; never run `db reset` or replay the baseline on live data.
+2. Apply only approved migrations, and verify every RLS policy using **real authenticated Resident/Staff/Admin** sessions.
+3. In the existing Supabase project, store the following in **Edge Function secrets**, not code/GitHub/chat:
+   - `FIREBASE_SERVICE_ACCOUNT_JSON` — a dedicated Firebase service-account JSON limited to the necessary **Firebase Cloud Messaging API Admin** permissions.
+   - `FIREBASE_PROJECT_ID=pse-4-fixmate-smartdormapp`.
+   - `FIXMATE_PUSH_WEBHOOK_SECRET` — a randomly generated 32+ character secret; never display this publicly.
+   - `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are supplied by the trusted Supabase runtime; never bundle their values in Flutter.
+4. Deploy `supabase/functions/send-report-push` with **`verify_jwt=false` only for this server-to-server endpoint**. Its own `x-fixmate-push-secret` check is mandatory. All other functions must keep their existing authorization.
+5. Configure a **Database Webhook** on INSERT to `public.push_delivery_outbox` calling the Edge Function with the same secret header. The function claims jobs from the queue rather than trusting any arbitrary recipient ID in the webhook payload. Add a low-frequency trusted scheduler for retries after observing free-tier quotas; a webhook alone cannot retry delayed failed sends. Limit scheduled invocations and disable if usage approaches any paid threshold.
+6. Test with a **controlled Resident Android phone**, a second Resident, and Maintenance Staff: opt in, change status, confirm Android receives the expected alert while backgrounded, confirm role isolation and no cross-account delivery, revoke token/sign out and confirm no further sends.
+7. Only then close Feature #24 and #47 following lecturer/team approval.
 
-- **Firebase Cloud Messaging (FCM)** for Android push: Google lists messaging as a no-cost product. https://firebase.google.com/products/cloud-messaging
-- **Existing Supabase Edge Functions** can run a trusted server-side sender within the current project's free-tier quota. https://supabase.com/docs/guides/functions/pricing
-- No Firebase paid Functions, external notification subscriptions, paid Supabase branch, or billing activation are required for this design.
+Reference: [Supabase FCM Edge Function guide](https://supabase.com/docs/guides/functions/examples/push-notifications?platform=fcm), [FCM HTTP v1](https://firebase.google.com/docs/cloud-messaging/send/v1-api), and [Supabase function secrets](https://supabase.com/docs/guides/functions/secrets).
 
-## One-time project-owner inputs
+## $300 promotional credit: billing caveat
 
-The connected GitHub and Supabase integrations cannot create or configure a Firebase project/device directly. A project owner must:
+The owner stated that the project's linked Google Cloud billing account has a **$300 promotional credit**. Firebase Console shows the project on **Blaze**, which is expected for a Firebase project linked to a Google Cloud billing account. This does **not** mean every cloud feature is permanently free.
 
-1. Create a **Firebase Spark (no-cost)** project named **FixMate** and register the Android app using this exact, case-sensitive package ID: `lt.kaunokolegija.vp_mobile` (verified from `mobile/android/app/build.gradle.kts` on the integration branch). **Do not use** the separate password-recovery callback URI `com.fixmate.smartdorm://reset-password`. If Firebase requests a display nickname, use `FixMate Android`.
-2. Download the app's Firebase client configuration `google-services.json` after registration. Its eventual Android path is `mobile/android/app/google-services.json`. You can provide the file to the project workflow through an authorized connection or a controlled upload; do not paste private keys into chat. **Do not** confuse it with any Firebase service-account JSON, which is a server secret and must never go in the browser, mobile bundle or GitHub repository.
-3. Approve configuring FCM sender credentials as **Supabase Function secrets** on the existing project, and authorize the relevant additive-only backend migration under release gate #47.
-4. Provide a test Android phone/account for a real foreground/background delivery acceptance test.
+- Google's common new-customer $300 Free Trial lasts **90 days from trial signup** and ends sooner if credit is exhausted. On a **Free Trial billing account**, Google says users are not billed during the trial; if converted to a **Paid billing account**, charges may occur outside the remaining credit and after expiry.
+- **Do not assume** the entire $300 balance remains or know its expiry date without checking the billing console. Google offers other promotional credits with different terms.
+- **FCM itself has no sending fee**. The planned sender uses the already connected Supabase project's Edge Function allowance, which has independent quotas and possible charges. No Firebase Cloud Functions, Google Cloud Run, BigQuery export or paid add-ons are required.
+- Before any billable deployment, check the exact remaining credit, expiry, billing account state and applicable quotas; set a low [Google Cloud budget alert](https://console.cloud.google.com/billing). Budget notifications alone do **not** cap spending.
+- **No change to billing, Firebase Blaze plan, credit balance, hosting, account roles or live Supabase deployment was made.**
 
-## Required implementation before F05.2 can be called Done
+Official references: [Google Cloud Free Trial](https://cloud.google.com/free/docs/free-cloud-features), [Firebase billing plans](https://firebase.google.com/docs/projects/billing/firebase-pricing-plans), [FCM no-cost product](https://firebase.google.com/products/cloud-messaging).
 
-- [ ] Add `firebase_core` / `firebase_messaging` using reviewed pinned versions; request notification permission and initialize Firebase only in the configured Android build.
-- [ ] Register/rotate/revoke device tokens through authenticated owner-only Supabase RLS; sign-out must revoke ownership. No device token may be attached to another resident's account.
-- [ ] Make an idempotent server-side outbox derived from F05.1 status notifications. Target only `resident_id`, never arbitrary request-selected recipients.
-- [ ] Send via FCM HTTP v1 from a trusted Supabase Edge Function; keep all private keys in environment secrets.
-- [ ] Retry transient delivery failures, mark invalid tokens inactive, and keep report-status mutations independent of any push network failure.
-- [ ] Run free local security tests plus a real Android handset test: delivery when app is backgrounded/closed, correct report/status, cross-account isolation, no duplicate delivery, no rollbacks on FCM failure.
-- [ ] Only then update Feature #24 to Closed/Done and deploy after #47.
+## Acceptance checklist
 
-**Existing user-visible behavior:** F05.1 provides a private in-app notification inbox in the local implementation. It is not a substitute for a delivered push notification.
-
-## Security and costs
-
-Never use client-facing publishable keys as FCM sender secrets. Never place service-account JSON in Dart, the web bundle, or source control. Use Firebase Spark and existing no-cost tiers; stop if quotas or pricing would create charges.
-
-
-## Verification at next continuation
-
-- [x] Exact Gradle `applicationId` independently checked: `lt.kaunokolegija.vp_mobile`.
-- [x] Free FCM/Spark setup instructions checked against official Firebase Flutter/Android setup guidance.
-- [ ] Firebase ChatGPT plugin installed/connected (plugin discovery currently reports installed=false); this requires explicit user action.
-- [ ] Firebase Spark project created and Android app registered with matching package.
-- [ ] Config retrieved, Gradle/FlutterFire integration reviewed and tested in a disposable release build.
-- [ ] Server sender credentials stored only in approved private secrets and end-to-end delivery tested before claiming F05.2 Done.
-
-Free setup references: https://firebase.google.com/docs/android/setup and https://firebase.google.com/docs/flutter/setup .
+- [x] Firebase project and Android package matched; client config added.
+- [x] Android FCM opt-in code, device registry and server-side outbox prepared.
+- [x] Server-side FCM HTTP v1 sender source prepared (not deployed).
+- [ ] Exact final revision passes Flutter CI, Android build, local RLS/API tests and real Chrome E2E.
+- [ ] Hosted Supabase backup/recovery and additive migration approval (#47).
+- [ ] Sender secrets stored and database webhook/scheduled retry configured by authorized operator.
+- [ ] Real Android background-delivery test completed; no sends to non-owner.
+- [ ] Feature #24 marked Done only after all acceptance requirements pass.
