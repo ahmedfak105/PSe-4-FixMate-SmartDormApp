@@ -1,6 +1,6 @@
 # FixMate — enable real Android Firebase notifications
 
-**Verified hosted status on 22 November 2026**
+\n**Security hardening:** `pg_net` was moved into the `extensions` extension-registration namespace via a guarded transactional reinstall (remote version `20261122171136`). Latest Security Advisor no longer reports `extension_in_public`. See [applied hardening SQL](sql/FCM_PGNET_NAMESPACE_HARDENING_APPLIED.sql).\n\n**Verified hosted status on 22 November 2026**
 
 - Supabase project: `epsvagztisdovixlqehi` (Free plan).
 - **FCM Edge sender deployed:** `send-report-push` is ACTIVE version 1.
