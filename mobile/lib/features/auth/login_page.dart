@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'sign_up_page.dart';
+import 'password_recovery_page.dart';
 
 /// Sign in with Supabase Auth or register a new Resident account.
 class LoginPage extends StatefulWidget {
@@ -164,6 +165,18 @@ class _LoginPageState extends State<LoginPage> {
                               )
                             : const Text('Sign in'),
                       ),
+                    ),
+                    const SizedBox(height: 8),
+                    TextButton(
+                      key: const Key('go_to_password_recovery'),
+                      onPressed: _busy ? null : () => Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => PasswordRecoveryRequestPage(
+                            initialEmail: _emailController.text.trim(),
+                          ),
+                        ),
+                      ),
+                      child: const Text('Forgot password?'),
                     ),
                     // Enabled after isolated local Supabase Auth + profile/RLS
                     // API tests passed. Set ENABLE_RESIDENT_SIGNUP=false
