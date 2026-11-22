@@ -2,7 +2,7 @@
 
 This Flutter application is part of the Kauno Kolegija Internal Internship **FixMate – SmartDormApp** project. It provides resident maintenance-reporting and maintenance-staff workflows against the shared Supabase backend.
 
-**MVP, not a production release.** The app can run in either authenticated Supabase mode or an offline, in-memory demo mode. The separate administrator interface lives in `admin-web/` on its own pull-request branch.
+**Connected app only.** Android and Flutter Web require authenticated Supabase data; the installed app contains no offline sample reports, synthetic accounts, or local fallback. Hosted rollout still needs security and device acceptance. Admin operations are part of the integrated Flutter Web application.
 
 ## Implemented scope
 
@@ -50,16 +50,28 @@ To hide the signup button on a deployment that does not allow new accounts, add 
 
 If your Chrome device has a different Flutter device name, run `flutter devices` first. Android and iOS project files are included, but a successful mobile-device build is **not** claimed in this repository.
 
-## Run the offline demonstration
+## Launch requirements — live Supabase only
+
+A normal installation must have a valid Supabase project URL and **public**
+publishable key. If either is missing or invalid, FixMate displays a
+connection-required/error screen; it does **not** open offline sample reports.
+A Web operations build can use the secure public connection form at runtime.
+
+To build the connected Android app:
 
 ```bash
 cd mobile
 flutter pub get
 flutter gen-l10n
-flutter run -d chrome --dart-define=FIXMATE_OFFLINE_DEMO=true
+flutter build apk --debug \
+  --dart-define=SUPABASE_URL=https://YOUR_PROJECT.supabase.co \
+  --dart-define=SUPABASE_PUBLISHABLE_KEY=YOUR_PUBLIC_PUBLISHABLE_KEY
 ```
 
-With this explicit offline-only flag and no Supabase dart-defines the app uses `InMemoryReportRepository` and displays a **DEMO DATA** banner. Demo changes do not persist to PostgreSQL.
+Never embed `service_role`, `sb_secret_`, Firebase service account JSON,
+or other privileged keys in client applications. The source tree's synthetic
+repositories are located **only under `test/`** and are compiled for
+isolated automated tests, not included in the installed app.
 
 ## Checks
 
@@ -75,11 +87,11 @@ flutter test
 
 ## Relevant source files
 
-- `lib/main.dart`: connected Supabase by default; offline demo data is available only with the explicit `FIXMATE_OFFLINE_DEMO=true` build flag.
+- `lib/main.dart`: connected Supabase is mandatory; missing public configuration shows a connection-required page.
 - `lib/features/auth/`: sign-in, registration form (feature-flagged), and profile/session gating.
 - `lib/features/reports/`: submission, list and details UI.
 - `lib/features/staff/`: staff queue, claim/resolve and internal notes.
-- `lib/data/repositories/`: in-memory and Supabase implementations.
+- `lib/data/repositories/`: Supabase-backed repositories and shared interfaces (synthetic test repository is in `test/support/`).
 - `test/`: checked-in model and widget tests.
 
 ## Security and known limitations
