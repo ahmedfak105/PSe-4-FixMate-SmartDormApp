@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../data/models/resident_profile.dart';
 import '../settings/edit_profile_page.dart';
+import '../settings/my_profile_avatar.dart';
 
 /// Keep historical decisions visible after Staff changes a reviewed report
 /// to in_progress or resolved. Only unassigned NEW reports can be reviewed.
@@ -46,6 +47,7 @@ class _ModeratorOperationsPageState extends State<ModeratorOperationsPage> {
   bool _loading = false;
   bool _busy = false;
   ResidentProfile? _editedProfile;
+  int _avatarRevision = 0;
 
   Future<void> _editOwnProfile() async {
     final updated = await Navigator.of(context).push<ResidentProfile>(
@@ -53,7 +55,7 @@ class _ModeratorOperationsPageState extends State<ModeratorOperationsPage> {
         profile: _editedProfile ?? widget.profile)),
     );
     if (updated != null && mounted) {
-      setState(() => _editedProfile = updated);
+      setState(() { _editedProfile = updated; _avatarRevision++; });
     }
   }
 
@@ -266,7 +268,22 @@ class _ModeratorOperationsPageState extends State<ModeratorOperationsPage> {
       appBar: AppBar(
         title: const Text('FixMate · Review Center'),
         actions: [
-          IconButton(tooltip: 'My profile', icon: const Icon(Icons.account_circle_outlined), onPressed: _editOwnProfile),
+          Tooltip(
+            message: 'My profile',
+            child: InkWell(
+              onTap: _editOwnProfile,
+              borderRadius: BorderRadius.circular(30),
+              child: Padding(
+                padding: const EdgeInsets.all(5),
+                child: MyProfileAvatar(
+                  key: ValueKey('my-avatar-${widget.profile.id}-$_avatarRevision'),
+                  userId: widget.profile.id,
+                  name: (_editedProfile ?? widget.profile).fullName,
+                  radius: 17,
+                ),
+              ),
+            ),
+          ),
           IconButton(tooltip: 'Refresh reviews', onPressed: _loading ? null : _refresh,
               icon: const Icon(Icons.refresh)),
           IconButton(tooltip: 'Sign out', onPressed: _logout,
