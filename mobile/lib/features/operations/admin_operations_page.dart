@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../data/models/resident_profile.dart';
 import '../settings/edit_profile_page.dart';
+import '../settings/my_profile_avatar.dart';
 
 /// System-admin Flutter Web workspace (Task #38 / F06.1).
 ///
@@ -28,6 +29,7 @@ class _AdminOperationsPageState extends State<AdminOperationsPage> {
   String? _error;
   String? _notice;
   ResidentProfile? _editedProfile;
+  int _avatarRevision = 0;
 
   Future<void> _editOwnProfile() async {
     final updated = await Navigator.of(context).push<ResidentProfile>(
@@ -35,7 +37,7 @@ class _AdminOperationsPageState extends State<AdminOperationsPage> {
         profile: _editedProfile ?? widget.profile)),
     );
     if (updated != null && mounted) {
-      setState(() => _editedProfile = updated);
+      setState(() { _editedProfile = updated; _avatarRevision++; });
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Profile updated successfully.')),
       );
@@ -296,8 +298,22 @@ class _AdminOperationsPageState extends State<AdminOperationsPage> {
               fontWeight: FontWeight.w500, color: Color(0xFF65818B))),
         ]),
         actions: [
-          IconButton(tooltip: 'My profile', icon: const Icon(Icons.account_circle_outlined),
-              onPressed: _editOwnProfile),
+          Tooltip(
+            message: 'My profile',
+            child: InkWell(
+              onTap: _editOwnProfile,
+              borderRadius: BorderRadius.circular(30),
+              child: Padding(
+                padding: const EdgeInsets.all(5),
+                child: MyProfileAvatar(
+                  key: ValueKey('my-avatar-${widget.profile.id}-$_avatarRevision'),
+                  userId: widget.profile.id,
+                  name: (_editedProfile ?? widget.profile).fullName,
+                  radius: 17,
+                ),
+              ),
+            ),
+          ),
           IconButton(tooltip: 'Refresh', icon: const Icon(Icons.refresh),
               onPressed: _loading || _busy ? null : _load),
           IconButton(tooltip: 'Sign out', icon: const Icon(Icons.logout),
