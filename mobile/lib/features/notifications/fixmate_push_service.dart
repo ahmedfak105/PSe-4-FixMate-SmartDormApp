@@ -35,8 +35,8 @@ class FixMatePushService {
       final messaging = FirebaseMessaging.instance;
       await messaging.setAutoInitEnabled(false);
     } catch (_) {
-      // Android without Google Play Services, incomplete config or offline
-      // demos continue to run without push. No token or credential is logged.
+      // Devices without Google Play Services or a valid Firebase config
+      // can still use core connected reporting without push.
       _ready = false;
     }
   }
