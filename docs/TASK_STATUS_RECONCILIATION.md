@@ -1,0 +1,160 @@
+> **Current implementation acceptance — 22 Nov 2026:** The original **12/12 TASK issues are closed** following reproducible local Flutter/Supabase/API/Storage/Chrome tests. Five CLI-named migrations build a fresh local environment including report validation and Moderator review. **This is NOT hosted deployment or lecturer final sign-off.** The populated remote still has the original six application tables and empty migration history; [RELEASE GATE #47](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/47) tracks approved backup/staging/reconciliation/target-project deployment. [Integrated Draft PR #46](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/pull/46) remains unmerged.
+
+# FixMate — Implementation Task Status Reconciliation
+
+**Reviewed:** 21 November 2026  
+**Source:** the 12 actual TASK issues in this repository (#30–#41), their individual acceptance criteria, the submitted Flutter/Admin code and verified Supabase/QA results.
+
+> **Important:** GitHub Projects V2 `Status` is a separate field from the issue body and issue open/closed state. The issue descriptions and completion state were reconciled; this document is the intended **Project Board target mapping**. Do not claim that the Projects V2 field is synchronized until it has been checked in the board itself.
+
+## Done (3)
+
+| Task | Evidence / reason |
+|---|---|
+| [#31 — Resident maintenance report submission form](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/31) | Category, form validation, Supabase report creation, success/error handling implemented and exercised |
+| [#32 — Flutter photo attachment](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/32) | Image selection and preview; JPEG/PNG/WebP validation; linked private Storage upload and error handling implemented and exercised |
+| [#37 — Atomic staff claim and report status transitions](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/37) | Database function bodies verified; conditional atomic report update, role validation, persisted history with timestamps and denial of inappropriate roles |
+
+These three verified issues were marked **closed/completed** in the issue tracker. Their associated Flutter/documentation PRs are still draft review items; completing a task does not itself merge a PR.
+
+## In Progress (8)
+
+| Task | Remaining acceptance item |
+|---|---|
+| [#30 — Flutter structure and authentication](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/30) | Supabase login/logout exist, but resident registration/sign-up not demonstrated |
+| [#33 — My Reports and details](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/33) | List/details/RLS work; submitted date exists in model but is not displayed in report details UI |
+| [#34 — Supabase database schema](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/34) | Tables and ERD implemented; complete version-controlled reproducible migrations and indexes not yet provided |
+| [#35 — Auth profiles and RBAC](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/35) | Existing roles, RLS and direct role-update blocking verified; registration/profile provisioning and admin role management/provisioning documentation incomplete |
+| [#36 — Maintenance report backend and Storage policies](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/36) | Report and photo flows work; remaining endpoint negative tests, invalid-field backend checks and upload error-path testing |
+| [#38 — Flutter Web admin / role navigation](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/38) | Working standalone HTML/JS admin exists; the project team reports the lecturer approved this framework change on 21 Nov 2026. Task remains In Progress because the originally described staff/moderator navigation and acceptance checks are not fully demonstrated |
+| [#40 — Staff queue and claim UI](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/40) | Queue/claim/conflict handling implemented in Flutter; original task is designated Admin Web, so delivery placement needs acceptance |
+| [#41 — Staff status update UI](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/41) | Staff claim/resolve controls work in Flutter; last status-update timestamp display and designated web area remain incomplete |
+
+## Backlog / To do (1)
+
+- [#39 — Moderator review UI](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/39): no dedicated moderator review flow with duplicate/inappropriate outcomes persisted to backend has been demonstrated.
+
+## Board synchronization and review
+
+- The GitHub Project is [FixMate board #1](https://github.com/users/ahmedfak105/projects/1).
+- Set the board `Status` field to **Done** for #31, #32, #37; **In Progress** for #30, #33, #34, #35, #36, #38, #40, #41; **Backlog** (or the board's equivalent `Todo`) for #39.
+- Do not classify Features/Epics as complete automatically from these task statuses; check their own acceptance criteria.
+- Avoid merging PRs #42/#43/#44 or closing any additional issues without review.
+- The PowerShell script `FixMate_Update_Project_Board.ps1`, prepared separately for the project team, uses GitHub CLI to synchronize **only these 12 existing board issues**. It previews changes before applying.
+
+**Review principle:** task status reflects the original issue's stated acceptance criteria, not merely the existence of some related code.
+
+
+## Follow-up implementation evidence — 21 November 2026 (after original review)
+
+The approved **Goals, Scope, and Acceptance Criteria in the individual GitHub TASK issues remain unchanged**. The team reported that the lecturer accepted standalone HTML/CSS/JavaScript as the Admin Web implementation technology in place of Flutter Web. The implementation still must satisfy role-specific features and backend rules.
+
+| TASK | New code/evidence | Remaining verification |
+|---|---|---|
+| **#33 — My Reports & details** | Resident list and details now display the submitted date from `createdAt`, with English/Lithuanian labels; Flutter CI passed on commit `5b980a8` | Re-check resident ownership and UI against test Supabase in browser/mobile before closing |
+| **#38 — Role-based Admin Web** | `admin-web/staff.html` and `staff.js` add a maintenance-staff-only web workspace; login redirects staff from Admin sign-in, with role guard on the staff page | Moderator-specific web navigation, live access checks for all roles and review workflow are outstanding |
+| **#40 — Staff available queue & claim UI** | Staff Web now displays Available/My Jobs and calls role-checked `claim_maintenance_report` with conflict feedback and refresh | Test with real staff sessions, concurrent claims and role denials before closing |
+| **#41 — Staff status update UI** | Staff Web includes Resolve action through `resolve_maintenance_report`; status-history update timestamp is shown when readable | Test live report transitions, latest timestamp and Resident status visibility before closing |
+| **#39 — Moderator review UI** | Not yet implemented | Requires an approved/persisted review outcome for valid, duplicate and inappropriate reports, with photo visibility and role checks |
+
+Admin Web static CI passed on commit `545e943`. These are **code-level progress updates**, not a declaration that the complete tasks are Done. The previous task classifications and Board field status should not be changed merely because code was committed.
+
+## Moderator review implementation update — 21 Nov 2026 (follow-up)
+
+**TASK #39 remains In Progress / not accepted.** The earlier "not implemented" note was a snapshot before this implementation.
+
+- Moderator UI is now committed to PR #44: `admin-web/moderator.html`, `moderator.js`; main login redirects role `moderator` to its own web view.
+- New, **not-yet-applied** migration in PR #42: [PROPOSED_MODERATOR_REVIEW_MIGRATION.sql](sql/PROPOSED_MODERATOR_REVIEW_MIGRATION.sql). It proposes `report_reviews`, a restricted review RPC, and a guard preventing claim/assignment of rejected reports.
+- [Moderator staging test plan](MODERATOR_REVIEW_STAGING_TEST_PLAN.md) captures the role-based, photo, persisted-decision, concurrency and regression checks required for acceptance.
+- **Not completed:** staging deployment, live browser/API tests, security verification, and lecturer/team review of database migration. Do **not** close TASK #39 or report it as Done yet.
+
+This proposed change adds a seventh public table **only if deployed**; existing six-table documentation records the verified baseline and is not automatically updated.
+
+## Resident registration progress — TASKS #30 and #35 (proposed, not deployed)
+
+- Added `mobile/lib/features/auth/sign_up_page.dart`: email/password/confirmation and name + optional building/room; **no user-selectable role**. The Login screen exposes the signup link **only** when `ENABLE_RESIDENT_SIGNUP=true` is supplied at launch.
+- Added `mobile/test/sign_up_page_test.dart` for local field validation and the absence of privileged role selection.
+- Added [proposed resident Auth provisioning trigger](sql/PROPOSED_RESIDENT_SIGNUP_PROVISIONING.sql). It uses the new auth user's UUID and forces `role = 'resident'` regardless of metadata.
+- The SQL has **not** been applied to Supabase. Leave signup disabled by default until trigger ownership, account creation, confirmation behavior and role isolation are tested in staging. Do not close #30/#35 yet.
+- Existing trusted staff/moderator/admin profile provisioning remains separate; this trigger does not authorize assigning privileged roles.
+
+## Live Supabase read-only verification — 22 November 2026 (supersedes proposed trigger)
+
+Direct connector inspection of FixMate's **existing** Supabase project `epsvagztisdovixlqehi` found:
+- **6** `auth.users`, **6** `public.profiles`, **0** users without profiles.
+- `auth.users` already has `on_auth_user_created`, which calls `private.handle_new_user()`.
+- `private.handle_new_user()` uses `SECURITY DEFINER`, empty `search_path`, inserts `NEW.id` and `full_name`, and forces `role='resident'` independently of user-editable metadata. Function owner is `postgres`.
+- `authenticated` cannot directly INSERT profiles or UPDATE `profiles.role`.
+- The signup UI no longer includes optional building/room fields because the existing trigger doesn't populate those fields. There is **no reason to install a duplicate auth trigger**.
+- [Resident provisioning SQL](sql/PROPOSED_RESIDENT_SIGNUP_PROVISIONING.sql) has been replaced with a **read-only verification script**, retaining its original path to avoid broken review links.
+- The default `ENABLE_RESIDENT_SIGNUP=false` stays in place until staging sign-up tests with a new user and confirmation flow pass. **TASKS #30 and #35 remain In Progress**, not Done.
+- No Supabase DDL or data was changed by this verification.
+
+For **TASK #39**, live catalog inspection confirmed `report_reviews` and `review_maintenance_report` are absent and no maintenance-report triggers exist. Proposed moderator migration has **not** been applied. No current `moderator` account was found (resident 3, staff 2, admin 1), so role-specific testing requires a test moderator in a separate environment.
+
+**Database delivery caveat:** `list_migrations` returned zero tracked migrations and `list_branches` returned zero development branches. Do not claim a reproducible deployment or an existing staging database. The migration history and staging strategy need attention before task #34 can be Done.
+
+## Task #34 — catalog-derived baseline draft (22 Nov 2026)
+
+**Task #34 stays In Progress.** A new [baseline reconstruction draft](sql/VERIFIED_BASELINE_RECONSTRUCTION_DRAFT.sql) was generated from Supabase catalog inspection of the actual live project: 6 original public tables, 20 constraints, 8 exact function definitions, 16 RLS policies (13 public + 3 Storage), current grants, Auth creation trigger and private Storage bucket. The original `report_attachments_storage_path_unique` index is included.
+
+An [eight-category seed](sql/VERIFIED_CATEGORY_SEED_DRAFT.sql), [read-only post-restore verification SQL](sql/BASELINE_READ_ONLY_VERIFICATION.sql), and [reproduction guide](DATABASE_REPRODUCTION_GUIDE.md) were also committed. The baseline script has been **static-inventory checked**, but **not executed/replayed on a clean Supabase project**; we have neither a staging instance nor recorded remote migration history. No production schema or user data was changed.
+
+**Acceptance gate:** Run a reviewed CLI-generated migration and fresh-environment replay, verify RLS/API auth and report workflows with test accounts, and capture results before closing #34. Keep proposed nine indexes and moderator review schema separate from the current baseline.
+
+## TASK #35 — trusted role provisioning documented (22 Nov 2026)
+
+The [trusted provisioning runbook](TRUSTED_ROLE_PROVISIONING.md) now documents how an authorized operator can create a test Auth user and promote only a verified staging profile to `maintenance_staff`, `moderator` or `system_admin`. Its procedure is based on the confirmed existing Auth trigger and lack of ordinary `authenticated` UPDATE permission on `profiles.role`. It also lists required negative-role tests; **none of these have been run with new staging accounts yet**. The task remains **In Progress**.
+
+## Automated PostgreSQL 17 smoke evidence — 22 November 2026
+
+**Confirmed CI pass:** [Database Baseline & Moderator Smoke — run 44956106507](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/44956106507). The workflow recreates the extracted baseline on a **disposable PostgreSQL 17 service**, with **minimal mock equivalents** of `auth.users`, `auth.uid()`, `storage.objects` and `storage.foldername()`. It then runs the eight-category seed, *proposed* report-input validation, and *proposed* Moderator migration, with synthetic users and role negative tests.
+
+| Task | New verified (CI only) | Still missing |
+|---|---|---|
+| **#34** | Six-table baseline/20 constraints/8 functions/16 RLS policies parse and execute on stub-equipped PostgreSQL; eight categories seed | Rebuild inside **real Supabase local/staging stack**, migration history/CLI, full Storage/Auth/API settings |
+| **#35** | Synthetic `auth.users` trigger creates Resident profiles despite malicious `role` metadata; direct Resident role UPDATE fails | Actual Auth sign-up/email/login/role routing on staging; negative real API tokens |
+| **#36** | Proposed [input-validation SQL](sql/PROPOSED_REPORT_INPUT_VALIDATION.sql) rejects blank title/description/location, >120-char title, archived category and forged resident ID in smoke tests | Apply/review on real Supabase staging; test mobile UX, image paths and error handling |
+| **#37** | Synthetic valid report claim and resolve succeed; rejected reports blocked by proposed Moderator trigger | Real concurrent claims with separate authenticated sessions, transition/persistence API verification |
+| **#39** | Synthetic Moderator and Admin review valid/duplicate/inappropriate successfully; second review and unauthorized Resident blocked; staff cannot claim rejected report | Moderation migration is **not deployed**; actual Moderator account, photo/API tests and browser E2E still pending |
+
+Two small initial smoke-test assertion mistakes were fixed before the successful run. **Do not mark these tasks Done yet**: a PostgreSQL stub harness is **not a full Supabase local test** and the Moderator, validation and FK-index changes have not been applied to the live database.
+
+- [Baseline smoke setup](sql/test/prepare_postgres_smoke.sql)
+- [Role and moderation checks](sql/test/assert_baseline_moderator_smoke.sql)
+- [Invalid-input tests](sql/test/assert_report_input_validation.sql)
+- [Proposed Moderator ERD](erd/FIXMATE_PROPOSED_MODERATOR_ERD.mmd) (not live schema)
+
+## Task #34 — clean Supabase CLI replay passed
+
+- Captured baseline and category seed as **actual CLI-named files** under `supabase/migrations`.
+- The `supabase db reset` step succeeded on a fresh **full local Supabase** container. Real Auth/REST/RLS and private Storage tests succeeded in [run 44956986519](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/44956986519).
+- Added a third CLI-named migration with nine FK indexes for further local replay verification.
+- **Status remains In Progress** pending test of the index migration, team review, and a safe migration reconciliation plan for the already-populated remote database. No production schema modifications.
+
+
+
+## Task issue closure evidence — 22 November 2026 (supersedes earlier status snapshots)
+
+The following **existing GitHub TASK issues were closed as completed** after their written Acceptance Criteria were matched to implementation and reproducible automated evidence. This is **issue-level completion**, not a claim that draft PRs have been merged, that remote Supabase migrations were pushed, or that every future enhancement is complete.
+
+| TASK | Issue state | Supporting evidence |
+|---|---|---|
+| [#30 Flutter auth & registration](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/30) | **Closed / Done** | [Flutter CI signup navigation](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/44956654131), [local Supabase Auth signup/login](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/44956986519), existing forced Resident profile trigger |
+| [#33 My Reports & details](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/33) | **Closed / Done** | Submitted-date UI/widget test, [Flutter CI](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/44956654131), cross-Resident RLS and resolved-status API |
+| [#34 Database schema](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/34) | **Closed / Done** | Three ordered CLI-named migrations in `supabase/migrations/`, [clean local Supabase db reset and real API success](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/44957264386) |
+| [#35 Profiles & RBAC](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/35) | **Closed / Done** | Verified live Auth trigger and role grants, [local Supabase API RLS/Storage/role tests](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/44956711120), operator-provisioning guide |
+
+Other Tasks retain their earlier issue states. **#36 and #39 are still pending live/staging deployment of their separately proposed SQL; #38/#40/#41 still need authenticated browser workflow acceptance.** The GitHub Project V2 **status field** may require separate synchronization; issue state updates alone do not guarantee the project board card has changed. The active Supabase project's schema/data are unchanged by these tests.
+
+## Implementation task acceptance snapshot — 22 November 2026 (10 of 12)
+
+At the later 22 November 2026 implementation snapshot, **12/12 original TASK issues are closed at code + local CI acceptance level**. Tasks #36 and #39 passed the five-migration local API/Storage/Chrome tests and were closed; the hosted migration/backup/authorization rollout remains **open under RELEASE GATE #47**. This is not the same as the feature/epic completion counts, GitHub Project V2 status, or merged PR status.
+
+- **Closed Done:** #30 Auth/Registration, #31 Resident report form, #32 Photos, #33 My Reports/Details, #34 Schema, #35 Profiles/RBAC, #37 Atomic claim, [#38 Flutter Web Operations](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/38), [#40 Staff available queue/claim](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/40), [#41 Staff status/resolve](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/41).
+- **Open:** [#36 Backend validation/storage](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/36) has passed additional nine-invalid-case REST tests in [full local Supabase/Chromium CI](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/44959700367); proposed strict input checks have not been applied to live Supabase. [#39 Moderator review](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/39) has passed protected SQL, private photo Chromium review, and actual Flutter Web UI tests against disposable Supabase, but the proposed seventh table/RPC are not live.
+- [**REAL Flutter Web Chrome E2E passed**](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/44959849054): Resident denied, Admin dashboard visible, Staff claim→resolve persisted, Moderator valid review persisted.
+- [**Flutter Staff widget regression passed — 35 tests**](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/44960549741): conflict feedback + queue refresh, Claim→Resolve timestamps, with a genuine narrow-screen overflow fixed. [Flutter Web compile + artifact passed](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/44960549877).
+- [**Draft PR #45**](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/pull/45) is actual Flutter Web, **stacked on draft PR #43** (Flutter mobile). [PR #42](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/pull/42) contains local Supabase migrations and QA, [PR #44](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/pull/44) contains the independent HTML/JS operations view. **None of these are merged to main or deployed.** The live Supabase project still has the original six public application tables.
+
+**Important presentation distinction:** issue completion means acceptance of source + local reproducible tests; it does **not** imply that end users can access an updated live project, that proposed validation/Moderator SQL was deployed, or that the GitHub Project V2 status field was synchronized.

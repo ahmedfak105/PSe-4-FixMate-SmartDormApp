@@ -1,0 +1,179 @@
+# FixMate – SmartDormApp | Final Lecturer Handoff (current state)
+
+**Date:** 22 November 2026  
+**Course/project:** Kauno Kolegija, Software Systems Engineering, Internal Internship  
+**Team:** Three students, nine-week Agile/Scrum plan, three sprints  
+**Product:** Connected Flutter Android and Flutter Web dormitory maintenance reporting system  
+**Integration PR:** [#46](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/pull/46), still **open** for lecturer/team review  
+**Live web:** https://ahmedfak105.github.io/PSe-4-FixMate-SmartDormApp/
+
+This is the **current handoff**, superseding older internal presentation notes
+which describe the original hosted six-table schema as still unchanged.
+
+## 1. Product and stakeholder value
+
+FixMate converts dormitory maintenance requests into structured, traceable
+records. Residents create reports with category, description, location and
+optional photo, then follow status changes and receive in-app notifications.
+Maintenance Staff can claim eligible reports, write notes and resolve work.
+Moderators can mark new reports valid, duplicate or inappropriate; a rejected
+report is blocked from normal staff assignment. System Administrators can
+monitor reports, assign work, edit categories and manage roles with an audit
+trail. The same connected Supabase backend serves Web and Android.
+
+## 2. Architecture and data
+
+- **Clients:** Flutter Android, responsive Flutter Web role-specific pages,
+  English/Lithuanian interface strings.
+- **Identity:** Supabase Auth; `auth.users` is managed by Supabase.
+- **Database:** Supabase PostgreSQL 17, **11** application tables in
+  `public`, all with RLS. Core six:
+  `profiles`, `maintenance_categories`, `maintenance_reports`,
+  `report_attachments`, `report_notes`,
+  `report_status_history`. Added five:
+  `report_reviews`, `user_role_audit`, `report_notifications`,
+  `push_device_tokens`, `push_delivery_outbox`.
+- **Storage:** private `report-photos` bucket and private 2-MiB
+  `profile-avatars` bucket.
+- **Business logic:** ownership RLS, column-level grants and PostgreSQL
+  RPCs for protected role/category changes, moderation and report workflow.
+- **Push delivery:** Resident Android Firebase Messaging client, protected
+  hosted Supabase sender, Vault-gated private delivery outbox and active
+  five-minute retry scheduler. **Live locked-screen notification delivery
+  is verified and accepted by the owner** (job #2 sent; HTTP 200; [test evidence](FCM_DEVICE_ACCEPTANCE_2026-11-22.md)).
+
+See [current hosted 11-table ERD](FIXMATE_HOSTED_ERD.md).
+
+## 3. Development and implementation
+
+The three-student team organized 12 implementation tasks under the approved
+Features/Epics in GitHub. Integration work combined Flutter Mobile, Flutter
+Web, Supabase schema and tests in one review branch. Nine additive SQL
+migrations were applied to the **existing live academic test project**
+without replaying the original baseline or deleting data deliberately;
+the original six accounts and six reports remained in post-deployment checks.
+The owner explicitly accepted possible loss of disposable academic test data,
+so no verified private backup or restore is claimed.
+
+**Important for future maintainers:** hosted Supabase applied new migration
+version stamps `20261122162335` through `20261122162452`, whereas the
+committed source migration files have older timestamps. Read the
+[hosted rollout log](HOSTED_RUNTIME_ROLLOUT_2026-11-22.md)
+before any future `supabase db push`; do not blindly replay migrations.
+
+## 4. Verification — evidence type matters
+
+| Evidence source | What was checked | Result |
+| --- | --- | --- |
+| GitHub Actions | Flutter analysis/tests, connected Android APK build, Web build, Chrome E2E, SQL smoke and FCM guard suite | **Passed** on earlier integrated candidate; latest doc-only commits may have fresh concurrent CI |
+| Hosted Supabase inspect | 11 application tables, all with RLS; moderator/admin RPCs; private avatars; queue/notifications | **Verified** |
+| Hosted transaction-only SQL tests | Non-admin permission denial; Admin role/category writes; Moderator duplicate rejection + block staff action; notification trigger | **Passed**, test changes rolled back |
+| Project-owner manual acceptance | User reports connected Web and Android functionality including roles, avatar and in-app notifications | **Reported successful**; not independently captured video |
+| Firebase FCM | Android Resident opt-in, actual hosted sender HTTP 200, queue job #2 sent on first attempt, owner reported receipt while screen **locked**, two-Resident scoped negative test rolled back | **Accepted for F05.2**, [feature #24 closed](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/24) |
+
+These are different evidence levels. Do not call a successful CI build a real
+phone delivery test. The project is a working academic MVP, not a fully signed
+off public production launch.
+
+### Reproducible GitHub Actions evidence
+
+- [Connected Android APK on integrated revision `8b309128`](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/45040526078) — **SUCCESS**; compiled connected debug APK artifact uploaded.
+- [Real Flutter Web Chrome E2E](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/45040530317) — **SUCCESS** on the same integration revision.
+- [Integrated Android/Web/Flutter/isolated DB release candidate](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/45040530260) — **SUCCESS**.
+- [GitHub Pages Web deploy](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/45040526030) — **SUCCESS**.
+- Hosted SQL/RLS/role/notification status is supported by fresh live checks described in [rollout log](HOSTED_RUNTIME_ROLLOUT_2026-11-22.md) and [release gate #47](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/47). GitHub CI does **not** prove FCM OS delivery.
+
+### Final hosted FCM bridge status (updated 22 Nov 2026)
+
+- The deployed `send-report-push` Edge sender **ACTIVE** now has a
+  **Vault-gated** database trigger on outbox inserts plus an **active 5-minute
+  retry cron**. The `pg_net` extension was reinstalled under the
+  `extensions` namespace after a Security Advisor warning.
+- Actual hosted migrations `20261122170759`
+  (`fixmate_push_vault_bridge_live`) and `20261122171136`
+  (`fixmate_pgnet_extension_harden_live`) were applied and checked.
+- **Final status:** The owner configured the server-only Firebase secrets
+  privately and added the matching Vault secret. Read-only SQL confirmed
+  the named Vault secret exists without accessing its value. One real
+  Android Resident registered, report #11 generated notification #3,
+  outbox job #2 was `sent` with 1 attempt and no error, and the owner
+  confirmed reception **with the screen locked**. An additional two-Resident
+  negative isolation check passed and was rolled back. [Acceptance log](FCM_DEVICE_ACCEPTANCE_2026-11-22.md).
+- Existing experimental report count can change as users test; the six
+  reports mentioned in the nine-migration rollout were a point-in-time
+  count, not a permanent production number.
+
+## 5. Demonstration (5 minutes)
+
+1. **Resident:** Sign in with a dedicated test Resident, edit profile/avatar,
+   create a report and show its details.
+2. **Moderator:** Log in with a dedicated test Moderator, review a new,
+   unassigned report and discuss valid vs rejected outcomes.
+3. **Staff:** Show available jobs, claim an eligible report and update to
+   `in_progress` or `resolved`.
+4. **Admin:** Show dashboard counts, People role management and Categories
+   management. Explain why a resident cannot elevate their own role.
+5. **Resident:** Return to My Reports and show the new status plus the
+   stored in-app notification. Explain that **FCM Android background
+   delivery was verified** on a real locked phone; demonstrate a new
+   alert only if a registered Android test device is available.
+
+Never show test users' passwords, private Storage URLs, Supabase secret API
+keys or Firebase service-account contents.
+
+## 6. Database SQL examples for the lecturer (read-only)
+
+```sql
+-- Tables and RLS flags in the current project
+select c.relname, c.relrowsecurity
+from pg_class c
+join pg_namespace n on n.oid = c.relnamespace
+where n.nspname = 'public' and c.relkind = 'r'
+order by c.relname;
+
+-- Status distribution without exposing residents' names
+select status, count(*) as reports
+from public.maintenance_reports
+group by status order by status;
+
+-- Confirm private buckets without revealing photo paths
+select id, public, file_size_limit
+from storage.buckets
+where id in ('report-photos', 'profile-avatars')
+order by id;
+
+-- Audit table inventory (no personal data)
+select count(*) as role_change_audit_rows
+from public.user_role_audit;
+
+-- Notification totals only (no user details)
+select count(*) as resident_status_notifications
+from public.report_notifications;
+```
+
+## 7. Critical pending acceptance
+
+The secured FCM delivery flow is **operational and accepted for Feature
+[F05.2 #24](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/24)**:
+secret-backed webhook, Vault-gated trigger, cron retry, owner-only device
+registration and real locked-screen Android receipt all checked. [Full
+acceptance evidence](FCM_DEVICE_ACCEPTANCE_2026-11-22.md). The **remaining
+project-wide gate** is lecturer/team review of the integration candidate
+and other separately pending feature acceptance, particularly password-reset
+email/redirect behavior where not yet verified. [Release Gate #47](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/47)
+and [PR #46](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/pull/46)
+remain **OPEN**; do not merge to main before approval.
+
+## 8. Lecturer resources
+
+- [Integrated review PR #46](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/pull/46)
+- [Current hosted SQL rollout](HOSTED_RUNTIME_ROLLOUT_2026-11-22.md)
+- [Current database ERD](erd/FIXMATE_HOSTED_11_TABLES.mmd)
+- [Live Web](https://ahmedfak105.github.io/PSe-4-FixMate-SmartDormApp/)
+- [FCM real-device acceptance](FCM_DEVICE_ACCEPTANCE_2026-11-22.md)
+- [Release checklist #47](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/47)
+
+
+### Final FK index completion (22 November 2026)
+
+The server has all four additional indexes for notification, push and role-audit foreign keys. Hosted migration `20261122171743` succeeded and the Supabase `unindexed_foreign_keys` advisor is now clear. This is a backend performance check; separate actual FCM locked-screen receipt was confirmed and recorded above. SQL: [post-rollout FK indexes](sql/FCM_POST_ROLLOUT_FK_INDEXES_APPLIED.sql).

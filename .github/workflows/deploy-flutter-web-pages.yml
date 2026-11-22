@@ -1,0 +1,78 @@
+name: FixMate Web — GitHub Pages (All Roles)
+
+on:
+  push:
+    branches:
+      - integration/lecturer-review-2026-11-22
+    paths:
+      - 'mobile/**'
+      - '.github/workflows/deploy-flutter-web-pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: fixmate-operations-pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build Flutter Web for project Pages path
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@v4
+      - name: Block Demo code before publishing public Web
+        run: bash ../scripts/check_connected_only_release.sh
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Install dependencies
+        run: |
+          flutter pub get
+          flutter gen-l10n
+      - name: Analyze and run tests
+        run: |
+          flutter analyze --no-fatal-infos
+          flutter test
+      - name: Build FixMate Resident + Operations Web (public key only)
+        env:
+          FIXMATE_PUBLISHABLE_KEY: sb_publishable_eHEuMIdnI8vo1FAzXQmPow_zHrQTrXt
+        run: |
+          flutter build web --release \
+            --base-href /PSe-4-FixMate-SmartDormApp/ \
+            --dart-define=FIXMATE_OPERATIONS_WEB=true \
+            --dart-define=FIXMATE_RESIDENT_WEB=true \
+            --dart-define=SUPABASE_URL=https://epsvagztisdovixlqehi.supabase.co \
+            --dart-define=SUPABASE_PUBLISHABLE_KEY="$FIXMATE_PUBLISHABLE_KEY"
+          test -s build/web/index.html
+          test -s build/web/main.dart.js
+          if grep -R -l -E 'sb_secret_|sb_service_|service_role' build/web/index.html; then
+            echo 'Prohibited privileged key marker detected in HTML' >&2
+            exit 1
+          fi
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+      - name: Upload built web site for Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: mobile/build/web
+
+  deploy:
+    name: Publish FixMate Web to GitHub Pages
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4

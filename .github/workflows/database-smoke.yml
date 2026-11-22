@@ -1,0 +1,67 @@
+name: FixMate Database Baseline & Moderator Smoke
+
+on:
+  push:
+    paths:
+      - 'docs/sql/**'
+      - 'supabase/migrations/**'
+      - '.github/workflows/database-smoke.yml'
+  pull_request:
+    paths:
+      - 'docs/sql/**'
+      - '.github/workflows/database-smoke.yml'
+  workflow_dispatch:
+
+jobs:
+  postgres-smoke:
+    name: Isolated PostgreSQL 17 schema & role smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: 5432
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: postgres
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install PostgreSQL client
+        run: |
+          if ! command -v psql >/dev/null; then
+            sudo apt-get update -qq
+            sudo apt-get install -y -qq postgresql-client
+          fi
+      - name: Prepare disposable Supabase schema stubs
+        run: psql -X -v ON_ERROR_STOP=1 -f docs/sql/test/prepare_postgres_smoke.sql
+      - name: Recreate verified six-table baseline
+        run: psql -X -v ON_ERROR_STOP=1 -f supabase/migrations/20261121222817_fixmate_baseline.sql
+      - name: Seed only the eight public maintenance categories
+        run: psql -X -v ON_ERROR_STOP=1 -f supabase/migrations/20261121222818_fixmate_categories_seed.sql
+      - name: Create the nine foreign-key indexes from versioned migration
+        run: psql -X -v ON_ERROR_STOP=1 -f supabase/migrations/20261121223150_fixmate_fk_indexes.sql
+      - name: Apply versioned local report input validation
+        run: psql -X -v ON_ERROR_STOP=1 -f supabase/migrations/20261122000339_fixmate_report_validation.sql
+      - name: Apply versioned local moderator review migration
+        run: psql -X -v ON_ERROR_STOP=1 -f supabase/migrations/20261122000340_fixmate_moderator_review.sql
+      - name: Assert authorization, signup trigger, claim/resolve and moderation
+        run: psql -X -v ON_ERROR_STOP=1 -f docs/sql/test/assert_baseline_moderator_smoke.sql
+      - name: Test invalid fields, ownership and archived-category blocking
+        run: psql -X -v ON_ERROR_STOP=1 -f docs/sql/test/assert_report_input_validation.sql
+      - name: Prove only one of two concurrent staff claims wins
+        run: |
+          bash -n docs/sql/test/test_concurrent_claims.sh
+          bash docs/sql/test/test_concurrent_claims.sh

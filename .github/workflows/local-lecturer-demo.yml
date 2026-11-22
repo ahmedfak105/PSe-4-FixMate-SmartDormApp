@@ -1,0 +1,67 @@
+name: FixMate Local Lecturer Demo Reproduction
+
+on:
+  push:
+    paths:
+      - '.github/workflows/local-lecturer-demo.yml'
+      - 'scripts/prepare_local_lecturer_demo.sh'
+      - 'docs/sql/test/local_supabase_api_smoke.sh'
+      - 'docs/sql/PROPOSED_REPORT_INPUT_VALIDATION.sql'
+      - 'docs/sql/PROPOSED_MODERATOR_REVIEW_MIGRATION.sql'
+      - 'supabase/migrations/**'
+  workflow_dispatch:
+
+concurrency:
+  group: fixmate-local-lecturer-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  recreate-demo:
+    name: Bootstrap local database and verify all demo roles
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with:
+          version: '3.2.0'
+      - name: Check script and local-only protections
+        run: |
+          bash -n scripts/prepare_local_lecturer_demo.sh
+          grep -q '127.0.0.1:54321' scripts/prepare_local_lecturer_demo.sh
+          grep -q '127.0.0.1' docs/sql/test/local_supabase_api_smoke.sh
+      - name: Install database client tooling
+        run: |
+          if ! command -v psql >/dev/null; then
+            sudo apt-get update -qq
+            sudo apt-get install -y -qq postgresql-client
+          fi
+          if ! command -v jq >/dev/null; then
+            sudo apt-get update -qq
+            sudo apt-get install -y -qq jq
+          fi
+      - name: Reproduce the entire four-role lecturer demo locally
+        run: bash scripts/prepare_local_lecturer_demo.sh
+      - name: Assert local seeded accounts and one review
+        env:
+          PGHOST: 127.0.0.1
+          PGPORT: 54322
+          PGUSER: postgres
+          PGPASSWORD: postgres
+          PGDATABASE: postgres
+        run: |
+          psql -X -v ON_ERROR_STOP=1 <<'SQL'
+          DO $$
+          BEGIN
+            IF (SELECT count(*) FROM public.profiles
+                WHERE role IN ('resident','maintenance_staff','moderator','system_admin')) < 5 THEN
+              RAISE EXCEPTION 'Missing synthetic demo profiles';
+            END IF;
+            IF (SELECT count(*) FROM public.report_reviews) < 2 THEN
+              RAISE EXCEPTION 'Missing expected local moderation review fixtures';
+            END IF;
+          END $$;
+          SQL
+      - name: Stop disposable containers
+        if: always()
+        run: supabase stop --no-backup || true
