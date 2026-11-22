@@ -1,0 +1,55 @@
+name: FixMate Connected Android APK
+
+on:
+  push:
+    branches:
+      - integration/lecturer-review-2026-11-22
+    paths:
+      - 'mobile/**'
+      - '.github/workflows/flutter-android-connected-build.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  connected-android:
+    name: Build connected Android debug APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Check source and dependencies
+        run: |
+          flutter pub get
+          flutter gen-l10n
+          flutter analyze --no-fatal-infos
+          flutter test
+      - name: Build Android connected to hosted FixMate Supabase
+        env:
+          FIXMATE_URL: https://epsvagztisdovixlqehi.supabase.co
+          FIXMATE_PUBLISHABLE_KEY: sb_publishable_eHEuMIdnI8vo1FAzXQmPow_zHrQTrXt
+        run: |
+          set -eu
+          case "$FIXMATE_PUBLISHABLE_KEY" in sb_publishable_*) ;; *) echo "Not a public publishable key" >&2; exit 1 ;; esac
+          flutter build apk --debug \
+            --dart-define=SUPABASE_URL="$FIXMATE_URL" \
+            --dart-define=SUPABASE_PUBLISHABLE_KEY="$FIXMATE_PUBLISHABLE_KEY"
+          test -s build/app/outputs/flutter-apk/app-debug.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: fixmate-connected-android-apk
+          path: mobile/build/app/outputs/flutter-apk/app-debug.apk
+          if-no-files-found: error
+          retention-days: 14
