@@ -5,7 +5,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../data/models/photo_data.dart';
 import '../../data/repositories/supabase_attachment_repository.dart';
-import '../../data/repositories/report_repository.dart';
 import '../../l10n/gen/app_localizations.dart';
 import '../../navigation/app_tab.dart';
 import '../bottom_tabs/bottom_tabs_cubit.dart';
@@ -27,15 +26,12 @@ class _NewReportPageState extends State<NewReportPage> {
   String? _categoriesError;
   bool _categoriesLoading = true;
   bool _saving = false;
-  bool _isDemo = true;
   PhotoData? _selectedPhoto;
   String? _photoName;
 
   @override
   void initState() {
     super.initState();
-    // The Cubit is provided above the screen in both run modes.
-    _isDemo = context.read<ReportsCubit>().repository is InMemoryReportRepository;
     _loadCategories();
   }
 
@@ -114,7 +110,7 @@ class _NewReportPageState extends State<NewReportPage> {
 
     String? photoError;
     final createdId = cubit.lastCreatedReportId;
-    if (!_isDemo && _selectedPhoto != null) {
+    if (_selectedPhoto != null) {
       try {
         if (createdId == null) {
           throw StateError('Could not determine the saved report ID.');
@@ -143,9 +139,7 @@ class _NewReportPageState extends State<NewReportPage> {
       content: FixMateText(photoError != null
           ? 'Report #$createdId saved, but photo upload failed: $photoError. '
               'Open report details to add the photo again.'
-          : (_isDemo
-              ? l10n.reportCreatedDemo
-              : 'Report saved to Supabase')),
+          : 'Report saved successfully.'),
     ));
     context.read<BottomTabsCubit>().selectTab(AppTab.myReports);
   }
@@ -178,10 +172,6 @@ class _NewReportPageState extends State<NewReportPage> {
                       child: ListView(
                         padding: const EdgeInsets.all(20),
                         children: [
-                          if (_isDemo) ...[
-                            FixMateText(l10n.demoNotice, style: Theme.of(context).textTheme.bodySmall),
-                            const SizedBox(height: 18),
-                          ],
                           TextFormField(
                             key: const Key('report_title'),
                             controller: _title,
@@ -225,8 +215,7 @@ class _NewReportPageState extends State<NewReportPage> {
                             ),
                             validator: requiredValue,
                           ),
-                          if (!_isDemo) ...[
-                            const SizedBox(height: 16),
+                          const SizedBox(height: 16),
                             OutlinedButton.icon(
                               onPressed: _saving ? null : _pickPhoto,
                               icon: const Icon(Icons.add_photo_alternate_outlined),
@@ -257,7 +246,6 @@ class _NewReportPageState extends State<NewReportPage> {
                                 ),
                               ),
                             ],
-                          ],
                           const SizedBox(height: 22),
                           FilledButton.icon(
                             key: const Key('submit_report'),
@@ -265,11 +253,9 @@ class _NewReportPageState extends State<NewReportPage> {
                             icon: const Icon(Icons.send_outlined),
                             label: FixMateText(_saving
                                 ? l10n.saving
-                                : (_isDemo
-                                    ? l10n.submitReport
-                                    : (Localizations.localeOf(context).languageCode == 'lt'
-                                        ? 'Pateikti pranešimą'
-                                        : 'Submit report'))),
+                                : (Localizations.localeOf(context).languageCode == 'lt'
+                                    ? 'Pateikti pranešimą'
+                                    : 'Submit report')),
                           ),
                         ],
                       ),
