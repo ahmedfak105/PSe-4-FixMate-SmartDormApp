@@ -75,7 +75,7 @@ begin
   end if;
   if v_current_role is distinct from p_expected_role then
     raise exception 'Account role was changed by another administrator'
-      using errcode = '40001';
+      using errcode = '22023';
   end if;
 
   if p_new_role = v_current_role then
