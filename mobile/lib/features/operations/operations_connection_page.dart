@@ -95,7 +95,7 @@ class _OperationsConnectionPageState extends State<OperationsConnectionPage> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text('FixMate · Flutter Web Operations')),
+    appBar: AppBar(title: const Text('FixMate · Operations')),
     body: Center(child: SingleChildScrollView(
       padding: const EdgeInsets.all(24),
       child: ConstrainedBox(
