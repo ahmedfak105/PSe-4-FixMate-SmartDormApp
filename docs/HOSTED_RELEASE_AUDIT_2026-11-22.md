@@ -29,6 +29,10 @@
 | `push_device_tokens`, `push_delivery_outbox`, push claim RPC | **Absent** |
 | Existing live `assign_maintenance_report`, `claim_maintenance_report`, `resolve_maintenance_report` functions | Present as invoker functions (not `SECURITY DEFINER`) |
 | Supabase migration history | **Empty**, despite populated manually created application tables |
+| Report-validation preflight | **0 invalid reports**, **0 missing/inactive-category references** |
+| Active categories | **8** (0 disabled) |
+| Existing Auth-to-profile signup trigger | **1** (`on_auth_user_created`); do **not** add a redundant trigger |
+| Reports with staff assignment | **5** of 5 |
 | Security advisor | One `auth_leaked_password_protection` warning (check entitlement before any plan change) |
 | Performance advisor | Nine missing FK-covering indexes; three overlapping permissive policies |
 
