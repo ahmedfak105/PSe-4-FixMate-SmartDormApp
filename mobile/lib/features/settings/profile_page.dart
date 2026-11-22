@@ -22,6 +22,7 @@ class _ProfilePageState extends State<ProfilePage> {
   bool _signingOut = false;
   String? _error;
   ResidentProfile? _currentProfile;
+  int _avatarRevision = 0;
 
   Future<void> _editProfile() async {
     final original = _currentProfile ?? widget.profile;
@@ -29,7 +30,9 @@ class _ProfilePageState extends State<ProfilePage> {
     final changed = await Navigator.of(context).push<ResidentProfile>(
       MaterialPageRoute(builder: (_) => EditProfilePage(profile: original)),
     );
-    if (changed != null && mounted) setState(() => _currentProfile = changed);
+    if (changed != null && mounted) {
+      setState(() { _currentProfile = changed; _avatarRevision++; });
+    }
   }
 
   Future<void> _signOut() async {
@@ -62,7 +65,7 @@ class _ProfilePageState extends State<ProfilePage> {
         profile == null
             ? const CircleAvatar(radius: 36, child: Icon(Icons.person_outline, size: 36))
             : Center(child: MyProfileAvatar(
-                key: ValueKey('avatar-${profile.id}-${profile.fullName}'),
+                key: ValueKey('avatar-${profile.id}-$_avatarRevision'),
                 userId: profile.id, name: profile.fullName)),
         const SizedBox(height: 12),
         Center(
