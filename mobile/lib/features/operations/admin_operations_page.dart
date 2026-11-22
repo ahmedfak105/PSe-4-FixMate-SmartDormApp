@@ -1,5 +1,6 @@
 import '../../fixmate_theme.dart';
 import 'report_filters.dart';
+import 'admin_categories_page.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -352,7 +353,7 @@ class _AdminOperationsPageState extends State<AdminOperationsPage> {
 
   @override
   Widget build(BuildContext context) {
-    const labels = ['Overview', 'All reports', 'Assignments', 'People'];
+    const labels = ['Overview', 'All reports', 'Assignments', 'People', 'Categories'];
     final content = switch (_tab) {
       0 => Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         _summary(),
@@ -364,7 +365,8 @@ class _AdminOperationsPageState extends State<AdminOperationsPage> {
       ]),
       1 => _listReports(assignmentsOnly: false),
       2 => _listReports(assignmentsOnly: true),
-      _ => _people(),
+      3 => _people(),
+      _ => AdminCategoriesPage(client: _client, adminId: widget.profile.id),
     };
 
     return Scaffold(
@@ -415,6 +417,8 @@ class _AdminOperationsPageState extends State<AdminOperationsPage> {
                   label: Text('Assignments')),
               NavigationRailDestination(icon: Icon(Icons.people_alt_outlined),
                   label: Text('People')),
+              NavigationRailDestination(icon: Icon(Icons.category_outlined),
+                  label: Text('Categories')),
             ],
           ),
         Expanded(child: SingleChildScrollView(
