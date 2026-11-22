@@ -4,10 +4,14 @@
 /// checks are the security boundary, never role-based widget visibility.
 enum FixMateWorkspace { resident, maintenanceStaff, moderator, systemAdmin, denied }
 
-FixMateWorkspace workspaceForRole(String role, {required bool operationsOnly}) {
+FixMateWorkspace workspaceForRole(String role, {
+  required bool operationsOnly,
+  bool allowResidentWeb = false,
+}) {
   switch (role.trim().toLowerCase()) {
     case 'resident':
-      return operationsOnly ? FixMateWorkspace.denied : FixMateWorkspace.resident;
+      return operationsOnly && !allowResidentWeb
+          ? FixMateWorkspace.denied : FixMateWorkspace.resident;
     case 'maintenance_staff':
       return FixMateWorkspace.maintenanceStaff;
     case 'moderator':
