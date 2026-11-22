@@ -268,10 +268,9 @@ class _ModeratorOperationsPageState extends State<ModeratorOperationsPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const FixMateText('FixMate · Review Center'),
+        title: const FixMateText('FixMate'),
         actions: [
-          const FixMateLanguageButton(),
-          const FixMateSupportMenu(),
+          const FixMateUtilityMenu(),
           Tooltip(
             message: 'My profile',
             child: InkWell(
