@@ -44,6 +44,21 @@ jobs:
           bash -n scripts/prepare_local_lecturer_demo.sh
           bash -n scripts/check_connected_only_release.sh
           bash scripts/check_connected_only_release.sh
+          test -f scripts/backup_fixmate_windows.ps1
+          test -f docs/WINDOWS_BACKUP_CHECKLIST.md
+      - name: Syntax-check offline backup helper without running exports
+        shell: pwsh
+        run: |
+          $parserTokens = $null
+          $parserErrors = $null
+          [System.Management.Automation.Language.Parser]::ParseFile(
+            (Join-Path (Get-Location) 'scripts/backup_fixmate_windows.ps1'),
+            [ref]$parserTokens, [ref]$parserErrors) | Out-Null
+          if ($parserErrors.Count -gt 0) {
+            $parserErrors | ForEach-Object { Write-Error $_.Message }
+            exit 1
+          }
+          Write-Host 'Backup helper parses without running Docker, Supabase or SQL.'
           cmp docs/sql/PROPOSED_REPORT_INPUT_VALIDATION.sql supabase/migrations/20261122000339_fixmate_report_validation.sql
           cmp docs/sql/PROPOSED_MODERATOR_REVIEW_MIGRATION.sql supabase/migrations/20261122000340_fixmate_moderator_review.sql
           test -f docs/sql/PROPOSED_MODERATOR_REVIEW_MIGRATION.sql
