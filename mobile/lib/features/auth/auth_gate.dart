@@ -14,9 +14,11 @@ import '../operations/operations_role.dart';
 /// Checks the Supabase session and loads the user's real profile before
 /// allowing entry to Resident screens. The database must still enforce RLS.
 class AuthGate extends StatefulWidget {
-  const AuthGate({super.key, required this.builder, this.operationsOnly = false});
+  const AuthGate({super.key, required this.builder,
+      this.operationsOnly = false, this.initialRecoveryLink = false});
 
   final bool operationsOnly;
+  final bool initialRecoveryLink;
 
   final Widget Function(ResidentProfile profile) builder;
 
@@ -33,6 +35,7 @@ class _AuthGateState extends State<AuthGate> {
   String? _authError;
   bool _recoveryMode = false;
   bool _resetCompleted = false;
+  bool _recoveryLandingConsumed = false;
 
   @override
   void initState() {
@@ -42,8 +45,11 @@ class _AuthGateState extends State<AuthGate> {
     _userId = _client.auth.currentUser?.id;
     // The SDK may exchange the recovery token during initialize(), before
     // this widget subscribes. The dedicated web landing marker is a fallback.
-    _recoveryMode = kIsWeb && isFixMateRecoveryLanding(Uri.base) &&
+    final recoveryLanding = widget.initialRecoveryLink ||
+        (kIsWeb && isFixMateRecoveryLanding(Uri.base));
+    _recoveryMode = recoveryLanding &&
         _client.auth.currentSession != null;
+    _recoveryLandingConsumed = _recoveryMode;
     if (_userId != null) _profileFuture = _repository.getCurrent();
     _subscription = _client.auth.onAuthStateChange.listen(
       (event) {
@@ -52,6 +58,7 @@ class _AuthGateState extends State<AuthGate> {
         if (event.event == AuthChangeEvent.passwordRecovery) {
           setState(() {
             _recoveryMode = nextId != null;
+            _recoveryLandingConsumed = true;
             _resetCompleted = false;
             _userId = nextId;
             _authError = null;
@@ -62,17 +69,23 @@ class _AuthGateState extends State<AuthGate> {
         if (event.event == AuthChangeEvent.signedOut) {
           setState(() {
             _recoveryMode = false;
+            _recoveryLandingConsumed = true;
             _userId = null;
             _profileFuture = null;
             _authError = null;
           });
           return;
         }
-        final isWebRecovery = kIsWeb &&
-            isFixMateRecoveryLanding(Uri.base) && nextId != null;
+        final isWebRecovery = !_recoveryLandingConsumed &&
+            (widget.initialRecoveryLink ||
+                (kIsWeb && isFixMateRecoveryLanding(Uri.base))) &&
+            nextId != null;
         if (_userId == nextId && (!isWebRecovery || _recoveryMode)) return;
         setState(() {
-          if (isWebRecovery) _recoveryMode = true;
+          if (isWebRecovery) {
+            _recoveryMode = true;
+            _recoveryLandingConsumed = true;
+          }
           _userId = nextId;
           _authError = null;
           _profileFuture = nextId == null ? null : _repository.getCurrent();
@@ -147,6 +160,7 @@ class _AuthGateState extends State<AuthGate> {
     if (!mounted) return;
     setState(() {
       _recoveryMode = false;
+      _recoveryLandingConsumed = true;
       _resetCompleted = true;
       _userId = null;
       _profileFuture = null;
