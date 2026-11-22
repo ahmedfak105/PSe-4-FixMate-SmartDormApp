@@ -52,15 +52,15 @@ class _FixMateSupportPageState extends State<FixMateSupportPage> {
             ButtonSegment(
               value: SupportSection.contacts,
               icon: Icon(Icons.contact_mail_outlined),
-              label: FixMateText('Contacts')),
+              label: FixMateText('Contacts', key: Key('support_tab_contacts'))),
             ButtonSegment(
               value: SupportSection.help,
               icon: Icon(Icons.help_outline),
-              label: FixMateText('Help')),
+              label: FixMateText('Help', key: Key('support_tab_help'))),
             ButtonSegment(
               value: SupportSection.about,
               icon: Icon(Icons.info_outline),
-              label: FixMateText('About')),
+              label: FixMateText('About', key: Key('support_tab_about'))),
           ],
           selected: {_section},
           onSelectionChanged: (value) =>
