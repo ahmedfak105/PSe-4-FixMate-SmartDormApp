@@ -49,9 +49,11 @@ class _ModeratorOperationsPageState extends State<ModeratorOperationsPage> {
     }
     setState(() { _loading = true; _error = null; });
     try {
+      // Fetch reports across statuses so the Reviewed tab retains audit
+      // decisions after a valid report is claimed and later resolved.
+      // _canReview still restricts NEW decisions to unassigned 'new' reports.
       final reports = await _client.from('maintenance_reports')
           .select('id,title,description,location,status,assigned_to,category_id,created_at')
-          .eq('status', 'new')
           .order('created_at', ascending: false).limit(500);
       final ids = reports.map((r) => (r['id'] as num).toInt()).toList();
       final categories = await _client.from('maintenance_categories')
