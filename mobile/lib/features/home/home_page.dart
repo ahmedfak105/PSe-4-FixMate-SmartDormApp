@@ -8,6 +8,7 @@ import '../../l10n/gen/app_localizations.dart';
 import '../../navigation/app_tab.dart';
 import '../bottom_tabs/bottom_tabs_cubit.dart';
 import '../reports/reports_cubit.dart';
+import '../notifications/resident_notifications_page.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -18,7 +19,22 @@ class HomePage extends StatelessWidget {
     final tabs = context.read<BottomTabsCubit>();
     final isDemo = context.read<ReportsCubit>().repository is InMemoryReportRepository;
     return Scaffold(
-      appBar: AppBar(title: FixMateText(l10n.appTitle)),
+      appBar: AppBar(
+        title: FixMateText(l10n.appTitle),
+        actions: [
+          if (!isDemo)
+            IconButton(
+              key: const Key('open_resident_notifications'),
+              tooltip: fmTr(context, 'Notifications'),
+              icon: const Icon(Icons.notifications_none_outlined),
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => const ResidentNotificationsPage(),
+                ),
+              ),
+            ),
+        ],
+      ),
       body: BlocBuilder<ReportsCubit, ReportsState>(builder: (context, state) {
         final active = state.items
             .where((report) => report.status != MaintenanceStatus.resolved).length;
