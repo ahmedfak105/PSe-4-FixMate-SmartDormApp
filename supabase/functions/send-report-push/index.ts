@@ -197,8 +197,9 @@ async function deliver(): Promise<Record<string, number>> {
     Deno.env.get("SUPABASE_SECRET_KEYS") ?? null,
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? null,
   );
-  const account = JSON.parse(requireConfig("FIREBASE_SERVICE_ACCOUNT_JSON"))
-    as ServiceAccount;
+  const account = JSON.parse(
+    requireConfig("FIREBASE_SERVICE_ACCOUNT_JSON"),
+  ) as ServiceAccount;
   const expectedProject = requireConfig("FIREBASE_PROJECT_ID");
   if (account.project_id !== expectedProject ||
       !/^[a-z0-9-]{6,63}$/.test(expectedProject)) {
