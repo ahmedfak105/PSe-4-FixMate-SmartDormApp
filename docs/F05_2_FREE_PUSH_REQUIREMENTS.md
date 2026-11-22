@@ -2,6 +2,44 @@
 
 **Status: not live / not accepted.** Do not label F05.2 Done merely because F05.1 in-app notifications are locally implemented.
 
+## Firebase Android enrollment received — 2026-11-22
+
+The project owner supplied `google-services.json` for the existing Firebase project
+`pse-4-fixmate-smartdormapp` (Firebase project number `677525069947`).
+The configuration's Android package `lt.kaunokolegija.vp_mobile` and Firebase
+Android App ID match the app registered in the project and the existing Flutter
+Gradle `applicationId`.
+
+- [x] User-supplied **client** configuration added to
+  `mobile/android/app/google-services.json`; the Firebase docs explicitly
+  describe these client identifiers as **non-secret**. Never commit an
+  administrative service-account private key.
+- [x] Google services Gradle plugin added for Android.
+- [x] Exact Flutter dependency versions added for `firebase_core` and
+  `firebase_messaging`; Android 13+ notification permission declared.
+- [x] Resident-only **opt-in** Firebase device token registration with
+  authenticated Supabase session, refresh handling, and opt-out/sign-out
+  revocation implemented in `mobile/lib/features/notifications/fixmate_push_service.dart`.
+- [x] `public.push_device_tokens` with owner-only RLS prepared in
+  `supabase/migrations/20261122210500_fcm_device_tokens.sql`; isolated API
+  permission tests added. **Not applied to the populated hosted database.**
+- [ ] Re-run CI and compile the integrated Android APK with Google Play
+  services. Test the opt-in on a physical phone.
+- [ ] Implement/approve the **server-side** FCM HTTP v1 sender and secure
+  secret deployment. Push delivery is *not* validated yet.
+
+### Billing plan warning
+
+The Firebase Console supplied by the owner shows **Blaze plan (pay as you go)**,
+not Spark. While FCM is free, Blaze can incur charges from unrelated services.
+Do not enable Cloud Functions, Cloud Run, hosting, storage, analytics export,
+or any billable integration to deliver this feature. The project is associated
+with `businessgo.kauko.lt` in Google Cloud, so confirm billing ownership and
+existing dependencies before downgrading, unlinking billing, or changing plans.
+Changing the plan was **not** authorized and **not** performed.
+
+Reference: https://firebase.google.com/docs/projects/billing/firebase-pricing-plans
+
 ## Selected free option
 
 - **Firebase Cloud Messaging (FCM)** for Android push: Google lists messaging as a no-cost product. https://firebase.google.com/products/cloud-messaging
