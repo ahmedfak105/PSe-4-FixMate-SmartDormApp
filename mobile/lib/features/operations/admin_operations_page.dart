@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../data/models/resident_profile.dart';
+import '../settings/edit_profile_page.dart';
 
 /// System-admin Flutter Web workspace (Task #38 / F06.1).
 ///
@@ -26,6 +27,21 @@ class _AdminOperationsPageState extends State<AdminOperationsPage> {
   bool _busy = false;
   String? _error;
   String? _notice;
+  ResidentProfile? _editedProfile;
+
+  Future<void> _editOwnProfile() async {
+    final updated = await Navigator.of(context).push<ResidentProfile>(
+      MaterialPageRoute(builder: (_) => EditProfilePage(
+        profile: _editedProfile ?? widget.profile)),
+    );
+    if (updated != null && mounted) {
+      setState(() => _editedProfile = updated);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Profile updated successfully.')),
+      );
+    }
+  }
+
   int _tab = 0;
   String _query = '';
 
@@ -276,6 +292,8 @@ class _AdminOperationsPageState extends State<AdminOperationsPage> {
               fontWeight: FontWeight.w500, color: Color(0xFF65818B))),
         ]),
         actions: [
+          IconButton(tooltip: 'My profile', icon: const Icon(Icons.account_circle_outlined),
+              onPressed: _editOwnProfile),
           IconButton(tooltip: 'Refresh', icon: const Icon(Icons.refresh),
               onPressed: _loading || _busy ? null : _load),
           IconButton(tooltip: 'Sign out', icon: const Icon(Icons.logout),
@@ -315,7 +333,7 @@ class _AdminOperationsPageState extends State<AdminOperationsPage> {
                             onSelected: (_) => setState(() => _tab = i))),
                   ])),
               const SizedBox(height: 12),
-              _WelcomePanel(name: widget.profile.fullName, reportCount: _reports.length),
+              _WelcomePanel(name: (_editedProfile ?? widget.profile).fullName, reportCount: _reports.length),
               const SizedBox(height: 12),
               if (_loading) const LinearProgressIndicator(),
               if (_error != null)
