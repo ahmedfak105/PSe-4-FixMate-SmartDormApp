@@ -399,6 +399,11 @@ get_json "$rest/push_device_tokens?select=token&user_id=eq.$a" "$a_token" |
   jq -e 'length==0' >/dev/null
 echo 'PASS: FCM device registration, resident-only RLS, no token theft, and revocation'
 
+# Re-enroll the same synthetic Resident device to test transactional outbox
+# creation when Staff changes the report's status.
+post_json "$rest/push_device_tokens?select=token,user_id" "$a_token" \
+  "$device_row" | jq -e 'length==1' >/dev/null
+
 # Resident submits a report with an active category, owner and NEW status.
 category_id="$(get_json "$rest/maintenance_categories?select=id&name=eq.Plumbing" "$a_token" | jq -er '.[0].id')"
 new_report() {
@@ -473,6 +478,45 @@ test -s "$workdir/staff_photo.png"
 
 post_json "$rest/rpc/resolve_maintenance_report" "$staff_token" "$payload1" | jq -e '. == true' >/dev/null
 get_json "$rest/maintenance_reports?select=status&id=eq.$id1" "$a_token" | jq -e '.[0].status=="resolved"' >/dev/null
+
+# F05.2: every status event yields a durable outbox item for that
+# Resident's opted-in device; no browser client may inspect raw tokens.
+outbox_count="$(psql -X -t -A -v ON_ERROR_STOP=1 \
+  -c "select count(*) from public.push_delivery_outbox
+      where resident_id = '$a'::uuid and token = '$device_token';")"
+if [[ "$outbox_count" != "2" ]]; then
+  echo "Expected two queued push deliveries for the opted-in Resident" >&2
+  exit 1
+fi
+outbox_forbidden="$(status_code GET \
+  "$rest/push_delivery_outbox?select=id" "$a_token")"
+if [[ ! "$outbox_forbidden" =~ ^4[0-9][0-9]$ ]]; then
+  echo "Resident was allowed to inspect server-only FCM outbox" >&2; exit 1
+fi
+claim_forbidden="$(status_code POST "$rest/rpc/claim_fixmate_push_jobs" \
+  "$a_token" '{"p_batch_size":10}')"
+if [[ ! "$claim_forbidden" =~ ^4[0-9][0-9]$ ]]; then
+  echo "Resident was allowed to claim push jobs" >&2; exit 1
+fi
+
+# The owner can revoke a device; its unsent jobs must be cancelled.
+revoke_code="$(curl -sS --max-time 20 -o "$workdir/revoke_outbox_device" \
+  -w '%{http_code}' -X DELETE \
+  "$rest/push_device_tokens?token=eq.$device_token&user_id=eq.$a" \
+  -H "apikey: $SUPABASE_ANON_KEY" \
+  -H "Authorization: Bearer $a_token" \
+  -H 'Prefer: return=representation')"
+if [[ "$revoke_code" != "200" ]]; then
+  echo "Outbox device revocation failed" >&2; exit 1
+fi
+cancelled_count="$(psql -X -t -A -v ON_ERROR_STOP=1 \
+  -c "select count(*) from public.push_delivery_outbox
+      where resident_id = '$a'::uuid
+      and token = '$device_token' and state = 'cancelled';")"
+if [[ "$cancelled_count" != "2" ]]; then
+  echo "Revoked device still has unsent push jobs" >&2; exit 1
+fi
+echo 'PASS: FCM outbox queues status changes, prevents client claims and cancels revoked devices'
 
 # F05.1: changing status creates exactly owner-only notification rows.
 notifications="$(get_json "$rest/report_notifications?select=id,report_id,new_status,read_at&report_id=eq.$id1&order=id.asc" "$a_token")"
