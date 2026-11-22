@@ -1,5 +1,5 @@
 name: fixmate_mobile
-description: FixMate resident mobile starter based on Kauno Kolegija Flutter mobile-skeleton.
+description: FixMate maintenance management for residents and service teams.
 publish_to: 'none'
 version: 0.1.0+1
 environment:
