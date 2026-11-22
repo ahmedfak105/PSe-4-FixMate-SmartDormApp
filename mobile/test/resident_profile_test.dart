@@ -10,7 +10,7 @@ void main() {
       'building': 'A',
       'room_number': '204',
     });
-    expect(profile.fullName, 'Demo Resident');
+    expect(profile.fullName, 'Resident Example');
     expect(profile.role, 'resident');
     expect(profile.building, 'A');
     expect(profile.roomNumber, '204');
