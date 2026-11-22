@@ -88,17 +88,10 @@ jobs:
         with:
           channel: stable
           cache: true
-      - name: Build Android debug app for offline demonstration
+      - name: Prepare Flutter dependencies
         run: |
           flutter pub get
           flutter gen-l10n
-          flutter build apk --debug --dart-define=FIXMATE_OFFLINE_DEMO=true
-      - uses: actions/upload-artifact@v4
-        with:
-          name: fixmate-integrated-android-debug-apk
-          path: mobile/build/app/outputs/flutter-apk/app-debug.apk
-          if-no-files-found: error
-          retention-days: 7
       - name: Build connected Android APK using public Supabase key
         env:
           FIXMATE_PUBLISHABLE_KEY: sb_publishable_eHEuMIdnI8vo1FAzXQmPow_zHrQTrXt
