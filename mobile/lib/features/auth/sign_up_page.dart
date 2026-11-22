@@ -93,8 +93,8 @@ class _SignUpPageState extends State<SignUpPage> {
                       key: const Key('signup_full_name'),
                       controller: _fullName,
                       textCapitalization: TextCapitalization.words,
-                      decoration: const InputDecoration(
-                        labelText: 'Full name',
+                      decoration: InputDecoration(
+                        labelText: fmTr(context, 'Full name'),
                         border: OutlineInputBorder(),
                       ),
                       validator: (value) {
@@ -110,8 +110,8 @@ class _SignUpPageState extends State<SignUpPage> {
                       controller: _email,
                       keyboardType: TextInputType.emailAddress,
                       autofillHints: const [AutofillHints.email],
-                      decoration: const InputDecoration(
-                        labelText: 'Email address',
+                      decoration: InputDecoration(
+                        labelText: fmTr(context, 'Email address'),
                         border: OutlineInputBorder(),
                       ),
                       validator: (value) {
@@ -128,8 +128,8 @@ class _SignUpPageState extends State<SignUpPage> {
                       controller: _password,
                       obscureText: true,
                       autofillHints: const [AutofillHints.newPassword],
-                      decoration: const InputDecoration(
-                        labelText: 'Password',
+                      decoration: InputDecoration(
+                        labelText: fmTr(context, 'Password'),
                         border: OutlineInputBorder(),
                       ),
                       validator: (value) {
@@ -144,8 +144,8 @@ class _SignUpPageState extends State<SignUpPage> {
                       key: const Key('signup_confirm_password'),
                       controller: _confirmPassword,
                       obscureText: true,
-                      decoration: const InputDecoration(
-                        labelText: 'Confirm password',
+                      decoration: InputDecoration(
+                        labelText: fmTr(context, 'Confirm password'),
                         border: OutlineInputBorder(),
                       ),
                       validator: (value) =>
