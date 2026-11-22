@@ -6,9 +6,11 @@ import 'password_recovery_page.dart';
 
 /// Sign in with Supabase Auth or register a new Resident account.
 class LoginPage extends StatefulWidget {
-  const LoginPage({super.key, this.connectionError, this.allowResidentSignup = true});
+  const LoginPage({super.key, this.connectionError,
+      this.allowResidentSignup = true, this.successMessage});
 
   final String? connectionError;
+  final String? successMessage;
   final bool allowResidentSignup;
 
   @override
@@ -145,6 +147,12 @@ class _LoginPageState extends State<LoginPage> {
                           : null,
                       onFieldSubmitted: (_) => _signIn(),
                     ),
+                    if (widget.successMessage != null) ...[
+                      const SizedBox(height: 14),
+                      Text(widget.successMessage!,
+                        key: const Key('reset_password_success'),
+                        style: const TextStyle(color: Color(0xFF127F76))),
+                    ],
                     if (_error != null || widget.connectionError != null) ...[
                       const SizedBox(height: 16),
                       Text(_error ?? widget.connectionError!,
