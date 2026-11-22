@@ -7,6 +7,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../data/models/resident_profile.dart';
 import '../settings/edit_profile_page.dart';
 import '../settings/my_profile_avatar.dart';
+import '../support/fixmate_support_page.dart';
+import '../../l10n/fixmate_i18n.dart';
 
 /// System-admin Flutter Web workspace (Task #38 / F06.1).
 ///
@@ -380,6 +382,8 @@ class _AdminOperationsPageState extends State<AdminOperationsPage> {
               fontWeight: FontWeight.w500, color: Color(0xFF65818B))),
         ]),
         actions: [
+          const FixMateLanguageButton(),
+          const FixMateSupportMenu(),
           Tooltip(
             message: 'My profile',
             child: InkWell(
