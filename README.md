@@ -1,4 +1,4 @@
-# FixMate – SmartDormApp
+> **Lecturer handoff updated 22 Nov 2026:** Use the [current 11-table lecturer handoff](docs/LECTURER_FINAL_HANDOFF_CURRENT_2026-11-22.md), [Mermaid ERD](docs/FIXMATE_HOSTED_ERD.md), and [FCM server activation checklist](docs/FCM_SERVER_FINAL_ACTIVATION_2026-11-22.md). The hosted `send-report-push` Edge Function is **ACTIVE**, but Firebase server secrets, automatic invocation and Android locked-screen delivery are **not yet confirmed**. [Release Gate #47](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/47) remains open.\n\n# FixMate – SmartDormApp
 
 Dormitory maintenance reporting app with distinct **Resident**, **Maintenance Staff**, **Moderator**, and **System Admin** workflows, developed for Kauno Kolegija internal internship.
 
