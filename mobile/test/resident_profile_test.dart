@@ -5,7 +5,7 @@ void main() {
   test('Reads resident profile columns from database JSON', () {
     final profile = ResidentProfile.fromJson({
       'id': 'test-user-uuid',
-      'full_name': 'Demo Resident',
+      'full_name': 'Resident Example',
       'role': 'resident',
       'building': 'A',
       'room_number': '204',
