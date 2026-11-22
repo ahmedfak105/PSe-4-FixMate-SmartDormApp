@@ -92,8 +92,8 @@ void main() {
   testWidgets('Admin loads the real Supabase operations dashboard',
       (tester) async {
     await loginAs(tester, 'admin.fixmate@example.com');
-    await waitFor(tester, find.text('FixMate · Flutter Web Admin'));
-    await waitFor(tester, find.textContaining('Welcome,'));
+    await waitFor(tester, find.text('FixMate'));
+    await waitFor(tester, find.textContaining('Welcome back,'));
     expect(find.text('All reports'), findsWidgets);
     expect(find.text('Assignments'), findsWidgets);
     expect(find.text('People'), findsWidgets);
