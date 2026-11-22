@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "677525069947",
+    "project_id": "pse-4-fixmate-smartdormapp",
+    "storage_bucket": "pse-4-fixmate-smartdormapp.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:677525069947:android:19e42960b4242505d702de",
+        "android_client_info": {
+          "package_name": "lt.kaunokolegija.vp_mobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAHOcG4jKXaINoF48e0jWhf7-LTHeMqZXg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
