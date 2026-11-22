@@ -205,7 +205,7 @@ class _StaffDashboardPageState extends State<StaffDashboardPage> {
             ),
           ),
           IconButton(
-            tooltip: 'Refresh reports',
+            tooltip: fmTr(context, 'Refresh reports'),
             icon: const Icon(Icons.refresh),
             onPressed: _loading || _busyReportId != null ? null : _refresh,
           ),
@@ -262,10 +262,10 @@ class _StaffDashboardPageState extends State<StaffDashboardPage> {
                 TextField(
                   key: const Key('staff_filter_search'),
                   controller: _filterSearchController,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     prefixIcon: Icon(Icons.search),
-                    labelText: 'Search reports',
-                    hintText: 'Title, location, description or report ID',
+                    labelText: fmTr(context, 'Search reports'),
+                    hintText: fmTr(context, 'Title, location, description or report ID'),
                   ),
                   onChanged: (v) => setState(() => _filterQuery = v),
                 ),
@@ -275,7 +275,7 @@ class _StaffDashboardPageState extends State<StaffDashboardPage> {
                     key: const Key('staff_filter_status'),
                     initialValue: _filterStatus,
                     isExpanded: true,
-                    decoration: const InputDecoration(labelText: 'Status'),
+                    decoration: InputDecoration(labelText: fmTr(context, 'Status')),
                     items: const [
                       DropdownMenuItem(value: 'all', child: FixMateText('All statuses')),
                       DropdownMenuItem(value: 'new', child: FixMateText('New')),
@@ -289,7 +289,7 @@ class _StaffDashboardPageState extends State<StaffDashboardPage> {
                     key: const Key('staff_filter_category'),
                     initialValue: _filterCategory,
                     isExpanded: true,
-                    decoration: const InputDecoration(labelText: 'Category'),
+                    decoration: InputDecoration(labelText: fmTr(context, 'Category')),
                     items: [
                       const DropdownMenuItem(value: 'all',
                         child: FixMateText('All categories')),
@@ -304,7 +304,7 @@ class _StaffDashboardPageState extends State<StaffDashboardPage> {
                     key: const Key('staff_filter_date'),
                     initialValue: _filterDate,
                     isExpanded: true,
-                    decoration: const InputDecoration(labelText: 'Submitted'),
+                    decoration: InputDecoration(labelText: fmTr(context, 'Submitted')),
                     items: const [
                       DropdownMenuItem(value: 'all', child: FixMateText('Any date')),
                       DropdownMenuItem(value: 'last7', child: FixMateText('Last 7 days')),
