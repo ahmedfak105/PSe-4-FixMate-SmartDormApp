@@ -338,19 +338,89 @@ class _AdminOperationsPageState extends State<AdminOperationsPage> {
     ]);
   }
 
+  Future<void> _changeUserRole(
+      Map<String, dynamic> person, String newRole) async {
+    if (!_authorized || _busy) return;
+    final id = person['id'] as String;
+    final existing = person['role'] as String;
+    if (id == widget.profile.id || existing == newRole) return;
+    final name = (person['full_name'] as String?)?.trim().isNotEmpty == true
+        ? person['full_name'] as String : id;
+    final approved = await showDialog<bool>(context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: FixMateText('Change user role'),
+        content: Text(
+          '${fmTr(context, 'Change role for')} $name '
+          '${fmTr(context, 'from')} ${fmTr(context, existing)} '
+          '${fmTr(context, 'to')} ${fmTr(context, newRole)}?'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(dialogContext, false),
+            child: const FixMateText('Cancel')),
+          FilledButton(onPressed: () => Navigator.pop(dialogContext, true),
+            child: const FixMateText('Confirm role change')),
+        ],
+      ));
+    if (approved != true || !mounted || !_authorized) return;
+    setState(() { _busy = true; _error = null; _notice = null; });
+    try {
+      await _client.rpc('manage_user_role', params: {
+        'p_user_id': id,
+        'p_expected_role': existing,
+        'p_new_role': newRole,
+      });
+      if (!mounted || !_authorized) return;
+      setState(() {
+        _notice = 'Role updated. The user must sign in again '
+            'to refresh their workspace.';
+      });
+    } on PostgrestException catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _error = error.code == 'PGRST202'
+            ? 'User role management is not enabled on this server yet.'
+            : 'Could not update role. Please refresh and try again.';
+      });
+    } catch (_) {
+      if (mounted) setState(() => _error =
+        'Could not update role. Please refresh and try again.');
+    } finally {
+      if (mounted) setState(() => _busy = false);
+      await _load();
+    }
+  }
+
   Widget _people() => Column(children: [
     for (final p in _profiles)
       Card(child: ListTile(
         leading: const Icon(Icons.person_outline),
         title: FixMateText((p['full_name'] as String?)?.isNotEmpty == true
             ? p['full_name'] as String : 'Unnamed user'),
-        subtitle: FixMateText('${p['role']} · ${p['building'] ?? 'No building'}'
-            ' · ${p['room_number'] ?? 'No room'}'),
-        trailing: const Icon(Icons.lock_outline),
+        subtitle: FixMateText('${fmTr(context, p['role'] as String)} · '
+            '${p['building'] ?? fmTr(context, 'No building')}'
+            ' · ${p['room_number'] ?? fmTr(context, 'No room')}'),
+        trailing: p['id'] == widget.profile.id
+          ? const Icon(Icons.lock_outline)
+          : PopupMenuButton<String>(
+              key: Key('user_role_${p['id']}'),
+              tooltip: fmTr(context, 'Change user role'),
+              enabled: !_busy && _authorized,
+              icon: const Icon(Icons.manage_accounts_outlined),
+              onSelected: (role) => _changeUserRole(p, role),
+              itemBuilder: (_) => const [
+                PopupMenuItem(value: 'resident',
+                  child: FixMateText('Resident')),
+                PopupMenuItem(value: 'maintenance_staff',
+                  child: FixMateText('Maintenance staff')),
+                PopupMenuItem(value: 'moderator',
+                  child: FixMateText('Moderator')),
+                PopupMenuItem(value: 'system_admin',
+                  child: FixMateText('System Admin')),
+              ],
+            ),
       )),
     const Padding(padding: EdgeInsets.all(12),
-      child: FixMateText('Roles are read-only here. Privileged role changes must '
-          'use trusted operator provisioning, never browser SQL keys.')),
+      child: FixMateText('Only authorized administrators can change roles. '
+          'Existing accounts must sign in again after role changes.')),
   ]);
 
   @override
