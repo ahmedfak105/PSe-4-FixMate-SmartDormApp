@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'sign_up_page.dart';
+import '../../l10n/fixmate_i18n.dart';
+import '../support/fixmate_support_page.dart';
 import 'password_recovery_page.dart';
 
 /// Sign in with Supabase Auth or register a new Resident account.
@@ -58,7 +60,8 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(title: const Text('FixMate')),
+        appBar: AppBar(title: const Text('FixMate'),
+          actions: const [FixMateLanguageButton(), FixMateSupportMenu()]),
         body: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 420),
