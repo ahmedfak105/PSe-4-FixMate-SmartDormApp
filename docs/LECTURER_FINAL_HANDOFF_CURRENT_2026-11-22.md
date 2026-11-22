@@ -42,7 +42,7 @@ trail. The same connected Supabase backend serves Web and Android.
   delivery still needs private Firebase credentials, invocation and
   real-phone confirmation.
 
-See [current hosted 11-table ERD](erd/FIXMATE_HOSTED_11_TABLES.mmd).
+See [current hosted 11-table ERD](FIXMATE_HOSTED_ERD.md).
 
 ## 3. Development and implementation
 
@@ -74,6 +74,14 @@ before any future `supabase db push`; do not blindly replay migrations.
 These are different evidence levels. Do not call a successful CI build a real
 phone delivery test. The project is a working academic MVP, not a fully signed
 off public production launch.
+
+### Reproducible GitHub Actions evidence
+
+- [Connected Android APK on integrated revision `8b309128`](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/45040526078) — **SUCCESS**; compiled connected debug APK artifact uploaded.
+- [Real Flutter Web Chrome E2E](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/45040530317) — **SUCCESS** on the same integration revision.
+- [Integrated Android/Web/Flutter/isolated DB release candidate](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/45040530260) — **SUCCESS**.
+- [GitHub Pages Web deploy](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/45040526030) — **SUCCESS**.
+- Hosted SQL/RLS/role/notification status is supported by fresh live checks described in [rollout log](HOSTED_RUNTIME_ROLLOUT_2026-11-22.md) and [release gate #47](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/47). GitHub CI does **not** prove FCM OS delivery.
 
 ## 5. Demonstration (5 minutes)
 
