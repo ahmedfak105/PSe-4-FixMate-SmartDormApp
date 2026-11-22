@@ -27,14 +27,18 @@ Future<void> main() async {
   // remains the default unless this explicit web-only flag is enabled.
   const residentWebFlag = bool.fromEnvironment('FIXMATE_RESIDENT_WEB', defaultValue: false);
   final allowResidentWeb = kIsWeb && operationsOnly && residentWebFlag;
+  // Offline fixture data is opt-in for lecturer/testing builds only.
+  // A normal Android installation must never silently show sample reports.
+  const allowOfflineDemo = bool.fromEnvironment(
+    'FIXMATE_OFFLINE_DEMO', defaultValue: false);
 
-  // Validate build-time public credentials as carefully as the runtime
-  // connection screen. Legacy service_role JWTs must never reach a Web client.
-  if (operationsOnly && isConfigured) {
+
+  // No connected Flutter build (Android or Web) may embed privileged keys.
+  if (isConfigured) {
     final problem = validateOperationsPublicConnection(supabaseUrl, supabaseKey);
     if (problem != null) {
       runApp(MaterialApp(home: Scaffold(body: Center(
-        child: Text('Invalid operations Supabase configuration: $problem'),
+        child: const Text('FixMate connection settings are invalid. Contact your administrator.'),
       ))));
       return;
     }
@@ -49,12 +53,14 @@ Future<void> main() async {
     // Firebase is a separate, Android-only channel. Browser users and offline
     // demonstrations do not initialize FCM or register device tokens.
     await FixMatePushService.instance.initialize();
+  } else if (allowOfflineDemo) {
+    debugPrint('FixMate: Running explicitly configured offline demonstration');
   } else {
-    debugPrint('FixMate: Running offline demo (Supabase not configured)');
+    debugPrint('FixMate: No connected backend configured');
   }
 
-  // A browser operations build must never silently fall back to DEMO DATA.
-  // Resident/Staff mobile mode retains its existing offline test/demo option.
+  // Operations web uses an authenticated connection page when not configured.
+  // Android and general Web never silently fall back to sample records.
   if (operationsOnly && !kIsWeb) {
     runApp(const MaterialApp(home: Scaffold(body: Center(
       child: Text('Operations-only mode requires a Flutter Web browser.'),
@@ -66,6 +72,38 @@ Future<void> main() async {
     // deployed to staging without hardcoding or leaking server credentials.
     runApp(_OperationsConnectApp(initialRecoveryLink: initialRecoveryLink,
         allowResidentWeb: allowResidentWeb));
+    return;
+  }
+  if (!isConfigured && !allowOfflineDemo) {
+    runApp(MaterialApp(
+      debugShowCheckedModeBanner: false,
+      theme: FixMateTheme.light,
+      home: Scaffold(
+        appBar: AppBar(title: const Text('FixMate')),
+        body: const Center(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: 440),
+            child: Padding(
+              padding: EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.cloud_off_outlined, size: 54),
+                  SizedBox(height: 16),
+                  Text('Unable to connect to FixMate',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 23, fontWeight: FontWeight.bold)),
+                  SizedBox(height: 12),
+                  Text('This installation needs the connected FixMate release. '
+                      'Please contact your administrator.',
+                      textAlign: TextAlign.center),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    ));
     return;
   }
   runApp(FixMateApp(requireLogin: isConfigured,
