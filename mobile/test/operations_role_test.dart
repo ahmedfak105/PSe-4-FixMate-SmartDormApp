@@ -22,6 +22,27 @@ void main() {
           FixMateWorkspace.systemAdmin);
     });
 
+    test('unified web allows Resident without exposing privileged screens', () {
+      expect(workspaceForRole('resident', operationsOnly: true,
+          allowResidentWeb: true), FixMateWorkspace.resident);
+      expect(workspaceForRole('maintenance_staff', operationsOnly: true,
+          allowResidentWeb: true), FixMateWorkspace.maintenanceStaff);
+      expect(workspaceForRole('moderator', operationsOnly: true,
+          allowResidentWeb: true), FixMateWorkspace.moderator);
+      expect(workspaceForRole('system_admin', operationsOnly: true,
+          allowResidentWeb: true), FixMateWorkspace.systemAdmin);
+      expect(workspaceForRole('not_a_real_role', operationsOnly: true,
+          allowResidentWeb: true), FixMateWorkspace.denied);
+    });
+
+    testWidgets('unified web sign-in offers Resident registration', (tester) async {
+      await tester.pumpWidget(const MaterialApp(
+        home: LoginPage(allowResidentSignup: true),
+      ));
+      expect(find.byKey(const Key('go_to_signup')), findsOneWidget);
+      expect(find.textContaining('Authorized maintenance staff'), findsNothing);
+    });
+
     test('resident cannot access privileged Flutter Web workspace', () {
       expect(workspaceForRole('resident', operationsOnly: true),
           FixMateWorkspace.denied);
