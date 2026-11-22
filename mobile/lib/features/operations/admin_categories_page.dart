@@ -109,77 +109,11 @@ class _AdminCategoriesPageState extends State<AdminCategoriesPage> {
     }
   }
 
-  Future<_CategoryDraft?> _editDialog({_Category? existing}) async {
-    final key = GlobalKey<FormState>();
-    final nameController = TextEditingController(text: existing?.name ?? '');
-    var active = existing?.active ?? true;
-
-    try {
-      return await showDialog<_CategoryDraft>(
+  Future<_CategoryDraft?> _editDialog({_Category? existing}) =>
+      showDialog<_CategoryDraft>(
         context: context,
-        builder: (context) => StatefulBuilder(
-          builder: (context, update) => AlertDialog(
-            title: Text(existing == null ? 'Add category' : 'Edit category'),
-            content: SizedBox(
-              width: 420,
-              child: Form(
-                key: key,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    TextFormField(
-                      key: const Key('category_name'),
-                      controller: nameController,
-                      maxLength: 80,
-                      autofocus: true,
-                      textCapitalization: TextCapitalization.words,
-                      decoration: const InputDecoration(labelText: 'Category name'),
-                      validator: validateCategoryName,
-                    ),
-                    SwitchListTile(
-                      key: const Key('category_active'),
-                      contentPadding: EdgeInsets.zero,
-                      title: const Text('Available for new reports'),
-                      value: active,
-                      onChanged: (value) => update(() => active = value),
-                    ),
-                    if (existing != null)
-                      const Text(
-                        'Renaming creates a new category. Existing reports '
-                        'retain their original category.',
-                        style: TextStyle(fontSize: 12, color: Color(0xFF6B7F8D)),
-                      ),
-                  ],
-                ),
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Cancel'),
-              ),
-              FilledButton(
-                key: const Key('save_category'),
-                onPressed: () {
-                  if (!key.currentState!.validate()) return;
-                  Navigator.pop(context, _CategoryDraft(
-                    name: nameController.text.trim(),
-                    active: active,
-                  ));
-                },
-                child: const Text('Save'),
-              ),
-            ],
-          ),
-        ),
+        builder: (_) => _CategoryEditorDialog(existing: existing),
       );
-    } finally {
-      // The dialog is removed before this async frame finishes.
-      // Do not retain sensitive content or controllers between forms.
-      nameController.dispose();
-    }
-  }
 
   Future<void> _manage({_Category? existing}) async {
     if (_busy || !_managementEnabled || !_sameSession) return;
@@ -352,6 +286,90 @@ class _AdminCategoriesPageState extends State<AdminCategoriesPage> {
             ),
           ]),
         )),
+    ],
+  );
+}
+
+/// Dialog owns its TextEditingController throughout route animations.
+class _CategoryEditorDialog extends StatefulWidget {
+  const _CategoryEditorDialog({this.existing});
+  final _Category? existing;
+
+  @override
+  State<_CategoryEditorDialog> createState() => _CategoryEditorDialogState();
+}
+
+class _CategoryEditorDialogState extends State<_CategoryEditorDialog> {
+  final _key = GlobalKey<FormState>();
+  late final TextEditingController _name;
+  late bool _active;
+
+  @override
+  void initState() {
+    super.initState();
+    _name = TextEditingController(text: widget.existing?.name ?? '');
+    _active = widget.existing?.active ?? true;
+  }
+
+  @override
+  void dispose() {
+    _name.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => AlertDialog(
+    title: Text(widget.existing == null ? 'Add category' : 'Edit category'),
+    content: SizedBox(
+      width: 420,
+      child: Form(
+        key: _key,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            TextFormField(
+              key: const Key('category_name'),
+              controller: _name,
+              maxLength: 80,
+              autofocus: true,
+              textCapitalization: TextCapitalization.words,
+              decoration: const InputDecoration(labelText: 'Category name'),
+              validator: validateCategoryName,
+            ),
+            SwitchListTile(
+              key: const Key('category_active'),
+              contentPadding: EdgeInsets.zero,
+              title: const Text('Available for new reports'),
+              value: _active,
+              onChanged: (value) => setState(() => _active = value),
+            ),
+            if (widget.existing != null)
+              const Text(
+                'Renaming creates a new category. Existing reports '
+                'retain their original category.',
+                style: TextStyle(fontSize: 12, color: Color(0xFF6B7F8D)),
+              ),
+          ],
+        ),
+      ),
+    ),
+    actions: [
+      TextButton(
+        onPressed: () => Navigator.pop(context),
+        child: const Text('Cancel'),
+      ),
+      FilledButton(
+        key: const Key('save_category'),
+        onPressed: () {
+          if (!_key.currentState!.validate()) return;
+          Navigator.pop(context, _CategoryDraft(
+            name: _name.text.trim(),
+            active: _active,
+          ));
+        },
+        child: const Text('Save'),
+      ),
     ],
   );
 }
