@@ -48,3 +48,8 @@ GitHub Actions workflows under `.github/workflows/` validate the integrated Flut
 - No private API keys, production credentials, actual resident data or passwords should be committed or included in demo screenshots.
 
 **Do not merge this branch to `main` until the latest combined tests have passed and the team has reviewed the scope.**
+
+## One-command local lecturer demonstration
+
+For a complete **four-role** demonstration without touching the hosted Supabase project, use the [local demo runbook](docs/LOCAL_LECTURER_DEMO_RUNBOOK.md) and the tested [Supabase CLI bootstrap script](scripts/prepare_local_lecturer_demo.sh). It reconstructs the local database, adds the two proposed backend changes **locally only**, provisions fictional Resident/Staff/Moderator/Admin users and verifies the report/photo workflows. This requires Docker and Flutter on a laptop; the APK artifact alone does not include a persistent local backend.
+
