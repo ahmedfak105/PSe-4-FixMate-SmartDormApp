@@ -63,3 +63,23 @@ order by p.proname;
 
 -- No users, names, emails, phone numbers, photos, device tokens or report text
 -- are returned by any query above.
+
+-- Preflight for additive report-validation constraints and signup provisioning:
+-- returns counts only; no names, emails or report bodies.
+select
+ (select count(*) from public.maintenance_reports
+  where nullif(btrim(title),'') is null
+     or nullif(btrim(description),'') is null
+     or nullif(btrim(location),'') is null
+     or char_length(title)>120) as incompatible_report_rows,
+ (select count(*) from public.maintenance_reports r
+  where not exists (select 1 from public.maintenance_categories c
+    where c.id=r.category_id and c.is_active)) as inactive_or_missing_category_references,
+ (select count(*) from pg_trigger t
+  join pg_class c on c.oid=t.tgrelid
+  join pg_namespace n on n.oid=c.relnamespace
+  where n.nspname='auth' and c.relname='users'
+    and t.tgname='on_auth_user_created' and not t.tgisinternal) as auth_profile_signup_triggers,
+ (select count(*) from public.maintenance_categories where is_active) as active_categories,
+ (select count(*) from public.maintenance_categories where not is_active) as disabled_categories,
+ (select count(*) from public.maintenance_reports where assigned_to is not null) as assigned_reports;
