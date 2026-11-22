@@ -1,4 +1,5 @@
 import '../../fixmate_theme.dart';
+import 'report_filters.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -46,6 +47,26 @@ class _AdminOperationsPageState extends State<AdminOperationsPage> {
 
   int _tab = 0;
   String _query = '';
+  String _statusFilter = 'all';
+  String _categoryFilter = 'all';
+  String _dateFilter = 'all';
+  final _searchController = TextEditingController();
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _clearFilters() {
+    _searchController.clear();
+    setState(() {
+      _query = '';
+      _statusFilter = 'all';
+      _categoryFilter = 'all';
+      _dateFilter = 'all';
+    });
+  }
 
   @override
   void initState() {
@@ -200,24 +221,83 @@ class _AdminOperationsPageState extends State<AdminOperationsPage> {
   }
 
   Widget _listReports({required bool assignmentsOnly}) {
-    final rows = _reports.where((r) {
-      if (assignmentsOnly && !(r['status'] == 'new' && r['assigned_to'] == null)) {
-        return false;
-      }
-      if (_query.isEmpty || assignmentsOnly) return true;
-      return '${r['id']} ${r['title']} ${r['location']}'
-          .toLowerCase().contains(_query.toLowerCase());
-    }).toList();
+    final rows = filterVisibleReports(
+      _reports,
+      categoryNames: _categories,
+      assignmentsOnly: assignmentsOnly,
+      text: assignmentsOnly ? '' : _query,
+      status: assignmentsOnly ? 'all' : _statusFilter,
+      category: assignmentsOnly ? 'all' : _categoryFilter,
+      dateRange: assignmentsOnly ? 'all' : _dateFilter,
+    );
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      if (!assignmentsOnly)
+      if (!assignmentsOnly) ...[
         Padding(
           padding: const EdgeInsets.only(bottom: 12),
           child: TextField(
-            decoration: const InputDecoration(prefixIcon: Icon(Icons.search),
-                labelText: 'Search reports', border: OutlineInputBorder()),
+            key: const Key('admin_filter_query'),
+            controller: _searchController,
+            decoration: const InputDecoration(
+              prefixIcon: Icon(Icons.search),
+              labelText: 'Search reports',
+              hintText: 'Title, description, location, category or ID',
+            ),
             onChanged: (value) => setState(() => _query = value),
           ),
         ),
+        Wrap(spacing: 8, runSpacing: 8, children: [
+          SizedBox(width: 190, child: DropdownButtonFormField<String>(
+            key: const Key('admin_filter_status'),
+            initialValue: _statusFilter,
+            isExpanded: true,
+            decoration: const InputDecoration(labelText: 'Status'),
+            items: const [
+              DropdownMenuItem(value: 'all', child: Text('All statuses')),
+              DropdownMenuItem(value: 'new', child: Text('New')),
+              DropdownMenuItem(value: 'in_progress', child: Text('In progress')),
+              DropdownMenuItem(value: 'resolved', child: Text('Resolved')),
+            ],
+            onChanged: (v) => setState(() => _statusFilter = v ?? 'all'),
+          )),
+          SizedBox(width: 190, child: DropdownButtonFormField<String>(
+            key: const Key('admin_filter_category'),
+            initialValue: _categoryFilter,
+            isExpanded: true,
+            decoration: const InputDecoration(labelText: 'Category'),
+            items: [
+              const DropdownMenuItem(value: 'all', child: Text('All categories')),
+              for (final item in _categories.entries)
+                DropdownMenuItem(
+                  value: item.key.toString(),
+                  child: Text(item.value, overflow: TextOverflow.ellipsis),
+                ),
+            ],
+            onChanged: (v) => setState(() => _categoryFilter = v ?? 'all'),
+          )),
+          SizedBox(width: 190, child: DropdownButtonFormField<String>(
+            key: const Key('admin_filter_date'),
+            initialValue: _dateFilter,
+            isExpanded: true,
+            decoration: const InputDecoration(labelText: 'Submitted'),
+            items: const [
+              DropdownMenuItem(value: 'all', child: Text('Any date')),
+              DropdownMenuItem(value: 'last7', child: Text('Last 7 days')),
+              DropdownMenuItem(value: 'last30', child: Text('Last 30 days')),
+            ],
+            onChanged: (v) => setState(() => _dateFilter = v ?? 'all'),
+          )),
+          TextButton.icon(
+            onPressed: _clearFilters,
+            icon: const Icon(Icons.filter_alt_off_outlined),
+            label: const Text('Clear filters'),
+          ),
+        ]),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          child: Text('${rows.length} matching reports',
+            style: Theme.of(context).textTheme.bodySmall),
+        ),
+      ],
       if (rows.isEmpty)
         const Padding(padding: EdgeInsets.all(30),
             child: Text('No reports found for this view.')),
