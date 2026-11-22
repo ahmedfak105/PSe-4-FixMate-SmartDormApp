@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101729">
+  <meta name="description" content="FixMate maintenance operations — secure Supabase admin dashboard">
+  <title>FixMate | Admin Workspace</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+  <main id="setupScreen" class="entry-screen" hidden>
+    <div class="entry-art"><div class="art-top"><span class="logo-mark">F<span>.</span></span><span class="art-eyebrow">FIXMATE / OPERATIONS</span></div><div class="art-content"><div class="art-number">01 / 03</div><h1>One place.<br><em>Every repair.</em></h1><p>Connect the admin workspace to the same Supabase project as your resident and maintenance applications.</p></div><div class="art-bottom"><span class="status-dot"></span> INTERNAL OPERATIONS WORKSPACE</div></div>
+    <section class="entry-pane"><div class="entry-inner"><div class="step-label">ONE-TIME SETUP</div><h2>Connect your workspace</h2><p class="muted">The publishable key is intended for browser apps. Never enter a service-role or secret key.</p>
+      <form id="setupForm" class="entry-form"><label for="projectUrl">Supabase project URL</label><input id="projectUrl" type="url" placeholder="https://your-project.supabase.co" required autocomplete="url"><label for="publishableKey">Publishable API key</label><input id="publishableKey" type="text" placeholder="sb_publishable_... or legacy anon JWT" required autocomplete="off" spellcheck="false"><p class="helper">Stored only in this browser's local storage. Do not use on shared computers.</p><button class="primary-btn full" type="submit">Connect to Supabase <span>→</span></button></form>
+      <p id="setupError" class="form-error" role="alert" hidden></p><div class="entry-foot">Same PostgreSQL database · Same authentication · Role-gated access</div>
+    </div></section>
+  </main>
+
+  <main id="authScreen" class="entry-screen" hidden>
+    <div class="entry-art"><div class="art-top"><span class="logo-mark">F<span>.</span></span><span class="art-eyebrow">FIXMATE / ADMIN</span></div><div class="art-content"><div class="art-number">02 / 03</div><h1>Better care.<br><em>Better living.</em></h1><p>Monitor campus maintenance requests and coordinate the teams who keep things running.</p></div><div class="art-bottom"><span class="status-dot"></span> CONNECTED TO SUPABASE AUTH</div></div>
+    <section class="entry-pane"><div class="entry-inner"><div class="step-label">ADMINISTRATOR ACCESS</div><h2>Welcome back</h2><p class="muted">Sign in with an existing <code>system_admin</code>, <code>maintenance_staff</code>, or <code>moderator</code> account. Each role opens its authorized workspace.</p>
+      <form id="loginForm" class="entry-form"><label for="email">Email address</label><input type="email" id="email" autocomplete="username" placeholder="admin@example.com" required><label for="password">Password</label><input type="password" id="password" autocomplete="current-password" placeholder="Your account password" required><button type="submit" class="primary-btn full" id="loginSubmit">Sign in to workspace <span>→</span></button></form>
+      <p id="authError" class="form-error" role="alert" hidden></p><button id="editConnection" class="text-link" type="button">Change Supabase connection</button>
+      <div class="entry-foot">The Admin dashboard requires <code>system_admin</code>. Maintenance staff and moderators use separate pages; Supabase RLS and RPC functions enforce permissions.</div>
+    </div></section>
+  </main>
+
+  <div id="dashboard" class="workspace" hidden>
+    <aside class="sidebar" aria-label="Main navigation">
+      <div class="sidebar-brand"><span class="logo-mark small">F<span>.</span></span><div><strong>fixmate<span class="brand-dot">.</span></strong><small>ADMIN WORKSPACE</small></div></div>
+      <div class="sidebar-subhead">OPERATIONS</div>
+      <nav class="nav-list">
+        <button type="button" class="nav-link active" data-view="overview"><span class="nav-symbol">◫</span> Overview</button>
+        <button type="button" class="nav-link" data-view="reports"><span class="nav-symbol">▤</span> All reports <span id="navReportsCount" class="nav-counter">0</span></button>
+        <button type="button" class="nav-link" data-view="assignments"><span class="nav-symbol">⇄</span> Assignments</button>
+        <button type="button" class="nav-link" data-view="people"><span class="nav-symbol">♙</span> People & roles</button><a href="moderator.html" style="display:block;padding:12px 18px;color:inherit;text-decoration:none">◈ Moderator review</a>
+      </nav>
+      <div class="sidebar-spacer"></div>
+      <div class="sidebar-help"><div class="help-label">STAFF WORKFLOW</div><strong>New → In progress → Resolved</strong><p>Assignment and repair status updates use your existing Supabase backend functions.</p></div>
+      <div class="sidebar-account"><div class="account-avatar">A</div><div class="account-text"><strong id="sideName">Administrator</strong><small id="sideEmail" title=""></small></div></div>
+      <button type="button" id="logoutButton" class="sidebar-logout">↪ <span>Sign out</span></button>
+    </aside>
+
+    <div class="main-area">
+      <header class="topbar"><div class="mobile-brand">F<span>.</span> <small>ADMIN</small></div><div class="breadcrumb">OPERATIONS <span>/</span> <strong id="pageCrumb">OVERVIEW</strong></div><div class="top-actions"><span class="live-label"><span class="status-dot green"></span> LIVE DATABASE</span><button type="button" class="outline-btn" id="refreshButton">↻ <span>Refresh</span></button></div></header>
+      <div class="mobile-nav" role="navigation" aria-label="Sections"><button type="button" class="mobile-link active" data-view="overview">Overview</button><button type="button" class="mobile-link" data-view="reports">Reports</button><button type="button" class="mobile-link" data-view="assignments">Assignments</button><button type="button" class="mobile-link" data-view="people">People</button></div>
+      <div id="globalNotice" class="notice" hidden></div>
+      <div class="content-shell">
+        <section class="view" id="overviewView">
+          <div class="page-head"><div><div class="kicker">THE OPERATIONS PULSE</div><h1>Good to see you, <span id="welcomeName">Admin</span><span class="h-accent">.</span></h1><p class="page-lead">A real-time snapshot of the maintenance requests across your dormitories.</p></div><div class="date-panel"><span>LAST REFRESHED</span><strong id="lastRefreshed">—</strong></div></div>
+          <div class="kpis"><article class="kpi"><div class="kpi-top">TOTAL REPORTS <span class="kpi-icon">▤</span></div><div class="kpi-value" id="totalReports">—</div><div class="kpi-foot">Reports in the current data window</div></article><article class="kpi"><div class="kpi-top">NEW REQUESTS <span class="kpi-icon purple">✳</span></div><div class="kpi-value" id="newReports">—</div><div class="kpi-foot">Waiting for maintenance</div></article><article class="kpi"><div class="kpi-top">IN PROGRESS <span class="kpi-icon amber">◷</span></div><div class="kpi-value" id="activeReports">—</div><div class="kpi-foot">Currently being handled</div></article><article class="kpi"><div class="kpi-top">RESOLVED <span class="kpi-icon green">✓</span></div><div class="kpi-value" id="resolvedReports">—</div><div class="kpi-foot">Repairs completed</div></article></div>
+          <div class="overview-grid"><article class="panel"><div class="panel-title-row"><div><div class="mini-kicker">MAINTENANCE HEALTH</div><h2>Status breakdown</h2></div><div class="panel-side-text">REPORT DISTRIBUTION</div></div><div id="statusBars" class="status-bars"></div></article><article class="panel feature-panel"><div class="mini-kicker">TODAY'S FOCUS</div><div class="feature-illustration">↗</div><h2>Keep things<br>moving.</h2><p>Find unassigned reports and get your maintenance team on the case.</p><button type="button" class="feature-btn" data-go="assignments">Open assignments <span>↗</span></button></article></div>
+          <article class="panel recent-panel"><div class="panel-title-row"><div><div class="mini-kicker">LATEST ACTIVITY</div><h2>Recent reports</h2></div><button type="button" class="subtle-link" data-go="reports">View all reports ↗</button></div><div id="recentReports" class="table-wrap"></div></article>
+        </section>
+        <section class="view" id="reportsView" hidden><div class="page-head"><div><div class="kicker">REPORT MANAGEMENT</div><h1>All maintenance reports<span class="h-accent">.</span></h1><p class="page-lead">Inspect real requests, statuses and assignments from PostgreSQL.</p></div></div><article class="panel"><div class="filter-row"><input type="search" id="searchReports" class="search-input" placeholder="Search title, location or report #" aria-label="Search reports"><select id="statusFilter" aria-label="Filter status"><option value="all">All statuses</option><option value="new">New</option><option value="in_progress">In progress</option><option value="resolved">Resolved</option></select><span id="reportsMatchCount" class="filter-count"></span></div><div id="allReports" class="table-wrap"></div></article></section>
+        <section class="view" id="assignmentsView" hidden><div class="page-head"><div><div class="kicker">STAFF COORDINATION</div><h1>Assign the next fix<span class="h-accent">.</span></h1><p class="page-lead">Assign an available report to a maintenance staff member. Staff then claims it to start work.</p></div></div><article class="panel"><div class="panel-title-row"><div><div class="mini-kicker">READY TO ASSIGN</div><h2>Unassigned requests</h2></div><span id="assignableCount" class="filter-count"></span></div><div id="assignableReports" class="table-wrap"></div></article><article class="info-panel"><strong>How this works</strong><p><b>Assign</b> calls <code>assign_maintenance_report</code>, which records the employee but leaves the status <code>new</code>. On the staff dashboard, <b>Claim</b> advances the report to <code>in_progress</code>. The admin page never changes status directly.</p></article></section>
+        <section class="view" id="peopleView" hidden><div class="page-head"><div><div class="kicker">ACCESS & RESPONSIBILITY</div><h1>Your people<span class="h-accent">.</span></h1><p class="page-lead">View existing profiles and roles. Account creation and role changes remain admin-controlled in Supabase.</p></div></div><article class="panel"><div class="panel-title-row"><div><div class="mini-kicker">DATABASE PROFILES</div><h2>Users and staff</h2></div><span class="read-only-tag">READ-ONLY</span></div><div id="peopleTable" class="table-wrap"></div></article><article class="info-panel"><strong>Why roles are read-only here</strong><p>Changing account roles is a privileged operation. This starter dashboard does not expose direct profile edits or use a secret service-role key in the browser. A secured server endpoint or restricted admin RPC can be added later.</p></article></section>
+        <footer class="footer-line"><span>FIXMATE / SMARTDORMAPP</span><span>KAUNO KOLEGIJA · INTERNAL PRACTICE</span></footer>
+      </div>
+    </div>
+  </div>
+
+  <dialog id="assignDialog" class="assign-modal"><form id="assignForm" method="dialog"><div class="dialog-kicker">ASSIGN A REPORT</div><h2 id="assignDialogTitle">Assign maintenance report</h2><p class="muted" id="assignDialogDescription"></p><label for="staffSelect">Maintenance staff member</label><select id="staffSelect" required></select><p class="helper">This action uses the existing restricted <code>assign_maintenance_report</code> function.</p><p id="assignError" class="form-error" role="alert" hidden></p><div class="dialog-actions"><button type="button" id="cancelAssign" class="outline-btn">Cancel</button><button type="submit" class="primary-btn" id="confirmAssign">Assign report →</button></div></form></dialog>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+  <script src="app.js" defer></script>
+</body>
+</html>

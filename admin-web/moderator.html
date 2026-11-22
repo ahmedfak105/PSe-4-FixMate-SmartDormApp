@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FixMate | Moderator Review</title>
+  <style>
+    :root{font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:#f4f6f9;color:#17263b}
+    *{box-sizing:border-box}body{margin:0}button,input,select,textarea{font:inherit}
+    header{background:#14243c;color:#fff;padding:19px max(20px,calc((100vw - 1080px)/2));display:flex;justify-content:space-between;align-items:center;gap:12px}
+    header strong{font-size:22px}header small{display:block;color:#c8d5e4;margin-top:4px}
+    header a{color:#d7ebfc}main{max-width:1080px;margin:32px auto;padding:0 18px 80px}
+    h1{font-size:30px;margin:0 0 8px}h2{font-size:18px;margin:0}
+    p{line-height:1.6}button{padding:10px 15px;border:0;border-radius:9px;color:#fff;background:#12657b;cursor:pointer}
+    button:disabled{opacity:.55;cursor:not-allowed}button.secondary{background:#e4ecf2;color:#234156}
+    button:hover:not(:disabled){filter:brightness(1.06)}
+    .top,.report-head,.actions,.controls{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+    .muted{color:#607284}.report{background:#fff;border:1px solid #dbe2ec;border-radius:14px;padding:23px;margin-top:16px;box-shadow:0 3px 13px #132a4210}
+    .chip{display:inline-block;border-radius:100px;background:#e4f0f4;padding:5px 11px;font-size:13px;color:#235364}
+    .chip.rejected{background:#fff0e9;color:#a24420}
+    dl{display:grid;grid-template-columns:140px minmax(0,1fr);gap:7px;font-size:14px;margin:18px 0}
+    dt{color:#718195}dd{margin:0;overflow-wrap:anywhere}
+    .status{padding:13px 15px;border-radius:10px;background:#e7f4f8;color:#204d61;margin:16px 0}
+    .status.error{background:#fff0ea;color:#a13c21}
+    .controls{margin:25px 0 10px}.controls select{padding:10px;background:white;border:1px solid #c9d7df;border-radius:7px}
+    .actions{border-top:1px solid #ebeff4;padding-top:16px;justify-content:flex-start}
+    .empty{padding:36px;text-align:center;background:white;border:1px solid #dbe2ec;border-radius:12px}
+    dialog{width:min(94vw,560px);border:0;border-radius:16px;padding:25px;box-shadow:0 30px 100px #14243c60}
+    dialog::backdrop{background:#10253b88}dialog label{display:block;margin:15px 0 6px;font-weight:600}
+    dialog select,dialog textarea{width:100%;padding:11px;border:1px solid #b9c8d5;border-radius:9px}
+    dialog textarea{min-height:95px;resize:vertical}.dialog-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:20px}
+    #previewDialog img{display:block;max-width:100%;max-height:65vh;object-fit:contain;margin:15px auto}
+    #loading{max-width:1080px;margin:auto;padding:60px 20px;text-align:center}
+    @media(max-width:590px){dl{grid-template-columns:1fr;gap:3px}dt{margin-top:6px}h1{font-size:26px}header{padding:18px}}
+  </style>
+</head>
+<body>
+  <header>
+    <div><strong>FixMate</strong><small>MODERATOR / CONTENT REVIEW</small></div>
+    <a href="index.html">Main workspace</a>
+  </header>
+  <div id="loading" role="status">Checking your moderator access…</div>
+  <main id="workspace" hidden>
+    <div class="top">
+      <div><h1>Review maintenance reports</h1><p class="muted">Inspect new reports, view attached photos, and record a review decision.</p></div>
+      <div><button type="button" id="refresh">Refresh</button> <button type="button" id="logout" class="secondary">Sign out</button></div>
+    </div>
+    <p id="message" class="status" role="status" aria-live="polite" hidden></p>
+    <div class="controls">
+      <label for="filter">Show
+        <select id="filter">
+          <option value="pending">Awaiting review</option>
+          <option value="reviewed">Reviewed</option>
+          <option value="all">All new reports</option>
+        </select>
+      </label>
+      <strong id="counter">0 reports</strong>
+    </div>
+    <section id="reportList" aria-live="polite"></section>
+    <p class="muted">Review status is separate from maintenance work status. Rejected reports cannot be assigned or claimed after the reviewed database migration is installed.</p>
+  </main>
+
+  <dialog id="reviewDialog">
+    <form id="reviewForm">
+      <h2 id="reviewTitle">Review report</h2>
+      <p class="muted">Only new, unassigned reports can be reviewed. Each report can receive one final decision.</p>
+      <label for="outcome">Decision</label>
+      <select id="outcome" required>
+        <option value="valid">Valid</option>
+        <option value="duplicate">Duplicate</option>
+        <option value="inappropriate">Inappropriate</option>
+      </select>
+      <label for="reason">Reason / feedback</label>
+      <textarea id="reason" maxlength="500" placeholder="Required if the report is a duplicate or inappropriate"></textarea>
+      <p id="reviewError" class="status error" role="alert" hidden></p>
+      <div class="dialog-actions">
+        <button type="button" class="secondary" id="cancelReview">Cancel</button>
+        <button type="submit" id="submitReview">Save decision</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="previewDialog">
+    <div class="report-head"><h2>Report photo</h2><button class="secondary" type="button" id="closePreview">Close</button></div>
+    <p id="photoMessage" class="muted" role="status">Loading private photo…</p>
+    <img id="previewImage" alt="Maintenance report attachment" hidden>
+  </dialog>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+  <script src="moderator.js" defer></script>
+</body>
+</html>
