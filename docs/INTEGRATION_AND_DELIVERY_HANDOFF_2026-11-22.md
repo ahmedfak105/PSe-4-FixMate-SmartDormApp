@@ -1,3 +1,5 @@
+> **Current implementation acceptance — 22 Nov 2026:** The original **12/12 TASK issues are closed** following reproducible local Flutter/Supabase/API/Storage/Chrome tests. Five CLI-named migrations build a fresh local environment including report validation and Moderator review. **This is NOT hosted deployment or lecturer final sign-off.** The populated remote still has the original six application tables and empty migration history; [RELEASE GATE #47](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/47) tracks approved backup/staging/reconciliation/target-project deployment. [Integrated Draft PR #46](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/pull/46) remains unmerged.
+
 # FixMate — Final integration and lecturer delivery checklist
 
 **Verified:** 22 November 2026. **Status:** Release preparation; no production deployment or PR merges performed.
@@ -26,14 +28,14 @@ The `main` branch currently contains only `README.md` and `docs/PRODUCT_BACKLOG.
 
 These are automated development/test results, not screenshots or an installed hosted deployment. Do not assume time-limited GitHub Actions artifacts are permanent.
 
-## Remaining two original TASK issues
+## Two original TASK issues closed locally; hosted rollout separate
 
 | Task | Present state | Actual acceptance gate |
 |---|---|---|
-| [#36 — Report backend/Storage policies](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/36) | Local Auth/API/RLS/Storage positive and negative tests pass; improved report validation SQL is proposed only | Reviewed deployment/verification of report field/category checks on authorized staging and target project |
-| [#39 — Moderator review](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/39) | Flutter Web review UI and local Supabase browser/RPC tests pass; live project lacks the review table/RPC | Approved deployment of seventh table/RPC/guard; staged and target-project permission/report/photo tests with authorized Moderator account |
+| [#36 — Report backend/Storage policies](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/36) | **Closed / Done at implementation acceptance**; five-file local migration replay, Auth/API/Storage negative tests pass | Hosted deployment is still separately gated in #47 |
+| [#39 — Moderator review](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/39) | **Closed / Done at implementation acceptance**; Flutter Web Chrome E2E and local Moderator RPC persisted outcomes | Hosted review table/RPC still missing; deployment is separately gated in #47 |
 
-Do **not** mark the two issues Done solely because the local Docker tests passed. Follow [controlled rollout and rollback gates](CONTROLLED_SUPABASE_ROLLOUT_TASK36_TASK39.md) and [read-only preflight](sql/REMOTE_ADDITIVE_PREDEPLOY_READ_ONLY.sql). The existing active Supabase database has six tables and **no recorded migration history**; never execute the fresh baseline migrations against it.
+The original task acceptance criteria were matched to tested code and the two issues were closed **as implemented locally**, not as a production release. Follow [controlled rollout and rollback gates](CONTROLLED_SUPABASE_ROLLOUT_TASK36_TASK39.md) and [read-only preflight](sql/REMOTE_ADDITIVE_PREDEPLOY_READ_ONLY.sql). The existing active Supabase database has six tables and **no recorded migration history**; never execute the fresh baseline migrations against it.
 
 ## Release candidate sign-off sequence
 

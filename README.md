@@ -41,9 +41,9 @@ GitHub Actions workflows under `.github/workflows/` validate the integrated Flut
 
 ## Deployment / review status
 
-**This is a review candidate, not a production release.** The active remote Supabase project contains six public application tables; its manually created schema must not be overwritten with the fresh database baseline migrations. The proposed new report validation and Moderator review SQL have passed isolated local tests but are **not deployed on the active project**. Do not claim that live Moderator review works until a separately approved staged rollout passes.
+**This is a review candidate, not a production release.** The five versioned local migrations include report validation and Moderator review as additions to the original three baseline migrations. Read [the local demonstration runbook](docs/LOCAL_LECTURER_DEMO_RUNBOOK.md) to reproduce the full workflow. The active remote Supabase project contains six public application tables; its manually created schema must not be overwritten with the fresh database baseline migrations. The proposed new report validation and Moderator review SQL have passed isolated local tests but are **not deployed on the active project**. Do not claim that live Moderator review works until a separately approved staged rollout passes.
 
-- GitHub issues **#36** (report input validation backend) and **#39** (Moderator review live rollout) remain in progress.
+- All **12/12 original implementation TASKs** are closed at local code/CI acceptance level, including [#36](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/36) and [#39](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/39). **Hosted migration is NOT done**: [RELEASE GATE #47](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/47) tracks approved remote staging/backup/reconciliation.
 - Previous source PRs: #42 (documentation/database), #43 (Flutter mobile), #45 (Flutter Web), with #44 an optional older HTML/JavaScript prototype. These remain subject to review.
 - No private API keys, production credentials, actual resident data or passwords should be committed or included in demo screenshots.
 

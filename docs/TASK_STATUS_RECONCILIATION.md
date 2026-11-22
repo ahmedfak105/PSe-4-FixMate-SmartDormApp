@@ -1,3 +1,5 @@
+> **Current implementation acceptance — 22 Nov 2026:** The original **12/12 TASK issues are closed** following reproducible local Flutter/Supabase/API/Storage/Chrome tests. Five CLI-named migrations build a fresh local environment including report validation and Moderator review. **This is NOT hosted deployment or lecturer final sign-off.** The populated remote still has the original six application tables and empty migration history; [RELEASE GATE #47](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/47) tracks approved backup/staging/reconciliation/target-project deployment. [Integrated Draft PR #46](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/pull/46) remains unmerged.
+
 # FixMate — Implementation Task Status Reconciliation
 
 **Reviewed:** 21 November 2026  
@@ -147,7 +149,7 @@ Other Tasks retain their earlier issue states. **#36 and #39 are still pending l
 
 ## Implementation task acceptance snapshot — 22 November 2026 (10 of 12)
 
-As of 22 November 2026, **10/12 original implementation TASK issues in the student repository are Closed as Done at code + CI acceptance level**; the two remaining open tasks are **#36 backend/input/photo acceptance** and **#39 Moderator review release readiness**. This is not the same as the feature/epic completion counts, GitHub Project V2 status, or merged PR status.
+At the later 22 November 2026 implementation snapshot, **12/12 original TASK issues are closed at code + local CI acceptance level**. Tasks #36 and #39 passed the five-migration local API/Storage/Chrome tests and were closed; the hosted migration/backup/authorization rollout remains **open under RELEASE GATE #47**. This is not the same as the feature/epic completion counts, GitHub Project V2 status, or merged PR status.
 
 - **Closed Done:** #30 Auth/Registration, #31 Resident report form, #32 Photos, #33 My Reports/Details, #34 Schema, #35 Profiles/RBAC, #37 Atomic claim, [#38 Flutter Web Operations](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/38), [#40 Staff available queue/claim](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/40), [#41 Staff status/resolve](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/41).
 - **Open:** [#36 Backend validation/storage](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/36) has passed additional nine-invalid-case REST tests in [full local Supabase/Chromium CI](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/44959700367); proposed strict input checks have not been applied to live Supabase. [#39 Moderator review](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/39) has passed protected SQL, private photo Chromium review, and actual Flutter Web UI tests against disposable Supabase, but the proposed seventh table/RPC are not live.

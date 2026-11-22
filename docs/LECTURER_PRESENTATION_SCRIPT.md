@@ -1,3 +1,5 @@
+> **Current implementation acceptance — 22 Nov 2026:** The original **12/12 TASK issues are closed** following reproducible local Flutter/Supabase/API/Storage/Chrome tests. Five CLI-named migrations build a fresh local environment including report validation and Moderator review. **This is NOT hosted deployment or lecturer final sign-off.** The populated remote still has the original six application tables and empty migration history; [RELEASE GATE #47](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/47) tracks approved backup/staging/reconciliation/target-project deployment. [Integrated Draft PR #46](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/pull/46) remains unmerged.
+
 # FixMate — Lecturer Presentation and Live Demonstration
 
 **Prepared for:** Kauno Kolegija Internal Internship  
@@ -69,7 +71,7 @@ This feature was tested against a disposable local Supabase environment with the
 
 "The original database has six RLS-protected public tables. We also inspected the three Storage policies for private report photos. A Resident cannot update their role directly, read another resident's reports or view another resident's private images. The status changes and review operations use role-checked database RPC functions, not arbitrary client updates.
 
-We have three ordered Supabase CLI migrations for rebuilding the **baseline** in a fresh development environment: the six-table schema, eight maintenance categories and nine supporting foreign-key indexes. Their clean local reset succeeded, but those baseline migrations must not be pushed over an already populated database with no recorded migration history."
+We have five ordered Supabase CLI migrations for rebuilding a **fresh local database**: the six-table baseline, eight maintenance categories, nine supporting foreign-key indexes, stricter report validation and the proposed Moderator review table/RPC. Their clean local reset succeeded, but those baseline migrations must not be pushed over an already populated database with no recorded migration history."
 
 **Show two or three read-only SELECT statements** from [FIXMATE_DEMO_QUERIES_READ_ONLY.sql](sql/FIXMATE_DEMO_QUERIES_READ_ONLY.sql):
 - Query 4: JOIN reports, resident profiles, categories and optional staff.
@@ -82,7 +84,7 @@ We have three ordered Supabase CLI migrations for rebuilding the **baseline** in
 
 "Our work is documented in GitHub and checked by CI. The integrated Flutter tests, Flutter Web build, real Chrome role-workflow tests, PostgreSQL smoke tests and local Supabase API tests passed. The integrated Android APK and Flutter Web artifacts were also built successfully.
 
-This is a tested release candidate, not a fully deployed production application. Ten of the twelve original implementation tasks are closed, while two still require an approved deployment and verification of report validation and Moderator review on the target Supabase project. Password recovery, push notifications and self-service role administration are not presented as complete.
+This is a tested release candidate, not a fully deployed production application. All twelve original implementation tasks are closed at **code and local-test acceptance level**. Hosted deployment and final project-specific verification are separately tracked in RELEASE GATE #47. Password recovery, push notifications and self-service role administration are not presented as complete.
 
 Thank you. We are ready for questions and can demonstrate the SQL, architecture and automated tests."
 
@@ -109,7 +111,7 @@ Thank you. We are ready for questions and can demonstrate the SQL, architecture 
 
 **Why can't we just run all migrations on production?** The hosted database already has the baseline schema but no recorded migration history. Reapplying the fresh baseline would collide with existing objects. We need a reviewed reconciliation and staged additive migration plan.
 
-**Is the project completely finished?** The integrated MVP is tested locally and the APK/Web artifacts are built. Tasks #36 and #39 are not yet accepted on the hosted backend, and some backlog features are beyond this tested scope.
+**Is the project completely finished?** The integrated MVP is tested locally and the APK/Web artifacts are built. Tasks #36 and #39 are implemented and tested locally, but the hosted release gate #47 is not completed, and some backlog features are beyond this tested scope.
 
 ## Lecturer handoff links
 

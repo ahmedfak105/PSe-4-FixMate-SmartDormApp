@@ -1,3 +1,19 @@
+> **Current implementation acceptance — 22 Nov 2026:** The original **12/12 TASK issues are closed** following reproducible local Flutter/Supabase/API/Storage/Chrome tests. Five CLI-named migrations build a fresh local environment including report validation and Moderator review. **This is NOT hosted deployment or lecturer final sign-off.** The populated remote still has the original six application tables and empty migration history; [RELEASE GATE #47](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/47) tracks approved backup/staging/reconciliation/target-project deployment. [Integrated Draft PR #46](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/pull/46) remains unmerged.
+
+## Final local migration series — 5 ordered files
+
+The initial three CLI files recreate the original six-table database and supporting indexes. The last two CLI-named migrations add stricter report validation and the Moderator review table/RPC/guard **only in a fresh local or approved staging database**:
+
+```text
+supabase/migrations/20261121222817_fixmate_baseline.sql
+supabase/migrations/20261121222818_fixmate_categories_seed.sql
+supabase/migrations/20261121223150_fixmate_fk_indexes.sql
+supabase/migrations/20261122000339_fixmate_report_validation.sql
+supabase/migrations/20261122000340_fixmate_moderator_review.sql
+```
+
+[PostgreSQL smoke pass](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/44964869207), [full Supabase Auth/API pass](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/44964866869), [real Flutter Web Chrome pass](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/44964869271), and [local demo reproduction pass](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/runs/44964866875) verify the five-migration local stack. Historical three-file baseline sections below refer only to the original deployment snapshot, not the full current local build.
+
 # FixMate — Rebuilding the Backend from a Clean Supabase Environment
 
 **TASK #34 — Design Supabase database schema**, including the acceptance criterion **"Schema changes are documented and reproducible."**

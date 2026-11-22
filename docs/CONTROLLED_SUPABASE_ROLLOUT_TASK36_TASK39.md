@@ -1,3 +1,5 @@
+> **Current implementation acceptance — 22 Nov 2026:** The original **12/12 TASK issues are closed** following reproducible local Flutter/Supabase/API/Storage/Chrome tests. Five CLI-named migrations build a fresh local environment including report validation and Moderator review. **This is NOT hosted deployment or lecturer final sign-off.** The populated remote still has the original six application tables and empty migration history; [RELEASE GATE #47](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/47) tracks approved backup/staging/reconciliation/target-project deployment. [Integrated Draft PR #46](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/pull/46) remains unmerged.
+
 # TASK #36 and #39 — Controlled, additive Supabase rollout
 
 **Status: staging-only proposal; NOT permission to modify the current project.**
@@ -56,7 +58,7 @@ There is **no universal safe automatic rollback** for the Moderator migration on
 
 Demonstrate: (1) real schema and ERD, (2) clean CLI rebuild and role/RLS tests, (3) successful Flutter Web browser workflow and APK/Web builds, (4) the preflight inventory showing why remote deployment is **still a separate gate**, and (5) the exact scripts that implement the missing features.
 
-**Task status:** #36 and #39 remain In Progress until reviewed remote/staging rollout and project-specific acceptance are documented. The Flutter Web feature tests passing locally does not mean the review RPC exists on the original live project.
+**Current distinction:** Original TASK #36 and #39 issues are closed after implementation and **local acceptance**. This does NOT mean the SQL is deployed to the original hosted project. All hosted/staging verification, backup/restore and release approval requirements remain open in [RELEASE GATE #47](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/47). The Flutter Web feature tests passing locally does not mean the review RPC exists on the original live project.
 
 ## Latest remote advisor snapshot — read-only, 22 November 2026
 

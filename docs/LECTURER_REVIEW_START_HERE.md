@@ -1,3 +1,5 @@
+> **Current implementation acceptance — 22 Nov 2026:** The original **12/12 TASK issues are closed** following reproducible local Flutter/Supabase/API/Storage/Chrome tests. Five CLI-named migrations build a fresh local environment including report validation and Moderator review. **This is NOT hosted deployment or lecturer final sign-off.** The populated remote still has the original six application tables and empty migration history; [RELEASE GATE #47](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/47) tracks approved backup/staging/reconciliation/target-project deployment. [Integrated Draft PR #46](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/pull/46) remains unmerged.
+
 # FixMate — Lecturer Review: Start Here
 
 **Kauno Kolegija • Internal Internship • 22 November 2026**  
@@ -33,7 +35,7 @@ Supabase `auth.users` manages login identities and an existing trigger creates a
 
 A separate proposed `report_reviews` table, restricted Moderator review RPC and rejected-report work guard were successfully tested in **disposable local Supabase**. They are **not** present in the original hosted Supabase project.
 
-Three ordered migrations under `supabase/migrations/` reconstruct the **baseline in a fresh local development project**: base schema, eight maintenance categories and nine foreign-key indexes. Do **not** apply those fresh-baseline scripts to the existing, populated hosted project, which has no recorded migration history.
+Five ordered migrations under `supabase/migrations/` reconstruct the **full local development schema**: the original baseline, eight maintenance categories, nine foreign-key indexes, validated report fields and a seventh Moderator review table/RPC. Do **not** apply those fresh-baseline scripts to the existing, populated hosted project, which has no recorded migration history.
 
 ## 3. Latest verified checks on the integrated code
 
@@ -65,10 +67,7 @@ Use **synthetic accounts and reports only**. Do not show real user records, priv
 
 ## 5. Task, feature and release status
 
-The implementation backlog tracks **12 Tasks**. At the current GitHub issue-state snapshot, **10 are closed** and **2 remain open**:
-
-- [Task #36](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/36): report input validation and backend/Storage acceptance on the approved target database.
-- [Task #39](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/39): Moderator review database migration and its target-project authorization/end-to-end acceptance.
+The implementation backlog tracks **12 original Tasks**; **all 12 are closed at implementation/local-test acceptance level**. [Task #36](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/36) and [Task #39](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/39) have accepted local Supabase/Flutter evidence, but their proposed changes have **not** been deployed on the hosted project. The remaining hosted rollout is tracked separately in **[RELEASE GATE #47](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/issues/47)**, not silently counted as complete.
 
 The wider Product Backlog includes **6 Epics / 22 Features**; closing the 12 implementation tasks **does not** mean every feature, such as push notifications, password recovery and full role self-administration, is complete. GitHub Project board Status fields may need separate review and synchronization with issue states.
 
