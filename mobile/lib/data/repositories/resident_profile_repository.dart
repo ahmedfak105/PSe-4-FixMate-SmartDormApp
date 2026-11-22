@@ -24,4 +24,35 @@ class ResidentProfileRepository {
     }
     return ResidentProfile.fromJson(row);
   }
+  /// Only approved editable fields are sent by the client. The database
+  /// must additionally enforce column-level UPDATE grants for privileged fields.
+  Future<ResidentProfile> updateMyContactDetails({
+    required String fullName,
+    String? building,
+    String? roomNumber,
+  }) async {
+    final user = client.auth.currentUser;
+    if (user == null) throw StateError('Please sign in again.');
+    final name = fullName.trim();
+    if (name.isEmpty || name.length > 100) {
+      throw ArgumentError('Name must be between 1 and 100 characters.');
+    }
+    String? optional(String? s) {
+      final value = s?.trim() ?? '';
+      if (value.length > 80) throw ArgumentError('Location fields must be at most 80 characters.');
+      return value.isEmpty ? null : value;
+    }
+    final updated = await client.from('profiles').update({
+      'full_name': name,
+      'building': optional(building),
+      'room_number': optional(roomNumber),
+    }).eq('id', user.id)
+      .select('id, full_name, role, building, room_number')
+      .single();
+    if (client.auth.currentUser?.id != user.id) {
+      throw StateError('Session changed while saving profile.');
+    }
+    return ResidentProfile.fromJson(updated);
+  }
+
 }
