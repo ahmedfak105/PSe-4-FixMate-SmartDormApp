@@ -268,6 +268,14 @@ const Map<String, String> _lithuanian = {
   "Public API key is required": "Būtinas viešasis API raktas",
   "Failed to load your account details.": "Nepavyko įkelti paskyros duomenų.",
   "Help center": "Pagalbos centras",
+  "Push notifications": "Tiesioginiai pranešimai",
+  "Receive Android alerts when your maintenance report status changes.": "Gaukite „Android“ pranešimus, kai pasikeičia jūsų techninės priežiūros pranešimo būsena.",
+  "Firebase is not available on this device.": "„Firebase“ šiame įrenginyje nepasiekiama.",
+  "Push notifications enabled on this Android device.": "Tiesioginiai pranešimai įjungti šiame „Android“ įrenginyje.",
+  "Push notifications disabled on this Android device.": "Tiesioginiai pranešimai išjungti šiame „Android“ įrenginyje.",
+  "Push notifications are not enabled on this server yet.": "Tiesioginiai pranešimai šiame serveryje dar neįjungti.",
+  "Cannot enable notifications. Check your device permission and connection.": "Nepavyko įjungti pranešimų. Patikrinkite įrenginio leidimus ir ryšį.",
+  "Could not change push notifications. Please retry.": "Nepavyko pakeisti tiesioginių pranešimų nustatymų. Bandykite dar kartą.",
 };
 
 const Map<String, String> _dynamicPrefixes = {
