@@ -4,6 +4,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../data/models/resident_profile.dart';
 import '../settings/edit_profile_page.dart';
 import '../settings/my_profile_avatar.dart';
+import '../support/fixmate_support_page.dart';
+import '../../l10n/fixmate_i18n.dart';
 import '../../data/models/staff_report.dart';
 import '../../data/repositories/staff_reports_repository.dart';
 import '../../data/repositories/staff_notes_repository.dart';
@@ -184,6 +186,8 @@ class _StaffDashboardPageState extends State<StaffDashboardPage> {
       appBar: AppBar(
         title: const Text('FixMate · Maintenance Workspace'),
         actions: [
+          const FixMateLanguageButton(),
+          const FixMateSupportMenu(),
           Tooltip(
             message: 'My profile',
             child: InkWell(
