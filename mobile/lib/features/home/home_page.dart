@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../l10n/fixmate_i18n.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../data/models/maintenance_report.dart';
 import '../../data/repositories/report_repository.dart';
@@ -17,7 +18,7 @@ class HomePage extends StatelessWidget {
     final tabs = context.read<BottomTabsCubit>();
     final isDemo = context.read<ReportsCubit>().repository is InMemoryReportRepository;
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.appTitle)),
+      appBar: AppBar(title: FixMateText(l10n.appTitle)),
       body: BlocBuilder<ReportsCubit, ReportsState>(builder: (context, state) {
         final active = state.items
             .where((report) => report.status != MaintenanceStatus.resolved).length;
@@ -36,15 +37,15 @@ class HomePage extends StatelessWidget {
               ),
               child: Column(crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('SMART DORM MAINTENANCE',
+                  const FixMateText('SMART DORM MAINTENANCE',
                     style: TextStyle(color: Color(0xFFCEF1E7), fontSize: 10,
                       fontWeight: FontWeight.w800, letterSpacing: 1.3)),
                   const SizedBox(height: 10),
-                  Text(l10n.homeWelcome,
+                  FixMateText(l10n.homeWelcome,
                     style: const TextStyle(color: Colors.white, fontSize: 25,
                       fontWeight: FontWeight.w800)),
                   const SizedBox(height: 8),
-                  Text(l10n.homeIntro,
+                  FixMateText(l10n.homeIntro,
                     style: const TextStyle(color: Color(0xFFE1F6EE), fontSize: 13)),
                   const SizedBox(height: 19),
                   FilledButton.icon(
@@ -54,7 +55,7 @@ class HomePage extends StatelessWidget {
                       foregroundColor: FixMateTheme.teal,
                       backgroundColor: Colors.white),
                     icon: const Icon(Icons.add_circle_outline),
-                    label: Text(l10n.tabNewReport),
+                    label: FixMateText(l10n.tabNewReport),
                   ),
                 ],
               ),
@@ -63,10 +64,10 @@ class HomePage extends StatelessWidget {
             if (state.loading && state.items.isEmpty)
               const LinearProgressIndicator(),
             if (state.error != null) ...[
-              Text(state.error!, style: TextStyle(
+              FixMateText(state.error!, style: TextStyle(
                 color: Theme.of(context).colorScheme.error)),
               TextButton(onPressed: context.read<ReportsCubit>().load,
-                child: Text(l10n.retry)),
+                child: FixMateText(l10n.retry)),
             ],
             Row(children: [
               Expanded(child: _HomeStat(
@@ -82,23 +83,23 @@ class HomePage extends StatelessWidget {
                 icon: Icons.check_circle_outline)),
             ]),
             const SizedBox(height: 24),
-            Text('Quick actions', style: Theme.of(context).textTheme.titleLarge),
+            FixMateText('Quick actions', style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 10),
             Card(
               child: ListTile(
                 contentPadding: const EdgeInsets.all(12),
                 leading: const Icon(Icons.assignment_outlined,
                   color: FixMateTheme.teal, size: 30),
-                title: Text(l10n.tabMyReports,
+                title: FixMateText(l10n.tabMyReports,
                   style: Theme.of(context).textTheme.titleMedium),
-                subtitle: const Text('Review updates on your maintenance requests'),
+                subtitle: const FixMateText('Review updates on your maintenance requests'),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () => tabs.selectTab(AppTab.myReports),
               ),
             ),
             if (isDemo) ...[
               const SizedBox(height: 22),
-              Text(l10n.demoNotice,
+              FixMateText(l10n.demoNotice,
                 style: Theme.of(context).textTheme.bodySmall),
             ],
           ],
@@ -122,10 +123,10 @@ class _HomeStat extends StatelessWidget {
         children: [
           Icon(icon, color: FixMateTheme.teal, size: 20),
           const SizedBox(height: 12),
-          Text(value, style: const TextStyle(fontSize: 24,
+          FixMateText(value, style: const TextStyle(fontSize: 24,
             fontWeight: FontWeight.w800, color: FixMateTheme.ink)),
           const SizedBox(height: 4),
-          Text(label, maxLines: 2, overflow: TextOverflow.ellipsis,
+          FixMateText(label, maxLines: 2, overflow: TextOverflow.ellipsis,
             style: const TextStyle(fontSize: 11, color: Color(0xFF6B7F8D))),
         ],
       ),
