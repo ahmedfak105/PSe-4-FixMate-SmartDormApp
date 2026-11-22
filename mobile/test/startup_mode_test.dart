@@ -2,53 +2,42 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fixmate_mobile/startup_mode.dart';
 
 void main() {
-  test('connected releases require the real backend and never load fixtures', () {
+  test('all configured clients use a real authenticated backend', () {
     for (final operations in [false, true]) {
-      for (final demo in [false, true]) {
-        expect(
-          resolveFixMateStartupMode(
-            hasPublicBackendConfig: true,
-            operationsWeb: operations,
-            explicitlyAllowOfflineDemo: demo,
-          ),
-          FixMateStartupMode.connected,
-        );
-      }
+      expect(
+        resolveFixMateStartupMode(
+          hasPublicBackendConfig: true,
+          operationsWeb: operations,
+        ),
+        FixMateStartupMode.connected,
+      );
     }
   });
 
-  test('unconfigured normal app cannot silently show demo reports', () {
+  test('unconfigured Android/general Web displays connection required', () {
     expect(
       resolveFixMateStartupMode(
         hasPublicBackendConfig: false,
         operationsWeb: false,
-        explicitlyAllowOfflineDemo: false,
       ),
       FixMateStartupMode.connectionRequired,
     );
   });
 
-  test('offline demo requires an explicit build flag', () {
+  test('unconfigured operations Web opens only the public connection form', () {
     expect(
       resolveFixMateStartupMode(
         hasPublicBackendConfig: false,
-        operationsWeb: false,
-        explicitlyAllowOfflineDemo: true,
+        operationsWeb: true,
       ),
-      FixMateStartupMode.offlineDemo,
+      FixMateStartupMode.operationsConnection,
     );
   });
 
-  test('operations browser always chooses its connection screen', () {
-    for (final demo in [false, true]) {
-      expect(
-        resolveFixMateStartupMode(
-          hasPublicBackendConfig: false,
-          operationsWeb: true,
-          explicitlyAllowOfflineDemo: demo,
-        ),
-        FixMateStartupMode.operationsConnection,
-      );
-    }
+  test('no offline or fixture startup mode exists', () {
+    expect(
+      FixMateStartupMode.values.map((mode) => mode.name),
+      ['connected', 'operationsConnection', 'connectionRequired'],
+    );
   });
 }
