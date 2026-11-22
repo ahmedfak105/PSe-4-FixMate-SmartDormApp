@@ -138,7 +138,7 @@ class _StaffDashboardPageState extends State<StaffDashboardPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('FixMate · Maintenance Staff'),
+        title: const Text('FixMate · Maintenance Workspace'),
         actions: [
           IconButton(
             tooltip: 'Refresh reports',
