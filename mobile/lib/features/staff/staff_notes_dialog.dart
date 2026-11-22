@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../l10n/fixmate_i18n.dart';
 
 import '../../data/models/staff_note.dart';
 import '../../data/repositories/staff_notes_repository.dart';
@@ -89,14 +90,14 @@ class _StaffNotesDialogState extends State<StaffNotesDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('Internal notes · Report #${widget.reportId}'),
+      title: FixMateText('Internal notes · Report #${widget.reportId}'),
       content: SizedBox(
         width: 560,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
+            FixMateText(
               'Only authorized maintenance staff and managers can see these notes. '
               'Residents do not see internal notes.',
               style: Theme.of(context).textTheme.bodySmall,
@@ -107,17 +108,17 @@ class _StaffNotesDialogState extends State<StaffNotesDialog> {
               child: _loading
                   ? const Center(child: CircularProgressIndicator())
                   : _error != null && _notes.isEmpty
-                      ? Center(child: Text(_error!))
+                      ? Center(child: FixMateText(_error!))
                       : _notes.isEmpty
-                          ? const Center(child: Text('No internal notes yet.'))
+                          ? const Center(child: FixMateText('No internal notes yet.'))
                           : ListView.builder(
                               itemCount: _notes.length,
                               itemBuilder: (context, index) {
                                 final note = _notes[index];
                                 return ListTile(
                                   dense: true,
-                                  title: Text(note.content),
-                                  subtitle: Text(
+                                  title: FixMateText(note.content),
+                                  subtitle: FixMateText(
                                     '${note.createdAt.toLocal()} · '
                                     '${note.authorId == widget.repository.staffId ? 'You' : 'Staff'}',
                                   ),
@@ -126,11 +127,11 @@ class _StaffNotesDialogState extends State<StaffNotesDialog> {
                             ),
             ),
             if (_error != null && _notes.isNotEmpty)
-              Text(_error!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
+              FixMateText(_error!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
             TextButton.icon(
               onPressed: _loading || _saving ? null : _loadNotes,
               icon: const Icon(Icons.refresh),
-              label: const Text('Refresh notes'),
+              label: const FixMateText('Refresh notes'),
             ),
             const SizedBox(height: 8),
             TextField(
@@ -151,12 +152,12 @@ class _StaffNotesDialogState extends State<StaffNotesDialog> {
       actions: [
         TextButton(
           onPressed: _saving ? null : () => Navigator.of(context).pop(),
-          child: const Text('Close'),
+          child: const FixMateText('Close'),
         ),
         FilledButton.icon(
           onPressed: _saving ? null : _saveNote,
           icon: const Icon(Icons.save_outlined),
-          label: Text(_saving ? 'Saving...' : 'Save note'),
+          label: FixMateText(_saving ? 'Saving...' : 'Save note'),
         ),
       ],
     );
