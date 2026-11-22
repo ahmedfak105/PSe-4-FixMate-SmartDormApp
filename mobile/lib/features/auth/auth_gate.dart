@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import '../../l10n/fixmate_i18n.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../data/models/resident_profile.dart';
@@ -118,7 +119,7 @@ class _AuthGateState extends State<AuthGate> {
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Could not sign out. Please retry.')),
+        const SnackBar(content: FixMateText('Could not sign out. Please retry.')),
       );
     }
   }
@@ -129,7 +130,7 @@ class _AuthGateState extends State<AuthGate> {
     bool allowRetry = false,
   }) {
     return Scaffold(
-      appBar: AppBar(title: const Text('FixMate')),
+      appBar: AppBar(title: const FixMateText('FixMate')),
       body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 460),
@@ -140,16 +141,16 @@ class _AuthGateState extends State<AuthGate> {
               children: [
                 const Icon(Icons.manage_accounts_outlined, size: 50),
                 const SizedBox(height: 16),
-                Text(heading, style: Theme.of(context).textTheme.titleLarge,
+                FixMateText(heading, style: Theme.of(context).textTheme.titleLarge,
                     textAlign: TextAlign.center),
                 const SizedBox(height: 12),
-                Text(description, textAlign: TextAlign.center),
+                FixMateText(description, textAlign: TextAlign.center),
                 if (allowRetry) ...[
                   const SizedBox(height: 20),
-                  FilledButton(onPressed: _retry, child: const Text('Retry')),
+                  FilledButton(onPressed: _retry, child: const FixMateText('Retry')),
                 ],
                 const SizedBox(height: 12),
-                OutlinedButton(onPressed: _signOut, child: const Text('Sign out')),
+                OutlinedButton(onPressed: _signOut, child: const FixMateText('Sign out')),
               ],
             ),
           ),
