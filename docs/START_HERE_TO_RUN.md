@@ -16,12 +16,12 @@ The same run still includes `fixmate-integrated-android-debug-apk`, an **offline
 
 ## B. Flutter Web operations — GitHub Pages
 
-The repository contains [the Pages deployment workflow](../.github/workflows/deploy-flutter-web-pages.yml). It builds a real Flutter Web operations UI with the repository subpath `/PSe-4-FixMate-SmartDormApp/`, with no embedded project API key. It **may not be live yet** until the repository owner enables Pages and a successful deployment is verified.
+The repository contains [the Pages deployment workflow](../.github/workflows/deploy-flutter-web-pages.yml). It builds a real Flutter Web operations UI with the repository subpath `/PSe-4-FixMate-SmartDormApp/`, with the hosted project's **public publishable key** compiled into the browser bundle (no secret or privileged keys). It **may not be live yet** until the repository owner enables Pages and a successful deployment is verified.
 
 1. Repository administrator: open [Settings → Pages](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/settings/pages) and set **Build and deployment → Source: GitHub Actions**.
 2. In [Actions → FixMate Operations Web — GitHub Pages](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/workflows/deploy-flutter-web-pages.yml), run the workflow on the integration branch (or inspect an automatically triggered run). Confirm both `build` and `deploy` succeed.
 3. **Only if the deployment succeeds**, open the Pages URL reported by that run (usually `https://ahmedfak105.github.io/PSe-4-FixMate-SmartDormApp/`; never assume it exists before success).
-4. On the Operations connection screen, enter project URL `https://epsvagztisdovixlqehi.supabase.co` and a **public** publishable key from [Supabase dashboard API keys](https://supabase.com/dashboard/project/epsvagztisdovixlqehi/settings/api-keys). Never enter `sb_secret`, service-role keys or database passwords.
+4. The Pages build is already configured to use `https://epsvagztisdovixlqehi.supabase.co` with a **public-only** API key. You should see the login page directly, without entering server configuration. Never enter `sb_secret`, service-role keys or database passwords.
 5. Log in with an existing `maintenance_staff` or `system_admin` profile. The Moderator page **cannot save reviews** on the six-table hosted database; this requires the separate approved staging/release gate. A Resident is deliberately denied access to the operations website.
 
 If Pages deployment is unavailable due to repository permissions, use the web ZIP from [Integrated Release Candidate](https://github.com/ahmedfak105/PSe-4-FixMate-SmartDormApp/actions/workflows/integrated-release.yml) and publish its contents on an HTTPS static host, preserving the base-path configuration (the generic web artifact in that workflow targets root `/`, so it should not be mounted under a subpath without rebuilding).
