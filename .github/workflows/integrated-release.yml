@@ -49,10 +49,11 @@ jobs:
       - name: Syntax-check offline backup helper without running exports
         shell: pwsh
         run: |
+          $parserTokens = $null
           $parserErrors = $null
           [System.Management.Automation.Language.Parser]::ParseFile(
             (Join-Path (Get-Location) 'scripts/backup_fixmate_windows.ps1'),
-            [ref]$null, [ref]$parserErrors) | Out-Null
+            [ref]$parserTokens, [ref]$parserErrors) | Out-Null
           if ($parserErrors.Count -gt 0) {
             $parserErrors | ForEach-Object { Write-Error $_.Message }
             exit 1
