@@ -330,5 +330,80 @@ void main() {
     expect(newStatus?['status'], 'in_progress');
   });
 
+  testWidgets('Admin changes another account role and restores it safely',
+      (tester) async {
+    final targetId = (await tester.runAsync(() async {
+      final auth = Supabase.instance.client.auth;
+      if (auth.currentSession != null) await auth.signOut();
+      final session = await auth.signInWithPassword(
+        email: 'resident.b.fixmate@example.com', password: _password);
+      final id = session.user!.id;
+      await auth.signOut();
+      return id;
+    }))!;
+
+    await loginAs(tester, 'admin.fixmate@example.com');
+    await waitFor(tester, find.text('People'));
+    await tester.ensureVisible(find.text('People').first);
+    await tester.tap(find.text('People').first);
+    final personRole = find.byKey(Key('user_role_$targetId'));
+    await waitFor(tester, personRole,
+        reason: 'Admin People tab did not enable audited role controls');
+    await tester.ensureVisible(personRole);
+    await tester.tap(personRole);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Maintenance staff').last);
+    await waitFor(tester, find.text('Change user role'));
+    await tester.tap(find.text('Confirm role change'));
+    await waitFor(tester, find.textContaining('Role updated.'));
+
+    final promoted = await tester.runAsync(() =>
+      Supabase.instance.client.from('profiles')
+        .select('role').eq('id', targetId).single());
+    expect(promoted?['role'], 'maintenance_staff');
+
+    await tester.ensureVisible(personRole);
+    await tester.tap(personRole);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Resident').last);
+    await waitFor(tester, find.text('Change user role'));
+    await tester.tap(find.text('Confirm role change'));
+    await waitFor(tester, find.textContaining('Role updated.'));
+
+    final restored = await tester.runAsync(() =>
+      Supabase.instance.client.from('profiles')
+        .select('role').eq('id', targetId).single());
+    expect(restored?['role'], 'resident');
+  });
+
+  testWidgets('Lithuanian support and English switch work in real Chrome',
+      (tester) async {
+    await loginAs(tester, 'admin.fixmate@example.com');
+    await waitFor(tester, find.byKey(const Key('app_utilities_menu')));
+    await tester.tap(find.byKey(const Key('app_utilities_menu')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Lietuvių').last);
+    await waitFor(tester, find.text('Apžvalga'),
+        reason: 'Lithuanian navigation did not appear');
+
+    await tester.tap(find.byKey(const Key('app_utilities_menu')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Kontaktai').last);
+    await waitFor(tester, find.text('Kauno kolegijos apgyvendinimo paslaugos'));
+    expect(find.text('apgyvendinimas@kaunokolegija.lt'), findsOneWidget);
+
+    await tester.tap(find.text('Pagalba').first);
+    await waitFor(tester, find.text('Kaip pranešti apie gedimą?'));
+    await tester.tap(find.text('Apie programėlę').first);
+    await waitFor(tester, find.text('Išmani bendrabučio priežiūra'));
+
+    await tester.pageBack();
+    await waitFor(tester, find.text('Apžvalga'));
+    await tester.tap(find.byKey(const Key('app_utilities_menu')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('English').last);
+    await waitFor(tester, find.text('Overview'));
+  });
+
 
 }
