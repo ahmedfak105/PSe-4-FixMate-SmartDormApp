@@ -255,6 +255,19 @@ const Map<String, String> _lithuanian = {
   "Submit report": "Pateikti pranešimą",
   "Add photo": "Pridėti nuotrauką",
   "Select category": "Pasirinkti kategoriją",
+  "Connect your operations workspace": "Prisijunkite prie priežiūros darbo srities",
+  "Sign in as maintenance staff, moderator or system admin. You need the shared FixMate Supabase project URL and a public browser API key.": "Prisijunkite kaip techninės priežiūros darbuotojas, moderatorius arba sistemos administratorius. Reikalingas bendras FixMate Supabase projekto adresas ir viešasis naršyklės API raktas.",
+  "Supabase project URL": "Supabase projekto adresas",
+  "Publishable / anon API key": "Viešasis / anoniminis API raktas",
+  "Hide public key": "Slėpti viešąjį raktą",
+  "Show public key": "Rodyti viešąjį raktą",
+  "Never enter a service-role or secret key. The public key does not bypass authentication or RLS.": "Niekada neįveskite privilegijuoto ar slapto rakto. Viešasis raktas neapeina autentifikavimo ar prieigos taisyklių.",
+  "Connecting...": "Jungiamasi...",
+  "Connect": "Prisijungti",
+  "Project URL is required": "Būtinas projekto adresas",
+  "Public API key is required": "Būtinas viešasis API raktas",
+  "Failed to load your account details.": "Nepavyko įkelti paskyros duomenų.",
+  "Help center": "Pagalbos centras",
 };
 
 const Map<String, String> _dynamicPrefixes = {
