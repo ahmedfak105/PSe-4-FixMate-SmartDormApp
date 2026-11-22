@@ -42,7 +42,7 @@ class _MyProfileAvatarState extends State<MyProfileAvatar> {
           .select('avatar_path').eq('id', widget.userId).maybeSingle();
       final path = profile?['avatar_path'] as String?;
       if (path == null || path.isEmpty) return null;
-      return client.storage.from('profile-avatars').download(path);
+      return await client.storage.from('profile-avatars').download(path);
     } catch (_) {
       // Existing installations without avatar_path remain usable.
       return null;
